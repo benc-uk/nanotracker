@@ -20,6 +20,10 @@ body {
   padding: 0.5em;
 }
 
+.active {
+  background-color: #4e4e4e !important;
+}
+
 button {
   background-color: #252525;
   color: rgb(23, 211, 23);

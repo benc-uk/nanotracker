@@ -18,24 +18,30 @@ async function init() {
   clock = new WAAClock(ctx)
   clock.start()
 
+  Alpine.store('step', 0)
+
   Alpine.data('t0', () => ({
     track: proj.patterns[0].tracks[0],
     displayStep,
+    activeStep: 0,
   }))
 
   Alpine.data('t1', () => ({
     track: proj.patterns[0].tracks[1],
     displayStep,
+    activeStep: 0,
   }))
 
   Alpine.data('t2', () => ({
     track: proj.patterns[0].tracks[2],
     displayStep,
+    activeStep: 0,
   }))
 
   Alpine.data('t3', () => ({
     track: proj.patterns[0].tracks[3],
     displayStep,
+    activeStep: 0,
   }))
 
   Alpine.start()
@@ -43,6 +49,7 @@ async function init() {
 
 function play() {
   console.log('### Play')
+
   if (clockEvent) {
     return
   }
@@ -50,9 +57,11 @@ function play() {
   if (ctx.state === 'suspended') ctx.resume()
 
   proj.patterns[0].currentStep = 0
+
   clockEvent = clock
     .callbackAtTime(() => {
       proj.patterns[0].tick()
+      Alpine.store('step', proj.patterns[0].currentStep)
     }, ctx.currentTime)
     .tolerance({ early: 0.02, late: 0.02 })
     .repeat(0.12)
@@ -71,17 +80,22 @@ window.addEventListener('load', init)
 document.querySelector('#playBtn').addEventListener('click', play)
 document.querySelector('#stopBtn').addEventListener('click', stop)
 
-function displayStep(s) {
+function displayStep(s, i) {
   if (s.enabled) {
-    return `${s.instrument.id} ${s.note} ${asHex(s.volume)}`
+    return `${toHexPadded(i)}: ${s.instrument.id} ${s.note} ${asHex255(s.volume)}`
   } else {
-    return '-- -- --'
+    return `${toHexPadded(i)}: -- -- --`
   }
 }
 
 // function to return a float between 0 and 1 as hex 00 to ff
-function asHex(f) {
+function asHex255(f) {
   return Math.round(f * 255)
     .toString(16)
     .padStart(2, '0')
+    .toLocaleUpperCase()
+}
+
+function toHexPadded(p) {
+  return p.toString(16).padStart(2, '0').toLocaleUpperCase()
 }

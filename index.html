@@ -15,26 +15,26 @@
     <button id="stopBtn">⏹️ STOP</button>
     <div id="tracks">
       <div class="track" x-data="t0">
-        <template x-for="s in track.steps">
-          <div class="step" x-text="displayStep(s)"></div>
+        <template x-for="(s, i) in track.steps">
+          <div class="step" :class="$store.step == i ? 'active':''" x-text="displayStep(s, i)"></div>
         </template>
       </div>
 
       <div class="track" x-data="t1">
-        <template x-for="s in track.steps">
-          <div class="step" x-text="displayStep(s)"></div>
+        <template x-for="(s, i) in track.steps">
+          <div class="step" :class="$store.step == i ? 'active':''" x-text="displayStep(s,i )"></div>
         </template>
       </div>
 
       <div class="track" x-data="t2">
-        <template x-for="s in track.steps">
-          <div class="step" x-text="displayStep(s)"></div>
+        <template x-for="(s, i) in track.steps">
+          <div class="step" :class="$store.step == i ? 'active':''" x-text="displayStep(s,i)"></div>
         </template>
       </div>
 
       <div class="track" x-data="t3">
-        <template x-for="s in track.steps">
-          <div class="step" x-text="displayStep(s)"></div>
+        <template x-for="(s, i) in track.steps">
+          <div class="step" :class="$store.step == i ? 'active':''" x-text="displayStep(s,i)"></div>
         </template>
       </div>
     </div>
