@@ -1,0 +1,36 @@
+body {
+  background-color: #333;
+}
+
+#tracks {
+  display: flex;
+}
+
+.track {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  color: rgb(23, 211, 23);
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  margin: 0.3rem;
+}
+
+.step {
+  padding: 0.5em;
+}
+
+button {
+  background-color: #252525;
+  color: rgb(23, 211, 23);
+  border: 1px solid rgb(13, 126, 13);
+  border-radius: 0.3rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  font-size: 1.4rem;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+}
+
+button:hover {
+  background-color: #131313;
+}

@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": false,
+    "lib": ["es2021"]
+  }
+}
