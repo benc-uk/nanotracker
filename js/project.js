@@ -20,19 +20,19 @@ export class Project {
   async load() {
     // TODO!!! Hard code for now
 
-    const kickSample = await loadSample('../samples/Drums/Mini/BD Mini 1.wav')
+    const kickSample = await loadSample('samples/Drums/Mini/BD Mini 1.wav')
     const kick = new Instrument('01', kickSample, 60, 1.0)
     this.instruments.push(kick)
 
-    const snareSample = await loadSample('../samples/Drums/Bold/SD Bold 2.wav')
+    const snareSample = await loadSample('samples/Drums/Bold/SD Bold 2.wav')
     const snare = new Instrument('02', snareSample, 60, 1.0)
     this.instruments.push(kick)
 
-    const hhSample = await loadSample('../samples/Drums/Cut/HH Cut 3.wav')
+    const hhSample = await loadSample('samples/Drums/Cut/HH Cut 3.wav')
     const hh = new Instrument('03', hhSample, 60, 1.0)
     this.instruments.push(hh)
 
-    const bassSample = await loadSample('../samples/Xtra/TB Synth/TB Cat.wav')
+    const bassSample = await loadSample('samples/Xtra/TB Synth/TB Cat.wav')
     const bass = new Instrument('04', bassSample, 60, 1.0)
     this.instruments.push(hh)
 
