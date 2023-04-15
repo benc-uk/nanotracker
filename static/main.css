@@ -1,0 +1,121 @@
+:root {
+  --grey-1: #9e9e9e;
+  --grey-2: #8e8e8e;
+  --grey-3: #7e7e7e;
+  --grey-4: #6f6f6f;
+  --grey-5: #5f5f5f;
+  --grey-6: #4f4f4f;
+  --grey-7: #3f3f3f;
+  --grey-8: #2f2f2f;
+  --grey-9: #202020;
+  --grey-10: #101010;
+
+  --green-1: #4caf50;
+  --green-2: #449e48;
+  --green-3: #3d8c40;
+  --green-4: #357a38;
+  --green-5: #2e6930;
+  --green-6: #265828;
+  --green-7: #1e4620;
+  --green-8: #173518;
+  --green-9: #0f2310;
+  --green-10: #081108;
+}
+
+body {
+  background-color: var(--grey-10);
+  font-family: 'Quicksand', sans-serif;
+}
+
+nav {
+  color: var(--color-4);
+  display: flex;
+  position: relative;
+  top: 2px;
+}
+
+#main {
+  border: 2px solid var(--green-2);
+  background-color: var(--grey-9);
+}
+
+nav li {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  margin: 0rem 0.3rem;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border: solid 2px var(--green-2);
+  background-color: var(--grey-7);
+  color: var(--green-5);
+  box-shadow: inset 0 -6px 5px -5px #000000;
+  cursor: pointer;
+}
+
+nav li.active {
+  border-bottom: none;
+  color: var(--green-1);
+  background-color: var(--grey-9);
+  box-shadow: none;
+}
+
+#tracks {
+  display: flex;
+}
+
+.track {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  color: lime;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  margin: 0.3rem;
+}
+
+.index {
+  flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  color: var(--grey-4);
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  margin: 0.3rem;
+}
+
+.step {
+  padding: 0.5em;
+}
+
+.active {
+  background-color: var(--green-7);
+}
+
+button {
+  background-color: var(--grey-7);
+  color: white;
+  border: 2px solid var(--green-5);
+  border-radius: 0.3rem;
+  padding: 0.2rem;
+
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background-color: var(--grey-6);
+  border: 2px solid var(--green-3);
+}
+
+input[type='checkbox'] {
+  transform: scale(1.8);
+}
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  color: var(--green-3);
+  height: 3.5rem;
+  padding-left: 1rem;
+}

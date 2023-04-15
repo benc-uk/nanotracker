@@ -45,7 +45,7 @@ export class Instrument {
     this.gainNode.gain.value = volume
 
     this.noteNode.connect(this.rootNode)
-    this.noteNode.start(0, 0, 0.4)
+    this.noteNode.start(0)
     this.playing = true
 
     this.noteNode.onended = () => {
