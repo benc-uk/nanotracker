@@ -11,7 +11,6 @@ Alpine.data('app', () => ({
   helpers: {
     displayStep,
   },
-  activeStep: 0,
   stayOnPattern: false,
   stopped: true,
   cursor: {
@@ -41,7 +40,7 @@ Alpine.data('app', () => ({
         if (this.stopped) return
 
         this.project.trigPatternStep()
-        this.activeStep = this.project.currentStep
+        //this.activeStep = this.project.currentStep
       }, ctx.currentTime)
       .tolerance({ early: 0.02, late: 0.02 })
       .repeat(0.11)
@@ -60,8 +59,7 @@ Alpine.data('app', () => ({
 
   stop() {
     this.stopped = true
-    this.project.patterns[0].currentStep = 0
-    this.activeStep = 0
+    this.project.currentStep = 0
     if (ctx.state === 'suspended') ctx.resume()
   },
 
@@ -69,9 +67,6 @@ Alpine.data('app', () => ({
     if (this.stayOnPattern) return
 
     this.project.activePattern = this.project.patterns[this.project.activePattern.nextPatternNum]
-    // if (this.activePattern >= this.project.patterns.length) {
-    //   this.project.activePattern = this.project.patterns[0]
-    // }
   },
 }))
 

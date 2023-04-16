@@ -48,7 +48,7 @@
                 <template x-for="si in project.activePattern.length">
                   <div
                     class="step"
-                    :class="activeStep == si ? 'active' : ''"
+                    :class="project.currentStep == si-1 ? 'active' : ''"
                     x-text="helpers.displayStep(project.activePattern.steps[ti-1][si-1], si)"
                   ></div>
                 </template>

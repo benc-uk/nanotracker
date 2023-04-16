@@ -13,19 +13,17 @@ export class Instrument {
 
     this.outputNode = ctx.createGain()
     this.outputNode.gain.value = gain
-
-    // Created once to save initization
-    this.playGainNode = ctx.createGain()
-    this.playGainNode.connect(this.outputNode)
   }
 
-  // Get a node that will play this instrument
+  // Get an AudioBufferSourceNode that will play this instrument
   createPlayNode(note, volume) {
+    this.playGainNode = ctx.createGain()
+    this.playGainNode.gain.value = volume
+    this.playGainNode.connect(this.outputNode)
+
     const noteNode = ctx.createBufferSource()
     noteNode.buffer = this.sample
     noteNode.detune.value = (note - this.rootNote) * 100
-
-    this.playGainNode.gain.value = volume
 
     noteNode.connect(this.playGainNode)
 
