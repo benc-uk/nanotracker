@@ -25,7 +25,6 @@ export class Track {
   }
 
   playStep(step) {
-    // const step = this.steps[stepIndex]
     if (!step || !step.enabled || !step.instrument) return
 
     // This makes the tracks monophonic and cut off previous notes
