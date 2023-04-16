@@ -2,5 +2,11 @@
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
-  }
+  },
+  "files.exclude": {
+    ".prettier*": true,
+    "eslint.*": true,
+    "*config.json": true,
+  },
+  "explorer.excludeGitIgnore": true
 }

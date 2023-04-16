@@ -1,55 +1,34 @@
 import { ctx } from '../app.js'
 
 export class Instrument {
-  rootNote = 60
   /** @type {AudioBuffer} */
   sample = null
-  /** @type {GainNode} */
-  gainNode = null
-  /** @type {GainNode} */
-  rootNode = null
-
-  /** @type {AudioBufferSourceNode} */
-  noteNode = null
-
-  playing = false
+  rootNote = 60
   id = '00'
 
   constructor(id, sampleBuffer, rootNote, gain) {
     this.id = id
-
-    this.rootNote = rootNote
-    this.source = ctx.createBufferSource()
     this.sample = sampleBuffer
+    this.rootNote = rootNote
 
-    this.rootNode = ctx.createGain()
-    this.rootNode.gain.value = gain
+    this.outputNode = ctx.createGain()
+    this.outputNode.gain.value = gain
 
-    this.gainNode = ctx.createGain()
-    this.gainNode.gain.value = 1.0
-    this.gainNode.connect(ctx.destination)
-    this.rootNode.connect(this.gainNode)
-    this.playing = false
-    this.noteNode = null
+    // Created once to save initization
+    this.playGainNode = ctx.createGain()
+    this.playGainNode.connect(this.outputNode)
   }
 
-  play(note, volume) {
-    if (this.playing && this.noteNode) {
-      this.noteNode.stop(0)
-    }
+  // Get a node that will play this instrument
+  createPlayNode(note, volume) {
+    const noteNode = ctx.createBufferSource()
+    noteNode.buffer = this.sample
+    noteNode.detune.value = (note - this.rootNote) * 100
 
-    this.noteNode = ctx.createBufferSource()
-    this.noteNode.buffer = this.sample
+    this.playGainNode.gain.value = volume
 
-    this.noteNode.detune.value = (note - this.rootNote) * 100
-    this.gainNode.gain.value = volume
+    noteNode.connect(this.playGainNode)
 
-    this.noteNode.connect(this.rootNode)
-    this.noteNode.start(0)
-    this.playing = true
-
-    this.noteNode.onended = () => {
-      this.playing = false
-    }
+    return noteNode
   }
 }

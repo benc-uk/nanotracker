@@ -1,5 +1,5 @@
 export function displayStep(s, i) {
-  if (s.enabled) {
+  if (s) {
     return `${toHexPadded(s.instrument.id)} ${s.note} ${floatAsByteHex(s.volume)}`
   } else {
     return `-- -- --`

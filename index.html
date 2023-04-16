@@ -33,20 +33,24 @@
             <button @click="play">▶️ PLAY</button>
             <button @click="stop">⏹️ STOP</button>
             <label for="stay">STAY &nbsp;</label> <input id="stay" type="checkbox" x-model="stayOnPattern" /> <label for="ptn">PATN: &nbsp;</label>
-            <input id="ptn" type="number" min="0" :max="project.patterns.length-1" x-model="activePattern" />
+            <input id="ptn" type="number" min="0" :max="project.patterns.length-1" x-model="project.activePattern.number" readonly />
           </div>
 
           <div id="tracks">
             <div class="index" style="flex-grow: 0">
-              <template x-for="i in project.patterns[activePattern].steps">
-                <div class="step" x-text="i"></div>
+              <template x-for="i in project.activePattern.length">
+                <div class="step" x-text="i-1"></div>
               </template>
             </div>
 
-            <template x-for="(t, i) in project.patterns[activePattern].tracks">
+            <template x-for="ti in project.trackCount">
               <div class="track">
-                <template x-for="(s, i) in t.steps">
-                  <div class="step" :class="activeStep == i ? 'active' : ''" x-text="displayStep(s, i)"></div>
+                <template x-for="si in project.activePattern.length">
+                  <div
+                    class="step"
+                    :class="activeStep == si ? 'active' : ''"
+                    x-text="helpers.displayStep(project.activePattern.steps[ti-1][si-1], si)"
+                  ></div>
                 </template>
               </div>
             </template>

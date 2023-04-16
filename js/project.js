@@ -2,6 +2,7 @@ import { Instrument } from './instrument.js'
 import { Pattern } from './pattern.js'
 import { Track } from './track.js'
 import { loadSample } from './samples.js'
+import { Step } from './step.js'
 
 /** Project class, of which there is a single instance */
 export class Project {
@@ -11,11 +12,18 @@ export class Project {
   /** @type {Pattern[]} */
   patterns = []
 
+  /** @type {Track[]} */
+  tracks = []
+
+  /** @type {Pattern} */
+  activePattern = null
+
   /** @type {number} */
-  activePattern = 0
+  currentStep = 0
 
   /** @type {string} */
   name = ''
+  trackCount = 99
 
   constructor() {}
 
@@ -33,27 +41,57 @@ export class Project {
         this.instruments.push(i)
       }
 
+      this.trackCount = data.trackCount
+      for (let i = 0; i < data.trackCount; i++) {
+        const t = new Track(i)
+        t.setGain(1.0)
+        this.tracks.push(t)
+      }
+
+      let pattNum = 0
       for (const pattData of data.patterns) {
-        const patt = new Pattern()
-        patt.steps = pattData.steps
+        const patt = new Pattern(pattNum++, pattData.length, data.trackCount)
+        patt.nextPatternNum = pattNum
 
-        for (const trackData of pattData.tracks) {
-          const track = new Track(patt.steps)
-
-          for (const stepData of trackData.steps) {
-            const inst = this.instruments[stepData.instrument]
-            if (!inst) continue
-
-            track.steps[stepData.index].setNote(inst, stepData.note, stepData.gain)
-          }
-
-          patt.tracks.push(track)
+        for (const stepData of pattData.steps) {
+          const trackNum = stepData[0]
+          const stepNum = stepData[1]
+          const inst = this.instruments[stepData[2]]
+          patt.steps[trackNum][stepNum] = new Step(inst, stepData[3], stepData[4])
         }
 
+        for (let s = 0; s < patt.length; s++) {
+          patt.steps[2][s] = new Step(this.instruments[2], 60, Math.random() * 0.3 + 0.1)
+        }
         this.patterns.push(patt)
       }
+
+      // Set start pattern
+      this.activePattern = this.patterns[0]
+      // set last pattern nextPatternNum to zero
+      this.patterns[this.patterns.length - 1].nextPatternNum = 0
     } catch (err) {
       console.error(err)
+    }
+  }
+
+  trigPatternStep() {
+    // Get the current step for each track
+    for (const track of this.tracks) {
+      const step = this.activePattern.steps[track.number][this.currentStep]
+      track.playStep(step)
+    }
+
+    this.currentStep++
+
+    if (this.currentStep >= this.activePattern.length) {
+      window.dispatchEvent(
+        new CustomEvent('endOfPattern', {
+          detail: {},
+        })
+      )
+
+      this.currentStep = 0
     }
   }
 }

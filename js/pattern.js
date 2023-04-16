@@ -1,36 +1,21 @@
-import { Track } from './track.js'
+import { Step } from './step.js'
 
 export class Pattern {
-  /** @type {number} */
-  steps = 32
-  /** @type {Track[]} */
-  tracks = []
-  /** @type {number} */
-  currentStep = 0
+  number = 0
+  length = 16
 
-  constructor() {
-    this.tracks = []
-  }
+  /** @type {Step[][]} first level of array is track num, next is the Step */
+  steps = []
 
-  tick() {
-    if (this.currentStep < 0) {
-      this.currentStep = 0
-    }
+  nextPatternNum = 0
 
-    for (const track of this.tracks) {
-      track.steps[this.currentStep].play()
-    }
+  constructor(num, len, trackCount) {
+    this.length = len
+    this.number = num
 
-    this.currentStep++
-
-    if (this.currentStep >= this.steps) {
-      window.dispatchEvent(
-        new CustomEvent('endOfPattern', {
-          detail: {},
-        })
-      )
-
-      this.currentStep = 0
+    // for each track, note we use sparse arrays!
+    for (let t = 0; t < trackCount; t++) {
+      this.steps[t] = []
     }
   }
 }

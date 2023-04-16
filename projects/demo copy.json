@@ -1,0 +1,353 @@
+{
+  "name": "Demo Project",
+  "trackCount": 8,
+  "instruments": [
+    {
+      "file": "samples/Drums/Mini/BD Mini 1.wav",
+      "root": 60,
+      "gain": 1.0
+    },
+    {
+      "file": "samples/Drums/Bold/SD Bold 2.wav",
+      "root": 60,
+      "gain": 1.0
+    },
+    {
+      "file": "samples/Drums/Cut/HH Cut 3.wav",
+      "root": 60,
+      "gain": 0.5
+    },
+    {
+      "file": "samples/Xtra/TB Synth/TB Cat.wav",
+      "root": 48,
+      "gain": 1.0
+    },
+    {
+      "file": "samples/Drums/Cut/RS Cut 6.wav",
+      "root": 60,
+      "gain": 1.0
+    }
+  ],
+  "patterns": [
+    {
+      "length": 16,
+      "tracks": [
+        {
+          "steps": [
+            {
+              "index": 0,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 2,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 10,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            }
+          ]
+        },
+        {
+          "steps": [
+            {
+              "index": 4,
+              "instrument": 1,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 12,
+              "instrument": 1,
+              "note": 60,
+              "gain": 1.0
+            }
+          ]
+        },
+        {
+          "steps": [
+            {
+              "index": 0,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 1,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.4
+            },
+            {
+              "index": 2,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 3,
+              "instrument": 4,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 4,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 5,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.4
+            },
+            {
+              "index": 6,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 7,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 8,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 10,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 12,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.6
+            },
+            {
+              "index": 13,
+              "instrument": 4,
+              "note": 62,
+              "gain": 0.9
+            },
+            {
+              "index": 14,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 15,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.7
+            }
+          ]
+        },
+        {
+          "gain": 1.0,
+          "steps": [
+            {
+              "index": 0,
+              "instrument": 3,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 2,
+              "instrument": 3,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 7,
+              "instrument": 3,
+              "note": 65,
+              "gain": 0.7
+            },
+            {
+              "index": 13,
+              "instrument": 3,
+              "note": 61,
+              "gain": 0.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "length": 16,
+      "tracks": [
+        {
+          "steps": [
+            {
+              "index": 0,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 2,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 8,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 13,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 10,
+              "instrument": 0,
+              "note": 60,
+              "gain": 1.0
+            }
+          ]
+        },
+        {
+          "steps": [
+            {
+              "index": 4,
+              "instrument": 1,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 12,
+              "instrument": 1,
+              "note": 60,
+              "gain": 1.0
+            },
+            {
+              "index": 14,
+              "instrument": 1,
+              "note": 51,
+              "gain": 1.0
+            }
+          ]
+        },
+        {
+          "steps": [
+            {
+              "index": 0,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 1,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.4
+            },
+            {
+              "index": 2,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 3,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 4,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 5,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.4
+            },
+            {
+              "index": 6,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 7,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 8,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.5
+            },
+            {
+              "index": 10,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 12,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.6
+            },
+            {
+              "index": 13,
+              "instrument": 2,
+              "note": 62,
+              "gain": 0.9
+            },
+            {
+              "index": 14,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.8
+            },
+            {
+              "index": 15,
+              "instrument": 2,
+              "note": 60,
+              "gain": 0.7
+            }
+          ]
+        },
+        {
+          "gain": 0.01,
+          "steps": [
+            {
+              "index": 4,
+              "instrument": 3,
+              "note": 52,
+              "gain": 0.8
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

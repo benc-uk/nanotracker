@@ -5,19 +5,22 @@ import { displayStep } from './js/utils.js'
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
 
-let clock
-let clockEvent
-
 // Top level Alpine.js component
 Alpine.data('app', () => ({
   project: null,
-  displayStep,
-  activePattern: 0,
+  helpers: {
+    displayStep,
+  },
   activeStep: 0,
   stayOnPattern: false,
+  stopped: true,
+  cursor: {
+    track: 0,
+    step: 0,
+  },
 
   async init() {
-    console.log('### Starting')
+    console.log('### Starting JS Tracker')
     console.log(`### Audio state ${ctx.state}`)
 
     const prj = new Project()
@@ -29,48 +32,46 @@ Alpine.data('app', () => ({
       return
     }
 
-    clock = new WAAClock(ctx)
+    // The main clock!
+    const clock = new WAAClock(ctx)
     clock.start()
 
+    clock
+      .callbackAtTime(() => {
+        if (this.stopped) return
+
+        this.project.trigPatternStep()
+        this.activeStep = this.project.currentStep
+      }, ctx.currentTime)
+      .tolerance({ early: 0.02, late: 0.02 })
+      .repeat(0.11)
+
+    // Hook for pattern changes
     window.addEventListener('endOfPattern', () => {
       this.endOfPattern()
     })
   },
 
   play() {
-    console.log('### Play')
-
-    if (clockEvent) {
-      return
-    }
+    this.stopped = false
 
     if (ctx.state === 'suspended') ctx.resume()
-
-    clockEvent = clock
-      .callbackAtTime(() => {
-        this.project.patterns[this.activePattern].tick()
-        this.activeStep = this.project.patterns[this.activePattern].currentStep
-      }, ctx.currentTime)
-      .tolerance({ early: 0.02, late: 0.02 })
-      .repeat(0.12)
   },
 
   stop() {
-    if (!clockEvent) return
-
-    clockEvent.clear()
+    this.stopped = true
     this.project.patterns[0].currentStep = 0
-
-    clockEvent = null
+    this.activeStep = 0
+    if (ctx.state === 'suspended') ctx.resume()
   },
 
   endOfPattern() {
     if (this.stayOnPattern) return
 
-    this.activePattern++
-    if (this.activePattern >= this.project.patterns.length) {
-      this.activePattern = 0
-    }
+    this.project.activePattern = this.project.patterns[this.project.activePattern.nextPatternNum]
+    // if (this.activePattern >= this.project.patterns.length) {
+    //   this.project.activePattern = this.project.patterns[0]
+    // }
   },
 }))
 
