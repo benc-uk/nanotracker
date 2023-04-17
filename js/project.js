@@ -15,15 +15,15 @@ export class Project {
   /** @type {Track[]} */
   tracks = []
 
-  /** @type {Pattern} */
-  activePattern = null
+  // /** @type {Pattern} */
+  // activePattern = null
 
-  /** @type {number} */
-  currentStep = 0
+  // /** @type {number} */
+  // currentStep = 0
 
   /** @type {string} */
-  name = ''
-  trackCount = 99
+  name = 'Default'
+  trackCount = 0
 
   constructor() {}
 
@@ -62,7 +62,7 @@ export class Project {
 
         // Dummy test code - add hihats
         for (let s = 0; s < patt.length; s++) {
-          patt.steps[2][s] = new Step(this.instruments[2], 60, Math.random() * 0.2 + 0.1)
+          patt.steps[2][s] = new Step(this.instruments[2], 60, Math.floor(Math.random() * 18) + 5)
         }
 
         this.patterns.push(patt)
@@ -77,23 +77,11 @@ export class Project {
     }
   }
 
-  trigPatternStep() {
+  trigPatternStep(patt, stepNum) {
     // Get the current step for each track
     for (const track of this.tracks) {
-      const step = this.activePattern.steps[track.number][this.currentStep]
+      const step = patt.steps[track.number][stepNum]
       track.playStep(step)
-    }
-
-    this.currentStep++
-
-    if (this.currentStep >= this.activePattern.length) {
-      window.dispatchEvent(
-        new CustomEvent('endOfPattern', {
-          detail: {},
-        })
-      )
-
-      this.currentStep = 0
     }
   }
 }

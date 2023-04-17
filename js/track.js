@@ -5,25 +5,36 @@ export class Track {
   number = 0
   muted = false
   playing = false
+
   /** @type {Step} */
   playingStep = null
+
+  /** @type {AudioBufferSourceNode} */
   stepNode = null
+
+  /** @type {GainNode} */
+  trackOutput
 
   constructor(num) {
     this.number = num
     this.muted = false
-    this.gainNode = null
+    this.trackOutput = null
 
-    this.gainNode = ctx.createGain()
-    this.gainNode.gain.value = 1.0
-    this.gainNode.connect(ctx.destination)
+    this.trackOutput = ctx.createGain()
+    this.trackOutput.gain.value = 1.0
+    this.trackOutput.connect(ctx.destination)
     this.stepNode = null
   }
 
   setGain(gain) {
-    this.gainNode.gain.value = gain
+    this.trackOutput.gain.value = gain
   }
 
+  /**
+   * Play a step on this track
+   *
+   * @param {Step} step - Step to play on this tracks audio channel
+   */
   playStep(step) {
     if (!step || !step.enabled || !step.instrument) return
 
@@ -37,7 +48,7 @@ export class Track {
 
     // Get a audio node to play this step, and connect to the track output
     this.stepNode = step.instrument.createPlayNode(step.note, step.volume)
-    step.instrument.outputNode.connect(this.gainNode)
+    step.instrument.outputNode.connect(this.trackOutput)
     this.stepNode.start(0)
   }
 }

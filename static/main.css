@@ -20,6 +20,8 @@
   --green-8: #173518;
   --green-9: #0f2310;
   --green-10: #081108;
+
+  --green-text: #30c935;
 }
 
 body {
@@ -61,22 +63,27 @@ nav li.active {
 
 #tracks {
   display: flex;
+  height: 338px;
+  overflow-y: scroll;
+}
+
+#tracks::-webkit-scrollbar {
+  display: none;
 }
 
 .track {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+  display: table;
   background-color: black;
-  color: lime;
+  color: rgb(255, 255, 255);
   font-family: 'Consolas', 'Courier New', Courier, monospace;
   margin: 0.3rem;
+  color: var(--green-text);
 }
 
 .index {
   flex-grow: 0;
-  display: flex;
-  flex-direction: column;
+  display: table;
   background-color: black;
   color: var(--grey-4);
   font-family: 'Consolas', 'Courier New', Courier, monospace;
@@ -84,11 +91,16 @@ nav li.active {
 }
 
 .step {
-  padding: 0.2em;
+  padding: 1px;
+  overflow: hidden;
 }
 
 .active {
   background-color: var(--green-7);
+}
+
+.cursor {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
 }
 
 button {

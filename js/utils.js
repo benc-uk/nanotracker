@@ -1,19 +1,28 @@
-export function displayStep(s, i) {
-  if (s) {
-    return `${toHexPadded(s.instrument.id)} ${s.note} ${floatAsByteHex(s.volume)}`
+export function displayStep(step) {
+  if (step) {
+    return `
+    ${toHexPadded(step.instrument.id)} 
+    ${step.note} 
+    ${toHexPadded(step.volume)} 
+    ${step.effect1type}${toHexPadded(step.effect1val1, 1)}${toHexPadded(step.effect1val2, 1)}`
   } else {
-    return `-- -- --`
+    return `-- -- -- ---`
   }
 }
 
-// function to return a float between 0 and 1 as hex 00 to ff
-function floatAsByteHex(f) {
-  return Math.round(f * 255)
-    .toString(16)
-    .padStart(2, '0')
-    .toLocaleUpperCase()
+export function stepClass(currentStep, cursor, stepNum, trkNum) {
+  let classes = {
+    cursor: false,
+    active: false,
+  }
+
+  classes.cursor = cursor.step == stepNum && cursor.track == trkNum
+  classes.active = currentStep == stepNum
+
+  return classes
 }
 
 function toHexPadded(v, pad = 2) {
+  if (v == null) return '-'
   return v.toString(16).padStart(pad, '0').toLocaleUpperCase()
 }

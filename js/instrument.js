@@ -12,13 +12,13 @@ export class Instrument {
     this.rootNote = rootNote
 
     this.outputNode = ctx.createGain()
-    this.outputNode.gain.value = gain
+    this.outputNode.gain.value = gain / 64
   }
 
   // Get an AudioBufferSourceNode that will play this instrument
   createPlayNode(note, volume) {
     this.playGainNode = ctx.createGain()
-    this.playGainNode.gain.value = volume
+    this.playGainNode.gain.value = volume / 64
     this.playGainNode.connect(this.outputNode)
 
     const noteNode = ctx.createBufferSource()
