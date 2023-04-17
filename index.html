@@ -17,46 +17,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="app" x-data="app" @end-of-pattern="endOfPattern()">
+    <div id="app" x-data="app">
       <nav>
-        <li>File</li>
-        <li class="active">Pattern</li>
-        <li>Song</li>
-        <li>Instrument</li>
-        <li>Mixer</li>
-        <li>Help</li>
+        <li :class="$store.view == 'file' && 'active'" @click="$store.view = 'file'">File</li>
+        <li :class="$store.view == 'patt' && 'active'" @click="$store.view = 'patt'">Patterns</li>
+        <li :class="$store.view == 'song' && 'active'" @click="$store.view = 'song'">Song</li>
+        <li :class="$store.view == 'inst' && 'active'" @click="$store.view = 'inst'">Instruments</li>
+        <li :class="$store.view == 'mixer' && 'active'" @click="$store.view = 'mixer'">Mixer</li>
+        <li :class="$store.view == 'help' && 'active'" @click="$store.view = 'help'">Help</li>
       </nav>
 
-      <template x-if="project">
-        <div id="main">
-          <div id="toolbar">
-            <button @click="play">▶️ PLAY</button>
-            <button @click="stop">⏹️ STOP</button>
-            <label for="stay">STAY &nbsp;</label> <input id="stay" type="checkbox" x-model="stayOnPattern" /> <label for="ptn">PATN: &nbsp;</label>
-            <input id="ptn" type="number" min="0" :max="project.patterns.length-1" x-model="activePattern.number" readonly />
-          </div>
-
-          <div id="tracks">
-            <div class="index">
-              <template x-for="i in activePattern.length">
-                <div class="step" :id="`step-${i - 1}`" x-text="i - 1"></div>
-              </template>
+      <div class="main">
+        <template x-if="$store.project">
+          <div x-show="$store.view == 'patt'" x-data="viewPatt">
+            <div class="toolbar">
+              <button @click="play">▶️ PLAY</button>
+              <button @click="stop">⏹️ STOP</button>
+              <label for="stay">STAY &nbsp;</label> <input id="stay" type="checkbox" x-model="stayOnPattern" /> <label for="ptn">PATN: &nbsp;</label>
+              <input id="ptn" type="number" min="0" x-model="activePattern.number" readonly />
+              <h3 x-text="$store.project.name"></h3>
             </div>
 
-            <template x-for="trkNum in project.trackCount">
-              <div class="track">
-                <template x-for="stepNum in activePattern.length">
-                  <div
-                    class="step"
-                    :class="helpers.stepClass(currentStep, cursor, stepNum-1, trkNum-1)"
-                    x-text="helpers.displayStep(activePattern.steps[trkNum-1][stepNum-1])"
-                  ></div>
+            <div id="tracks">
+              <div class="index">
+                <template x-for="i in activePattern.length">
+                  <div class="step" :id="`step-${i - 1}`" :class="(i-1) % 4 == 0 ? 'yellow' : ''" x-text="i.toString().padStart(3, '0')"></div>
                 </template>
               </div>
-            </template>
+
+              <template x-for="trkNum in $store.project.trackCount">
+                <div class="track">
+                  <template x-for="stepNum in activePattern.length">
+                    <div
+                      class="step"
+                      :class="helpers.stepClass(currentStep, cursor, stepNum-1, trkNum-1)"
+                      x-text="helpers.displayStep(activePattern.steps[trkNum-1][stepNum-1])"
+                    ></div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <div x-show="$store.view == 'file'" x-data="viewFile">
+          <div class="padded">
+            <button>SAVE</button> <button @click="load()">LOAD</button>
+            <ul>
+              <li>
+                Filename:
+                <div x-text="filename"></div>
+              </li>
+              <li>
+                Project Name:
+                <div x-text="projName"></div>
+              </li>
+            </ul>
           </div>
         </div>
-      </template>
+      </div>
     </div>
   </body>
 </html>

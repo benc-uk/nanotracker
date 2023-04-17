@@ -15,22 +15,32 @@ export class Project {
   /** @type {Track[]} */
   tracks = []
 
-  // /** @type {Pattern} */
-  // activePattern = null
-
-  // /** @type {number} */
-  // currentStep = 0
-
   /** @type {string} */
   name = 'Default'
   trackCount = 0
 
-  constructor() {}
+  constructor(trackCount) {
+    this.trackCount = trackCount
 
-  async load(filePath) {
+    for (let i = 0; i < trackCount; i++) {
+      const t = new Track(i)
+      this.tracks.push(t)
+    }
+
+    this.patterns[0] = new Pattern(0, 16, trackCount)
+  }
+
+  async load(inputString) {
     try {
-      const resp = await fetch(filePath)
-      const data = await resp.json()
+      const data = JSON.parse(inputString)
+
+      this.patterns = []
+      this.instruments = []
+      this.tracks = []
+      for (let i = 0; i < this.trackCount; i++) {
+        const t = new Track(i)
+        this.tracks.push(t)
+      }
 
       this.name = data.name
 
@@ -39,13 +49,6 @@ export class Project {
         const samp = await loadSample(instData.file)
         const i = new Instrument(instId++, samp, instData.root, instData.gain)
         this.instruments.push(i)
-      }
-
-      this.trackCount = data.trackCount
-      for (let i = 0; i < data.trackCount; i++) {
-        const t = new Track(i)
-        t.setGain(1.0)
-        this.tracks.push(t)
       }
 
       let pattNum = 0
@@ -57,13 +60,18 @@ export class Project {
           const trackNum = stepData[0]
           const stepNum = stepData[1]
           const inst = this.instruments[stepData[2]]
+          if (!inst) {
+            console.log(`### WARNING! Instrument ${stepData[2]} not found`)
+            continue
+          }
+
           patt.steps[trackNum][stepNum] = new Step(inst, stepData[3], stepData[4])
         }
 
         // Dummy test code - add hihats
-        for (let s = 0; s < patt.length; s++) {
-          patt.steps[2][s] = new Step(this.instruments[2], 60, Math.floor(Math.random() * 18) + 5)
-        }
+        // for (let s = 0; s < patt.length; s++) {
+        //   patt.steps[2][s] = new Step(this.instruments[2], 60, Math.floor(Math.random() * 18) + 5)
+        // }
 
         this.patterns.push(patt)
       }

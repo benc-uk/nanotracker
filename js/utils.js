@@ -11,15 +11,11 @@ export function displayStep(step) {
 }
 
 export function stepClass(currentStep, cursor, stepNum, trkNum) {
-  let classes = {
-    cursor: false,
-    active: false,
+  return {
+    cursor: cursor.step == stepNum && cursor.track == trkNum,
+    active: currentStep == stepNum,
+    stripe: stepNum % 4 == 0,
   }
-
-  classes.cursor = cursor.step == stepNum && cursor.track == trkNum
-  classes.active = currentStep == stepNum
-
-  return classes
 }
 
 function toHexPadded(v, pad = 2) {

@@ -22,6 +22,7 @@
   --green-10: #081108;
 
   --green-text: #30c935;
+  --yellow: #c8e233;
 }
 
 body {
@@ -36,7 +37,7 @@ nav {
   top: 2px;
 }
 
-#main {
+.main {
   border: 2px solid var(--green-2);
   background-color: var(--grey-9);
 }
@@ -63,8 +64,11 @@ nav li.active {
 
 #tracks {
   display: flex;
-  height: 338px;
+  height: 75vh;
   overflow-y: scroll;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  cursor: default;
+  user-select: none;
 }
 
 #tracks::-webkit-scrollbar {
@@ -76,7 +80,6 @@ nav li.active {
   display: table;
   background-color: black;
   color: rgb(255, 255, 255);
-  font-family: 'Consolas', 'Courier New', Courier, monospace;
   margin: 0.3rem;
   color: var(--green-text);
 }
@@ -86,17 +89,25 @@ nav li.active {
   display: table;
   background-color: black;
   color: var(--grey-4);
-  font-family: 'Consolas', 'Courier New', Courier, monospace;
   margin: 0.3rem;
 }
 
+.yellow {
+  color: white;
+}
+
 .step {
-  padding: 1px;
+  padding: 0px;
+  margin: 0px;
   overflow: hidden;
 }
 
 .active {
   background-color: var(--green-7);
+}
+
+.stripe {
+  background-color: var(--grey-10);
 }
 
 .cursor {
@@ -105,11 +116,10 @@ nav li.active {
 
 button {
   background-color: var(--grey-7);
-  color: white;
+  color: var(--green-text);
   border: 2px solid var(--green-5);
   border-radius: 0.3rem;
   padding: 0.2rem;
-
   font-size: 0.9rem;
 }
 
@@ -132,11 +142,15 @@ input[type='number'] {
   font-size: 1rem;
 }
 
-#toolbar {
+.toolbar {
   display: flex;
   align-items: center;
   gap: 1rem;
   color: var(--green-3);
   height: 3.5rem;
   margin-left: 1rem;
+}
+
+.padded {
+  padding: 1rem;
 }
