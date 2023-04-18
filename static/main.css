@@ -72,6 +72,10 @@ nav li.active {
   user-select: none;
 }
 
+#tracksHeader {
+  display: flex;
+}
+
 #tracks::-webkit-scrollbar {
   display: none;
 }
@@ -85,6 +89,11 @@ nav li.active {
   color: var(--green-text);
 }
 
+.mutedTrack {
+  background-color: var(--grey-10);
+  color: var(--grey-7);
+}
+
 .index {
   flex-grow: 0;
   display: table;
@@ -93,7 +102,19 @@ nav li.active {
   margin: 0.3rem;
 }
 
-.yellow {
+.trackHead {
+  flex-grow: 1;
+  margin: 0.3rem;
+  text-align: center;
+}
+
+.trackHead:first-of-type {
+  flex-grow: 0;
+  color: var(--grey-9);
+  margin: 0.3rem;
+}
+
+.white {
   color: white;
 }
 
@@ -115,6 +136,10 @@ nav li.active {
   outline: 2px solid rgba(255, 255, 255, 0.8);
 }
 
+.record {
+  outline: 2px solid rgba(255, 0, 0, 0.8);
+}
+
 button {
   background-color: var(--grey-7);
   color: var(--green-text);
@@ -127,6 +152,11 @@ button {
 button:hover {
   background-color: var(--grey-6);
   border: 2px solid var(--green-3);
+}
+
+button.mini {
+  padding: 4px;
+  width: 30px;
 }
 
 input[type='checkbox'] {

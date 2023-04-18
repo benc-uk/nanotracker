@@ -4,10 +4,12 @@ export class Instrument {
   /** @type {AudioBuffer} */
   sample = null
   rootNote = 60
-  id = '00'
+  number = '00'
+  name = 'Unnamed'
 
-  constructor(id, sampleBuffer, rootNote, gain) {
-    this.id = id
+  constructor(name, num, sampleBuffer, rootNote, gain) {
+    this.name = name
+    this.number = num
     this.sample = sampleBuffer
     this.rootNote = rootNote
 

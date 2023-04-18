@@ -4,7 +4,6 @@ import { Step } from './step.js'
 export class Track {
   number = 0
   muted = false
-  playing = false
 
   /** @type {Step} */
   playingStep = null
@@ -36,7 +35,7 @@ export class Track {
    * @param {Step} step - Step to play on this tracks audio channel
    */
   playStep(step) {
-    if (!step || !step.enabled || !step.instrument) return
+    if (!step || !step.enabled || !step.instrument || this.muted) return
 
     // This makes the tracks monophonic and cut off previous notes
     if (this.stepNode && this.playingStep) {

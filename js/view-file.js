@@ -21,6 +21,7 @@ export const viewFile = () => ({
 
       await prj.load(data)
       Alpine.store('project', prj)
+      console.log('Loaded demo project')
     } catch (err) {
       console.error(err)
     }

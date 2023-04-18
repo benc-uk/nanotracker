@@ -19,6 +19,7 @@ export class Project {
   name = 'Default'
   trackCount = 0
 
+  // Create an empty project with a single empty pattern
   constructor(trackCount) {
     this.trackCount = trackCount
 
@@ -37,18 +38,19 @@ export class Project {
       this.patterns = []
       this.instruments = []
       this.tracks = []
-      for (let i = 0; i < this.trackCount; i++) {
-        const t = new Track(i)
-        this.tracks.push(t)
+      this.trackCount = data.trackCount
+      for (let trackNum = 0; trackNum < this.trackCount; trackNum++) {
+        this.tracks.push(new Track(trackNum))
       }
 
       this.name = data.name
 
-      let instId = 0
+      let instNum = 0
       for (const instData of data.instruments) {
         const samp = await loadSample(instData.file)
-        const i = new Instrument(instId++, samp, instData.root, instData.gain)
-        this.instruments.push(i)
+        const name = instData.file.substring(instData.file.lastIndexOf('/') + 1)
+        const inst = new Instrument(name, instNum++, samp, instData.root, instData.gain)
+        this.instruments.push(inst)
       }
 
       let pattNum = 0
