@@ -68,11 +68,6 @@ export class Project {
           patt.steps[trackNum][stepNum] = new Step(inst, stepData[3], stepData[4])
         }
 
-        // Dummy test code - add hihats
-        // for (let s = 0; s < patt.length; s++) {
-        //   patt.steps[2][s] = new Step(this.instruments[2], 60, Math.floor(Math.random() * 18) + 5)
-        // }
-
         this.patterns.push(patt)
       }
 

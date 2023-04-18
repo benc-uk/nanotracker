@@ -24,7 +24,6 @@ export const viewPatt = () => ({
 
     // effect to watch the store
     Alpine.effect(() => {
-      //this.project = Alpine.store('project')
       this.activePattern = Alpine.store('project').patterns[0]
     })
 
@@ -126,5 +125,12 @@ export const viewPatt = () => ({
     this.stopped = true
 
     if (ctx.state === 'suspended') ctx.resume()
+  },
+
+  patternChange(offset) {
+    const newPattNum = this.activePattern.number + offset
+    if (newPattNum >= Alpine.store('project').patterns.length) return
+    if (newPattNum < 0) return
+    this.activePattern = Alpine.store('project').patterns[newPattNum]
   },
 })

@@ -31,11 +31,15 @@
         <template x-if="$store.project">
           <div x-show="$store.view == 'patt'" x-data="viewPatt">
             <div class="toolbar">
-              <button @click="play">▶️ PLAY</button>
-              <button @click="stop">⏹️ STOP</button>
-              <label for="stay">STAY &nbsp;</label> <input id="stay" type="checkbox" x-model="stayOnPattern" /> <label for="ptn">PATN: &nbsp;</label>
-              <input id="ptn" type="number" min="0" x-model="activePattern.number" readonly />
-              <h3 x-text="$store.project.name"></h3>
+              <button @click="play" class="mr-1">▶️ PTN</button>
+              <button @click="play" class="mr-1">▶️ SONG</button>
+              <button @click="stop" class="mr-1">⏹️ STOP</button>
+              <!-- <label for="stay">STAY &nbsp;</label>
+              <input id="stay" type="checkbox" x-model="stayOnPattern" /> -->
+              <input id="ptn" x-model="activePattern.number" size="1" readonly />
+
+              <button @click="patternChange(-1)" style="padding: 4px; width: 30px">-</button>
+              <button @click="patternChange(+1)" style="padding: 4px; width: 30px">+</button>
             </div>
 
             <div id="tracks">
@@ -61,17 +65,14 @@
         </template>
 
         <div x-show="$store.view == 'file'" x-data="viewFile">
+          <div class="toolbar">
+            <button @click="save" x-show="fileHandle">💾 SAVE</button>
+            <button @click="load">📂 LOAD</button>
+          </div>
           <div class="padded">
-            <button>SAVE</button> <button @click="load()">LOAD</button>
             <ul>
-              <li>
-                Filename:
-                <div x-text="filename"></div>
-              </li>
-              <li>
-                Project Name:
-                <div x-text="projName"></div>
-              </li>
+              <li>Filename: <span x-text="filename"></span></li>
+              <li>Project Name: <span x-text="$store.project.name"></span></li>
             </ul>
           </div>
         </div>
