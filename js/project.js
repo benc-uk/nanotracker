@@ -120,7 +120,6 @@ export class Project {
    * @param {number} stepNum
    */
   trigPatternStep(patt, stepNum) {
-    console.log('trigPatternStep', patt, stepNum)
     // Get the current step for each track
     for (const track of this.tracks) {
       const step = patt.steps[track.number][stepNum]
