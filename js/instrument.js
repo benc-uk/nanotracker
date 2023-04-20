@@ -1,20 +1,30 @@
 import { ctx } from '../app.js'
+import { Sample } from './sample.js'
 
 export class Instrument {
   /** @type {AudioBuffer} */
   sample = null
   rootNote = 60
-  number = '00'
+  number = 0
   name = 'Unnamed'
+  /** @type {Sample} */
+  samples = []
+  gain = 64
 
-  constructor(name, num, sampleBuffer, rootNote, gain) {
+  constructor(num, name) {
     this.name = name
     this.number = num
-    this.sample = sampleBuffer
-    this.rootNote = rootNote
 
     this.outputNode = ctx.createGain()
-    this.outputNode.gain.value = gain / 64
+    this.outputNode.gain.value = this.gain / 64
+  }
+
+  async addSample(sample) {
+    this.samples.push(sample)
+  }
+
+  clearSamples() {
+    this.samples = []
   }
 
   // Get an AudioBufferSourceNode that will play this instrument
@@ -24,7 +34,7 @@ export class Instrument {
     this.playGainNode.connect(this.outputNode)
 
     const noteNode = ctx.createBufferSource()
-    noteNode.buffer = this.sample
+    noteNode.buffer = this.samples[0].buffer
     noteNode.detune.value = (note - this.rootNote) * 100
 
     noteNode.connect(this.playGainNode)

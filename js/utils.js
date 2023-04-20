@@ -1,3 +1,5 @@
+import { ctx } from '../app.js'
+
 export function stepText(step) {
   if (step) {
     return `
@@ -11,13 +13,6 @@ export function stepText(step) {
 }
 
 export function stepClass(currentStep, cursor, stepNum, trkNum, recMode) {
-  // if (muted) {
-  //   return {
-  //     mutedTrack: true,
-  //     cursor: cursor.step == stepNum && cursor.track == trkNum && !recMode,
-  //   }
-  // }
-
   let classes = {
     stripe: currentStep != stepNum && stepNum % 4 == 0,
     record: cursor.step == stepNum && cursor.track == trkNum && recMode,
@@ -28,7 +23,26 @@ export function stepClass(currentStep, cursor, stepNum, trkNum, recMode) {
   return classes
 }
 
-function toHexPadded(v, pad = 2) {
+export function toHexPadded(v, pad = 2) {
   if (v == null) return '-'
   return v.toString(16).padStart(pad, '0').toLocaleUpperCase()
+}
+
+/**
+ * Load sample file from URL
+ *
+ * @param {string} url - URL of sample file
+ */
+export async function loadSampleURL(url) {
+  try {
+    const resp = await fetch(url)
+    const buff = await resp.arrayBuffer()
+
+    /** @type {AudioBuffer} */
+    const audioBuffer = await ctx.decodeAudioData(buff)
+
+    return audioBuffer
+  } catch (err) {
+    console.error(err)
+  }
 }

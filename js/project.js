@@ -1,8 +1,9 @@
 import { Instrument } from './instrument.js'
 import { Pattern } from './pattern.js'
 import { Track } from './track.js'
-import { loadSample } from './samples.js'
+import { Sample } from './sample.js'
 import { Step } from './step.js'
+import { loadSampleURL, toHexPadded } from './utils.js'
 
 /** Project class, of which there is a single instance */
 export class Project {
@@ -19,7 +20,10 @@ export class Project {
   name = 'Default'
   trackCount = 0
 
-  // Create an empty project with a single empty pattern
+  song = []
+
+  // Create an new project with 256 empty patterns
+  // And empty bank of 128 instruments
   constructor(trackCount) {
     this.trackCount = trackCount
 
@@ -28,35 +32,46 @@ export class Project {
       this.tracks.push(t)
     }
 
-    this.patterns[0] = new Pattern(0, 16, trackCount)
+    this.clearInstruments()
+    this.clearPatterns()
   }
 
-  async load(inputString) {
+  clearPatterns() {
+    this.patterns = []
+    for (let i = 0; i < 256; i++) {
+      this.patterns.push(new Pattern(i, 16, this.trackCount))
+    }
+  }
+
+  clearInstruments() {
+    this.instruments = []
+    for (let i = 0; i < 128; i++) {
+      this.instruments.push(new Instrument(i, 'Unnamed ' + i))
+    }
+  }
+
+  async parse(inputString) {
     try {
       const data = JSON.parse(inputString)
-
-      this.patterns = []
-      this.instruments = []
-      this.tracks = []
-      this.trackCount = data.trackCount
-      for (let trackNum = 0; trackNum < this.trackCount; trackNum++) {
-        this.tracks.push(new Track(trackNum))
-      }
 
       this.name = data.name
 
       let instNum = 0
       for (const instData of data.instruments) {
-        const samp = await loadSample(instData.file)
+        const sampBuff = await loadSampleURL(instData.file)
+
         const name = instData.file.substring(instData.file.lastIndexOf('/') + 1)
-        const inst = new Instrument(name, instNum++, samp, instData.root, instData.gain)
-        this.instruments.push(inst)
+        const inst = new Instrument(instNum++, name.replace('.wav', ''))
+        const samp = new Sample(name, 0, sampBuff)
+
+        inst.addSample(samp)
+        this.instruments[inst.number] = inst
       }
 
       let pattNum = 0
       for (const pattData of data.patterns) {
-        const patt = new Pattern(pattNum++, pattData.length, data.trackCount)
-        patt.nextPatternNum = pattNum
+        const patt = this.patterns[pattNum++]
+        patt.length = pattData.length
 
         for (const stepData of pattData.steps) {
           const trackNum = stepData[0]
@@ -69,8 +84,6 @@ export class Project {
 
           patt.steps[trackNum][stepNum] = new Step(inst, stepData[3], stepData[4])
         }
-
-        this.patterns.push(patt)
       }
 
       // Set start pattern

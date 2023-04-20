@@ -87,6 +87,7 @@ export const viewPatt = () => ({
     if (newNum >= Alpine.store('project').patterns.length) return
     if (newNum < 0) return
     this.activePattern = Alpine.store('project').patterns[newNum]
+    if (this.currentStep >= this.activePattern.length) this.currentStep = 0
   },
 
   instChange(offset) {
@@ -183,9 +184,11 @@ export const viewPatt = () => ({
       this.stop()
     }
 
+    // tracker keyboard octave
+
     if (e.key === 'z') {
+      if (!this.record) return
       e.preventDefault()
-      this.stop()
       const inst = prj.instruments[this.activeInst]
       this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, 60, 64)
     }

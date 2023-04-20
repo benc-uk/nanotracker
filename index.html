@@ -19,7 +19,7 @@
   <body>
     <div id="app" x-data="app">
       <nav>
-        <li :class="$store.view == 'file' && 'active'" @click="$store.view = 'file'">File</li>
+        <li :class="$store.view == 'file' && 'active'" @click="$store.view = 'file'">Project</li>
         <li :class="$store.view == 'patt' && 'active'" @click="$store.view = 'patt'">Patterns</li>
         <li :class="$store.view == 'song' && 'active'" @click="$store.view = 'song'">Song</li>
         <li :class="$store.view == 'inst' && 'active'" @click="$store.view = 'inst'">Instruments</li>
@@ -29,57 +29,94 @@
 
       <div class="main" id="main">
         <template x-if="$store.project">
-          <div x-show="$store.view == 'patt'" x-data="viewPatt" id="pattEdit">
-            <div class="toolbar">
-              <button @click="stayOnPattern = true; play()" class="mr-1">▶️ PTN</button>
-              <button @click="stayOnPattern = false; play()" class="mr-1">▶️ SONG</button>
-              <button @click="stop" class="mr-1">⏹️ STOP</button>
+          <div>
+            <div x-show="$store.view == 'patt'" x-data="viewPatt" id="pattEdit">
+              <div class="toolbar">
+                <button @click="stayOnPattern = true; play()" class="mr-1">▶️ PTN</button>
+                <button @click="stayOnPattern = false; play()" class="mr-1">▶️ SONG</button>
+                <button @click="stop" class="mr-1">⏹️ STOP</button>
 
-              <input id="ptn" x-model="activePattern.number" size="1" readonly />
-              <button @click="patternChange(-1)" class="mini">-</button>
-              <button @click="patternChange(+1)" class="mini mr-1">+</button>
+                <input id="ptn" x-model="activePattern.number" size="1" readonly />
+                <button @click="patternChange(-1)" class="mini">-</button>
+                <button @click="patternChange(+1)" class="mini mr-1">+</button>
 
-              <input :value="$store.project.instruments[activeInst]?.name" />
-              <button @click="instChange(-1)" class="mini">-</button>
-              <button @click="instChange(+1)" class="mini mr-1">+</button>
-            </div>
+                <input :value="$store.project.instruments[activeInst]?.name" />
+                <button @click="instChange(-1)" class="mini">-</button>
+                <button @click="instChange(+1)" class="mini mr-1">+</button>
+              </div>
 
-            <div id="tracksHeader">
-              <div class="trackHead">&nbsp;&nbsp;&nbsp;</div>
-              <template x-for="(trk, trkNum) in $store.project.tracks">
-                <div class="trackHead">
-                  <span x-text="`Track: ${trkNum}`" class="mr-1"></span>
-                  <button class="mini" @click="trk.muted = !trk.muted">M</button>
-                  <button class="mini" @click="soloTrack(trkNum)">S</button>
-                </div>
-              </template>
-            </div>
-
-            <div id="tracks">
-              <div class="index">
-                <template x-for="s in activePattern.length">
-                  <div class="step" :id="`step-${s - 1}`" :class="(s - 1) % 4 == 0 && 'white'" x-text="s.toString().padStart(3, '0')"></div>
+              <div id="tracksHeader">
+                <div class="trackHead">&nbsp;&nbsp;&nbsp;</div>
+                <template x-for="(trk, trkNum) in $store.project.tracks">
+                  <div class="trackHead">
+                    <span x-text="`Track: ${trkNum}`" class="mr-1"></span>
+                    <button class="mini" @click="trk.muted = !trk.muted">M</button>
+                    <button class="mini" @click="soloTrack(trkNum)">S</button>
+                  </div>
                 </template>
               </div>
 
-              <template x-for="(trk, trkNum) in $store.project.tracks">
-                <div class="track" :class="trk?.muted && 'mutedTrack'">
-                  <template x-for="stepNum in activePattern.length">
-                    <div
-                      class="step"
-                      :class="fn.stepClass(currentStep, cursor, stepNum-1, trkNum, record)"
-                      x-text="fn.stepText(activePattern.steps[trkNum][stepNum-1])"
-                    ></div>
+              <div id="tracks">
+                <div class="index">
+                  <template x-for="s in activePattern.length">
+                    <div class="step" :id="`step-${s - 1}`" :class="(s - 1) % 4 == 0 && 'white'" x-text="s.toString().padStart(3, '0')"></div>
                   </template>
                 </div>
-              </template>
+
+                <template x-for="(trk, trkNum) in $store.project.tracks">
+                  <div class="track" :class="trk?.muted && 'mutedTrack'">
+                    <template x-for="stepNum in activePattern.length">
+                      <div
+                        class="step"
+                        :class="fn.stepClass(currentStep, cursor, stepNum-1, trkNum, record)"
+                        x-text="fn.stepText(activePattern.steps[trkNum][stepNum-1])"
+                      ></div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <!-- end patt view -->
+
+            <div x-show="$store.view == 'inst'" x-data="viewInst">
+              <div class="row padded">
+                <div class="col mr-2">
+                  <h3 for="instSel">Instruments</h3>
+                  <div class="row padded-sm">
+                    <button @click="" class="mr-1">LOAD</button>
+                    <button @click="" class="mr-1">ZAP</button>
+                    <button @click="" class="mr-1">SAVE</button>
+                  </div>
+
+                  <select size="10" class="mr-1" x-model="selectedInstNum">
+                    <template x-for="(inst, index) in $store.project?.instruments" :key="index">
+                      <option :value="index" x-text="inst.name"></option>
+                    </template>
+                  </select>
+                </div>
+
+                <div class="col">
+                  <h3 for="sampSel">Samples</h3>
+                  <div class="row padded-sm">
+                    <button @click="" class="mr-1">LOAD</button>
+                    <button @click="" class="mr-1">SAVE</button>
+                  </div>
+                  <select size="10" style="width: 300px">
+                    <template x-for="samp in $store.project.instruments[selectedInstNum]?.samples">
+                      <option :value="samp" x-text="`sample-${samp.name}`"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
+          <!-- end inst view -->
         </template>
 
         <div x-show="$store.view == 'file'" x-data="viewFile">
           <div class="toolbar">
-            <button @click="save" x-show="fileHandle">💾 SAVE</button>
+            <button @click="newProj" class="mr-1">✨ NEW</button>
+            <button @click="save" x-show="fileHandle" class="mr-1">💾 SAVE</button>
             <button @click="load">📂 LOAD</button>
           </div>
           <div class="padded">
@@ -90,43 +127,7 @@
           </div>
         </div>
 
-        <div x-show="$store.view == 'help'" x-data="viewHelp">
-          <div class="padded">
-            <h1>JS Tracker</h1>
-            <table>
-              <thead>
-                <tr>
-                  <th>Key</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tr>
-                <td style="width: 120px">Enter</td>
-                <td>Play song from current pattern</td>
-              </tr>
-              <tr>
-                <td>Ctrl + Enter</td>
-                <td>Play & loop pattern from top</td>
-              </tr>
-              <tr>
-                <td>Shift + Enter</td>
-                <td>Play & loop pattern from current step</td>
-              </tr>
-              <tr>
-                <td>Escape</td>
-                <td>Stop playback</td>
-              </tr>
-              <tr>
-                <td>Space</td>
-                <td>Enter edit mode, will stop playback</td>
-              </tr>
-              <tr>
-                <td>Delete</td>
-                <td>Clear step (in edit mode)</td>
-              </tr>
-            </table>
-          </div>
-        </div>
+        <div x-show="$store.view == 'help'" x-data="viewHelp" x-html="content"></div>
       </div>
     </div>
   </body>

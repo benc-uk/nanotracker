@@ -19,9 +19,8 @@ export const viewFile = () => ({
       const data = await resp.text()
       this.filename = 'demo.json'
 
-      await prj.load(data)
+      await prj.parse(data)
       Alpine.store('project', prj)
-      console.log('Loaded demo project')
     } catch (err) {
       console.error(err)
     }
@@ -35,7 +34,7 @@ export const viewFile = () => ({
 
     const data = await this.file.text()
     const prj = new Project(8)
-    await prj.load(data)
+    await prj.parse(data)
 
     Alpine.store('project', prj)
     Alpine.store('view', 'patt')
@@ -45,5 +44,10 @@ export const viewFile = () => ({
     alert('Not implemented yet 🤕')
     // const writable = await this.fileHandle.createWritable()
     // await writable.close()
+  },
+
+  newProj() {
+    Alpine.store('project', new Project(8))
+    Alpine.store('view', 'patt')
   },
 })
