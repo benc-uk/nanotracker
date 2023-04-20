@@ -1,6 +1,8 @@
 {
   "name": "Demo Project",
+  "tempo": 136,
   "trackCount": 8,
+  "song": [0, 1, 2],
   "instruments": [
     {
       "file": "samples/Drums/Mini/BD Mini 1.wav",
@@ -18,7 +20,7 @@
       "gain": 64
     },
     {
-      "file": "samples/Xtra/TB Synth/TB Cat.wav",
+      "file": "samples/SY bunkbass 1.wav",
       "root": 48,
       "gain": 64
     },
@@ -30,7 +32,7 @@
   ],
   "patterns": [
     {
-      "length": 32,
+      "length": 16,
       "steps": [
         [0, 0, 0, 60, 64],
         [0, 1, 0, 60, 64],

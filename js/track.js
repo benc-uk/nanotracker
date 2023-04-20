@@ -5,11 +5,11 @@ export class Track {
   number = 0
   muted = false
 
-  /** @type {Step} */
-  playingStep = null
+  /** @type {GainNode} */
+  activeOutNode = null
 
   /** @type {AudioBufferSourceNode} */
-  stepNode = null
+  activeAudioNode = null
 
   /** @type {GainNode} */
   trackOutput
@@ -22,11 +22,20 @@ export class Track {
     this.trackOutput = ctx.createGain()
     this.trackOutput.gain.value = 1.0
     this.trackOutput.connect(ctx.destination)
-    this.stepNode = null
+
+    this.activeAudioNode = null
+    this.activeOutNode = null
   }
 
   setGain(gain) {
     this.trackOutput.gain.value = gain
+  }
+
+  stop() {
+    if (this.activeAudioNode && this.activeOutNode) {
+      this.activeAudioNode.stop(0)
+      this.activeOutNode.disconnect()
+    }
   }
 
   /**
@@ -38,16 +47,15 @@ export class Track {
     if (!step || !step.enabled || !step.instrument || this.muted) return
 
     // This makes the tracks monophonic and cut off previous notes
-    if (this.stepNode && this.playingStep) {
-      this.playingStep.instrument.outputNode.disconnect()
-      this.stepNode.stop(0)
+    if (this.activeAudioNode && this.activeOutNode) {
+      this.activeAudioNode.stop(0)
+      this.activeOutNode.disconnect()
     }
 
-    this.playingStep = step
-
-    // Get a audio node to play this step, and connect to the track output
-    this.stepNode = step.instrument.createPlayNode(step.note, step.volume)
-    step.instrument.outputNode.connect(this.trackOutput)
-    this.stepNode.start(0)
+    const [audioNode, outNode] = step.instrument.createPlayNode(step.note, step.volume)
+    this.activeOutNode = outNode
+    this.activeAudioNode = audioNode
+    this.activeAudioNode.start(0)
+    this.activeOutNode.connect(this.trackOutput)
   }
 }

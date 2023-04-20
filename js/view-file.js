@@ -1,9 +1,7 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
-import { Project } from './project.js'
-
 export const viewFile = () => ({
-  filename: 'None',
+  filename: 'none',
   fileHandle: null,
 
   async init() {
@@ -13,13 +11,13 @@ export const viewFile = () => ({
 
   async loadDemo() {
     try {
-      const prj = new Project(8)
+      const prj = Alpine.store('project')
 
       const resp = await fetch('projects/demo.json')
       const data = await resp.text()
       this.filename = 'demo.json'
 
-      await prj.parse(data)
+      await prj.parseJSON(data)
       Alpine.store('project', prj)
     } catch (err) {
       console.error(err)
@@ -33,8 +31,7 @@ export const viewFile = () => ({
     this.file = await fileHandle.getFile()
 
     const data = await this.file.text()
-    const prj = new Project(8)
-    await prj.parse(data)
+    await prj.parseJSON(data)
 
     Alpine.store('project', prj)
     Alpine.store('view', 'patt')
@@ -47,7 +44,7 @@ export const viewFile = () => ({
   },
 
   newProj() {
-    Alpine.store('project', new Project(8))
+    Alpine.store('project').clearAll()
     Alpine.store('view', 'patt')
   },
 })

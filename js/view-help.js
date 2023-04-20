@@ -1,7 +1,9 @@
+import { VERSION } from '../app.js'
+
 export const viewHelp = () => ({
   content: `
   <div class="padded">
-  <h1>JS Tracker v0.0.1</h1>
+  <h1>JS Tracker v${VERSION}</h1>
   <h3>&copy; Ben Coleman, 2023 &mdash; <a href="https://github.com/benc-uk/js-tracker">github.com/benc-uk/js-tracker</a></h3>
   <table>
     <thead>

@@ -5,6 +5,10 @@ import { Sample } from './sample.js'
 import { Step } from './step.js'
 import { loadSampleURL, toHexPadded } from './utils.js'
 
+const MAX_INSTRUMENTS = 128
+const MAX_PATTERNS = 256
+export const DEFAULT_TRACK_COUNT = 8
+
 /** Project class, of which there is a single instance */
 export class Project {
   /** @type {Instrument[]} */
@@ -17,14 +21,16 @@ export class Project {
   tracks = []
 
   /** @type {string} */
-  name = 'Default'
+  name = 'New Project'
   trackCount = 0
+  tempo = 120
 
-  song = []
+  // Pattern chain
+  song = [0]
 
   // Create an new project with 256 empty patterns
   // And empty bank of 128 instruments
-  constructor(trackCount) {
+  constructor(trackCount = DEFAULT_TRACK_COUNT) {
     this.trackCount = trackCount
 
     for (let i = 0; i < trackCount; i++) {
@@ -38,23 +44,35 @@ export class Project {
 
   clearPatterns() {
     this.patterns = []
-    for (let i = 0; i < 256; i++) {
+    for (let i = 0; i < MAX_PATTERNS; i++) {
       this.patterns.push(new Pattern(i, 16, this.trackCount))
     }
   }
 
   clearInstruments() {
     this.instruments = []
-    for (let i = 0; i < 128; i++) {
+    for (let i = 0; i < MAX_INSTRUMENTS; i++) {
       this.instruments.push(new Instrument(i, 'Unnamed ' + i))
     }
   }
 
-  async parse(inputString) {
+  clearAll() {
+    this.name = 'New Project'
+    this.song = [0]
+    this.clearInstruments()
+    this.clearPatterns()
+  }
+
+  async parseJSON(inputString) {
     try {
       const data = JSON.parse(inputString)
 
+      this.clearInstruments()
+      this.clearPatterns()
+
       this.name = data.name
+      this.tempo = data.tempo
+      this.song = data.song
 
       let instNum = 0
       for (const instData of data.instruments) {
@@ -62,9 +80,11 @@ export class Project {
 
         const name = instData.file.substring(instData.file.lastIndexOf('/') + 1)
         const inst = new Instrument(instNum++, name.replace('.wav', ''))
-        const samp = new Sample(name, 0, sampBuff)
+        const samp = new Sample(0, name)
+        samp.buffer = sampBuff
+        inst.samples[0] = samp
+        inst.rootNote = instData.root
 
-        inst.addSample(samp)
         this.instruments[inst.number] = inst
       }
 
@@ -95,7 +115,12 @@ export class Project {
     }
   }
 
+  /**
+   * @param {Pattern} patt
+   * @param {number} stepNum
+   */
   trigPatternStep(patt, stepNum) {
+    console.log('trigPatternStep', patt, stepNum)
     // Get the current step for each track
     for (const track of this.tracks) {
       const step = patt.steps[track.number][stepNum]

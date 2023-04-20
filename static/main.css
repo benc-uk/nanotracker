@@ -91,6 +91,7 @@ nav li.active {
   color: rgb(255, 255, 255);
   margin: 0.3rem;
   color: var(--green-text);
+  font-size: calc(0.35rem + 0.8vw);
 }
 
 .mutedTrack {
@@ -104,6 +105,7 @@ nav li.active {
   background-color: black;
   color: var(--grey-4);
   margin: 0.3rem;
+  font-size: calc(0.35rem + 0.8vw);
 }
 
 .trackHead {
@@ -161,6 +163,12 @@ button:hover {
 button.mini {
   padding: 4px;
   width: 30px;
+}
+
+button[disabled] {
+  background-color: var(--grey-9);
+  border: 2px solid var(--grey-7);
+  color: var(--grey-4);
 }
 
 input[type='checkbox'] {
@@ -222,4 +230,16 @@ h5,
 h6 {
   padding: 0.2rem;
   margin: 0.2rem;
+}
+
+.version {
+  float: right;
+  color: var(--green-6);
+}
+
+/* media queries to hide elements on small screens */
+@media (max-width: 920px) {
+  .hide-small {
+    display: none;
+  }
 }

@@ -4,6 +4,8 @@ import { stepText, stepClass } from './utils.js'
 import { ctx } from '../app.js'
 import { Step } from './step.js'
 
+const BPM_MAGIC = 15
+
 export const viewPatt = () => ({
   fn: {
     stepText,
@@ -19,6 +21,8 @@ export const viewPatt = () => ({
   },
   activeInst: 0,
   record: false,
+  clockTimer: null,
+  songPos: 0,
 
   async init() {
     this.activePattern = Alpine.store('project').patterns[0]
@@ -27,6 +31,7 @@ export const viewPatt = () => ({
     // effect to watch the store
     Alpine.effect(() => {
       this.activePattern = Alpine.store('project').patterns[0]
+      if (this.clockTimer) this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
     })
 
     // Keyboard bindings
@@ -37,31 +42,34 @@ export const viewPatt = () => ({
     const clock = new WAAClock(ctx)
     clock.start()
 
-    clock
-      .callbackAtTime(() => {
-        // The main playback logic lives here
-        if (this.stopped) return
-        const prj = Alpine.store('project')
+    this.clockTimer = clock.setTimeout(() => {
+      // The main playback logic lives here
+      if (this.stopped) return
+      const prj = Alpine.store('project')
 
-        prj.trigPatternStep(this.activePattern, this.currentStep)
+      prj.trigPatternStep(this.activePattern, this.currentStep)
 
-        this.currentStep++
+      this.currentStep++
 
-        if (this.currentStep >= this.activePattern.length) {
-          if (this.stayOnPattern) {
-            // Do nothing
-          } else {
-            this.activePattern = prj.patterns[this.activePattern.nextPatternNum]
-          }
-          this.currentStep = 0
+      if (this.currentStep >= this.activePattern.length) {
+        if (this.stayOnPattern) {
+          // Do nothing
+        } else {
+          this.songPos++
+          if (this.songPos >= prj.song.length) this.songPos = 0
+          const nextPattNum = prj.song[this.songPos]
+          this.activePattern = prj.patterns[nextPattNum]
         }
+        this.currentStep = 0
+      }
 
-        this.cursor.step = this.currentStep
-        if (!this.record) {
-          this.followPlayingStep(this.currentStep)
-        }
-      }, ctx.currentTime)
-      .repeat(0.11)
+      this.cursor.step = this.currentStep
+      if (!this.record) {
+        this.followPlayingStep(this.currentStep)
+      }
+    }, ctx.currentTime)
+
+    this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
   },
 
   followPlayingStep(stepNum) {
@@ -78,6 +86,9 @@ export const viewPatt = () => ({
 
   stop() {
     this.stopped = true
+    for (const t of Alpine.store('project').tracks) {
+      t.stop()
+    }
 
     if (ctx.state === 'suspended') ctx.resume()
   },
@@ -107,7 +118,7 @@ export const viewPatt = () => ({
 
   // Keys here!
   bindKeys(e) {
-    if (Alpine.store('view') !== 'patt') return
+    //if (Alpine.store('view') !== 'patt') return
 
     const prj = Alpine.store('project')
 
