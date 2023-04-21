@@ -35,13 +35,13 @@
               <button @click="stayOnPattern = true; play()" class="mr-1">▶️ PTN</button>
               <button @click="stayOnPattern = false; play()" class="mr-1">▶️ SONG</button>
               <button @click="stop" class="mr-1">⏹️ STOP</button>
-              <button @click="record = !record" class="mr-1" :class="record && 'lit'">⏺️ REC</button>
+              <button @click="this.recordMode" class="mr-1" :class="record && 'lit'">⏺️ REC</button>
 
-              <input id="ptn" x-model="activePattern.number" size="1" readonly />
+              PATT:<input id="ptn" x-model="activePattern.number" size="1" readonly />
               <button @click="patternChange(-1)" class="mini">-</button>
               <button @click="patternChange(+1)" class="mini mr-1">+</button>
 
-              <input :value="$store.project.instruments[activeInst]?.name" />
+              INST:<input :value="$store.project.instruments[activeInst]?.name" />
               <button @click="instChange(-1)" class="mini">-</button>
               <button @click="instChange(+1)" class="mini mr-1">+</button>
             </div>

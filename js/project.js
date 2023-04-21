@@ -3,7 +3,7 @@ import { Pattern } from './pattern.js'
 import { Track } from './track.js'
 import { Sample } from './sample.js'
 import { Step } from './step.js'
-import { loadSampleURL, toHexPadded } from './utils.js'
+import { loadSampleURL, toHex } from './utils.js'
 
 const MAX_INSTRUMENTS = 128
 const MAX_PATTERNS = 256

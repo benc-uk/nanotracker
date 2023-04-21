@@ -1,31 +1,27 @@
 import { ctx } from '../app.js'
 
-// export function stepText(step) {
-//   if (step) {
-//     return `
-//     ${toHexPadded(step.instrument.number)}
-//     ${step.note}
-//     ${toHexPadded(step.volume)}
-//     ${step.effect1type}${toHexPadded(step.effect1val1, 1)}${toHexPadded(step.effect1val2, 1)}`
-//   } else {
-//     return `-- -- -- ---`
-//   }
-// }
+export function toHex(v, pad = 2) {
+  const empty = ''.padStart(pad, '-')
 
-// export function stepClass(currentStep, cursor, stepNum, trkNum, recMode) {
-//   let classes = {
-//     stripe: currentStep != stepNum && stepNum % 4 == 0,
-//     record: cursor.step == stepNum && cursor.track == trkNum && recMode,
-//     cursor: cursor.step == stepNum && cursor.track == trkNum && !recMode,
-//     active: currentStep == stepNum,
-//   }
+  if (v === undefined) return empty
+  if (v == null) return empty
 
-//   return classes
-// }
-
-export function toHexPadded(v, pad = 2) {
-  if (v == null) return '-'
   return v.toString(16).padStart(pad, '0').toLocaleUpperCase()
+}
+
+export function toNote(noteNum) {
+  const empty = '---'
+
+  if (noteNum === undefined) return empty
+  if (noteNum == null) return empty
+
+  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G', 'A', 'A#', 'B']
+  const octave = Math.floor(noteNum / 12) - 1
+  const note = noteNum % 12
+
+  let out = `${notes[note]}${octave}`
+  if (out.length === 2) out += '&nbsp;'
+  return out
 }
 
 /**

@@ -2,9 +2,40 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { ctx } from '../app.js'
 import { Step } from './step.js'
-import { toHexPadded } from './utils.js'
+import { toHex, toNote } from './utils.js'
 
 const BPM_MAGIC = 15
+const keyboardKeys = [
+  'z',
+  's',
+  'x',
+  'd',
+  'c',
+  'v',
+  'g',
+  'b',
+  'h',
+  'n',
+  'j',
+  'm',
+  'q',
+  '2',
+  'w',
+  '3',
+  'e',
+  'r',
+  '5',
+  't',
+  '6',
+  'y',
+  '7',
+  'u',
+  'i',
+  '9',
+  'o',
+  '0',
+  'p',
+]
 
 export const viewPatt = () => ({
   stayOnPattern: false,
@@ -14,6 +45,7 @@ export const viewPatt = () => ({
   cursor: {
     step: 0,
     track: 0,
+    column: 3,
   },
   activeInst: 0,
   record: false,
@@ -94,7 +126,10 @@ export const viewPatt = () => ({
     if (newNum >= Alpine.store('project').patterns.length) return
     if (newNum < 0) return
     this.activePattern = Alpine.store('project').patterns[newNum]
+
+    // Handle switching to a shorter pattern
     if (this.currentStep >= this.activePattern.length) this.currentStep = 0
+    if (this.cursor.step >= this.activePattern.length) this.cursor.step = this.activePattern.length - 1
   },
 
   instChange(offset) {
@@ -114,21 +149,34 @@ export const viewPatt = () => ({
 
   renderStep(step, stepNum, trkNum) {
     let classes = 'step '
+    const isRecord = this.cursor.track == trkNum && this.record
+    const isCurrent = this.currentStep == stepNum
+    const isCursorStep = this.cursor.step == stepNum
 
-    classes += this.currentStep != stepNum && stepNum % 4 == 0 ? 'stripe ' : ''
-    classes += this.cursor.step == stepNum && this.cursor.track == trkNum && this.record ? 'record ' : ''
-    classes += this.cursor.step == stepNum && this.cursor.track == trkNum && !this.record ? 'cursor ' : ''
-    classes += this.currentStep == stepNum ? 'active' : ''
+    classes += !isCurrent && stepNum % 4 == 0 ? 'stripe ' : ''
+    classes += isCursorStep && isRecord ? 'record ' : ''
+    classes += isCursorStep && this.cursor.track == trkNum && !this.record ? 'cursor ' : ''
+    classes += isCurrent ? 'active' : ''
 
-    if (step) {
-      return `<div class="${classes}">
-        <span>${toHexPadded(step.instrument.number)}</span>
-        <span>${toHexPadded(step.note)}</span>
-        <span>${toHexPadded(step.volume)}</span>
-        <span>${step.effect1.type}${toHexPadded(step.effect1.val1, 1)}${toHexPadded(step.effect1.val2, 1)}</span>
-      </div>`
-    } else {
-      return `<div class="${classes}">-- -- -- ---</div>`
+    let instNum = step?.instrument.number
+    if (instNum !== undefined) {
+      instNum++
+    }
+
+    return `<div class="${classes}">
+      <span class="${isCursorStep && isRecord && this.cursor.column == 0 && 'recordcol'}">${toNote(step?.note)}</span>
+      <span class="${isCursorStep && isRecord && this.cursor.column == 1 && 'recordcol'}">${toHex(instNum)}</span>
+      <span class="${isCursorStep && isRecord && this.cursor.column == 2 && 'recordcol'}">${toHex(step?.volume)}</span>
+      <span class="${isCursorStep && isRecord && this.cursor.column == 3 && 'recordcol'}">
+        ${toHex(step?.effect1.type) + '' + toHex(step?.effect1.val1, 1) + '' + toHex(step?.effect1.val2, 1)}
+      </span>
+    </div>`
+  },
+
+  recordMode() {
+    this.record = !this.record
+    if (this.record) {
+      this.cursor.column = 0
     }
   },
 
@@ -158,12 +206,42 @@ export const viewPatt = () => ({
 
     if (e.key === 'ArrowLeft') {
       e.preventDefault()
+
+      if (this.record) {
+        this.cursor.column--
+        if (this.cursor.column < 0) {
+          this.cursor.track--
+          if (this.cursor.track < 0) {
+            this.cursor.track = 0
+            this.cursor.column = 0
+          } else {
+            this.cursor.column = 3
+          }
+        }
+        return
+      }
+
       this.cursor.track--
       if (this.cursor.track < 0) this.cursor.track = 0
     }
 
     if (e.key === 'ArrowRight') {
       e.preventDefault()
+
+      if (this.record) {
+        this.cursor.column++
+        if (this.cursor.column > 3) {
+          this.cursor.track++
+          if (this.cursor.track >= prj.trackCount) {
+            this.cursor.track = prj.trackCount - 1
+            this.cursor.column = 3
+          } else {
+            this.cursor.column = 0
+          }
+        }
+        return
+      }
+
       this.cursor.track++
       if (this.cursor.track >= prj.trackCount) this.cursor.track = prj.trackCount - 1
     }
@@ -203,7 +281,7 @@ export const viewPatt = () => ({
     if (e.key === ' ') {
       e.preventDefault()
       this.stop()
-      this.record = !this.record
+      this.recordMode()
     }
 
     if (e.key === 'Escape') {
@@ -212,12 +290,15 @@ export const viewPatt = () => ({
     }
 
     // tracker keyboard octave
+    const ki = keyboardKeys.indexOf(e.key)
 
-    if (e.key === 'z') {
-      if (!this.record) return
+    if (ki !== -1) {
       e.preventDefault()
+      if (!this.record) return
+
       const inst = prj.instruments[this.activeInst]
-      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, 60, 64)
+      const note = 60 + ki
+      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, note, 64)
     }
   },
 })
