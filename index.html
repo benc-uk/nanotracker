@@ -35,6 +35,7 @@
               <button @click="stayOnPattern = true; play()" class="mr-1">▶️ PTN</button>
               <button @click="stayOnPattern = false; play()" class="mr-1">▶️ SONG</button>
               <button @click="stop" class="mr-1">⏹️ STOP</button>
+              <button @click="record = !record" class="mr-1" :class="record && 'lit'">⏺️ REC</button>
 
               <input id="ptn" x-model="activePattern.number" size="1" readonly />
               <button @click="patternChange(-1)" class="mini">-</button>
@@ -49,9 +50,9 @@
               <div class="trackHead">&nbsp;&nbsp;&nbsp;</div>
               <template x-for="(trk, trkNum) in $store.project.tracks">
                 <div class="trackHead">
-                  <span x-text="`T:${trkNum+1}`" class="mr-1"></span>
-                  <button class="mini hide-small" @click="trk.muted = !trk.muted">M</button>
-                  <button class="mini hide-small" @click="soloTrack(trkNum)">S</button>
+                  <span x-text="`T:${trkNum+1}`" class="mr-1 hide-small"></span>
+                  <button class="mini" :class="trk.muted && 'lit'" @click="trk.muted = !trk.muted">M</button>
+                  <button class="mini" @click="soloTrack(trkNum)">S</button>
                 </div>
               </template>
             </div>
@@ -66,11 +67,7 @@
               <template x-for="(trk, trkNum) in $store.project.tracks">
                 <div class="track" :class="trk?.muted && 'mutedTrack'">
                   <template x-for="stepNum in activePattern.length">
-                    <div
-                      class="step"
-                      :class="fn.stepClass(currentStep, cursor, stepNum-1, trkNum, record)"
-                      x-text="fn.stepText(activePattern.steps[trkNum][stepNum-1])"
-                    ></div>
+                    <div x-html="renderStep(activePattern.steps[trkNum][stepNum - 1], stepNum - 1, trkNum)"></div>
                   </template>
                 </div>
               </template>

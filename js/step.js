@@ -7,9 +7,11 @@ export class Step {
   note = 60
   enabled = false
 
-  effect1type = '-'
-  effect1val1 = null
-  effect1val2 = null
+  effect1 = {
+    type: 0,
+    val1: 0,
+    val2: 0,
+  }
 
   constructor(inst, note, vol) {
     this.volume = vol

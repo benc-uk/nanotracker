@@ -90,7 +90,6 @@ nav li.active {
   background-color: black;
   color: rgb(255, 255, 255);
   margin: 0.3rem;
-  color: var(--green-text);
   font-size: calc(0.35rem + 0.8vw);
 }
 
@@ -128,6 +127,22 @@ nav li.active {
   padding: 0px;
   margin: 0px;
   overflow: hidden;
+}
+
+.step > span:nth-child(1) {
+  color: rgb(79, 202, 202);
+}
+
+.step > span:nth-child(2) {
+  color: rgb(241, 212, 81);
+}
+
+.step > span:nth-child(3) {
+  color: rgb(199, 73, 238);
+}
+
+.step > span:nth-child(4) {
+  color: rgb(58, 99, 235);
 }
 
 .active {
@@ -169,6 +184,12 @@ button[disabled] {
   background-color: var(--grey-9);
   border: 2px solid var(--grey-7);
   color: var(--grey-4);
+}
+
+button.lit {
+  color: rgba(240, 73, 32, 0.8);
+  background-color: rgba(75, 40, 31, 0.8);
+  border: 2px solid rgba(129, 20, 6, 0.8);
 }
 
 input[type='checkbox'] {

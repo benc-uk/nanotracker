@@ -1,16 +1,12 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
-import { stepText, stepClass } from './utils.js'
 import { ctx } from '../app.js'
 import { Step } from './step.js'
+import { toHexPadded } from './utils.js'
 
 const BPM_MAGIC = 15
 
 export const viewPatt = () => ({
-  fn: {
-    stepText,
-    stepClass,
-  },
   stayOnPattern: false,
   stopped: true,
   activePattern: null,
@@ -114,6 +110,26 @@ export const viewPatt = () => ({
       track.muted = true
     }
     prj.tracks[trackNum].muted = false
+  },
+
+  renderStep(step, stepNum, trkNum) {
+    let classes = 'step '
+
+    classes += this.currentStep != stepNum && stepNum % 4 == 0 ? 'stripe ' : ''
+    classes += this.cursor.step == stepNum && this.cursor.track == trkNum && this.record ? 'record ' : ''
+    classes += this.cursor.step == stepNum && this.cursor.track == trkNum && !this.record ? 'cursor ' : ''
+    classes += this.currentStep == stepNum ? 'active' : ''
+
+    if (step) {
+      return `<div class="${classes}">
+        <span>${toHexPadded(step.instrument.number)}</span>
+        <span>${toHexPadded(step.note)}</span>
+        <span>${toHexPadded(step.volume)}</span>
+        <span>${step.effect1.type}${toHexPadded(step.effect1.val1, 1)}${toHexPadded(step.effect1.val2, 1)}</span>
+      </div>`
+    } else {
+      return `<div class="${classes}">-- -- -- ---</div>`
+    }
   },
 
   // Keys here!
