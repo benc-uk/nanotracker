@@ -35,7 +35,7 @@
               <button @click="stayOnPattern = true; play()" class="mr-1">▶️ PTN</button>
               <button @click="stayOnPattern = false; play()" class="mr-1">▶️ SONG</button>
               <button @click="stop" class="mr-1">⏹️ STOP</button>
-              <button @click="this.recordMode" class="mr-1" :class="record && 'lit'">⏺️ REC</button>
+              <button @click="recordMode" class="mr-1" :class="record && 'lit'">⏺️ REC</button>
 
               PATT:<input id="ptn" x-model="activePattern.number" size="1" readonly />
               <button @click="patternChange(-1)" class="mini">-</button>
