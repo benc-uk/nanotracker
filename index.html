@@ -20,12 +20,12 @@
     <div id="app" x-data="app">
       <div class="version" x-text="version"></div>
       <nav>
-        <li :class="$store.view == 'file' && 'active'" @click="$store.view = 'file'">Project</li>
-        <li :class="$store.view == 'patt' && 'active'" @click="$store.view = 'patt'">Patterns</li>
-        <li :class="$store.view == 'song' && 'active'" @click="$store.view = 'song'">Song</li>
-        <li :class="$store.view == 'inst' && 'active'" @click="$store.view = 'inst'">Instruments</li>
-        <li :class="$store.view == 'mixer' && 'active'" @click="$store.view = 'mixer'">Mixer</li>
-        <li :class="$store.view == 'help' && 'active'" @click="$store.view = 'help'">Help</li>
+        <li :class="$store.view == 'file' && 'active'" @click="changeView('file')">Project</li>
+        <li :class="$store.view == 'patt' && 'active'" @click="changeView('patt')">Patterns</li>
+        <li :class="$store.view == 'song' && 'active'" @click="changeView('song')">Song</li>
+        <li :class="$store.view == 'inst' && 'active'" @click="changeView('inst')">Instruments</li>
+        <li :class="$store.view == 'mixer' && 'active'" @click="changeView('mixer')">Mixer</li>
+        <li :class="$store.view == 'help' && 'active'" @click="changeView('help')">Help</li>
       </nav>
 
       <div class="main" id="main">
@@ -37,13 +37,27 @@
               <button @click="stop" class="mr-1">⏹️ STOP</button>
               <button @click="recordMode" class="mr-1" :class="record && 'lit'">⏺️ REC</button>
 
-              PATT:<input id="ptn" x-model="activePattern.number" size="1" readonly />
-              <button @click="patternChange(-1)" class="mini">-</button>
-              <button @click="patternChange(+1)" class="mini mr-1">+</button>
+              PATT:&nbsp;
+              <select @change="patternChange($event.target.value)" class="mr-1" x-ref="pattSel">
+                <template x-for="pattNum in 256" :key="pattNum">
+                  <option :value="pattNum-1" x-text="pattNum"></option>
+                </template>
+              </select>
+              <button @click="patternChange(activePattern.number-1)" class="mini">-</button>
+              <button @click="patternChange(activePattern.number+1)" class="mini mr-1">+</button>
 
-              INST:<input :value="$store.project.instruments[activeInst]?.name" />
-              <button @click="instChange(-1)" class="mini">-</button>
-              <button @click="instChange(+1)" class="mini mr-1">+</button>
+              INST:&nbsp;
+              <select @change="instChange($event.target.value)" class="mr-1">
+                <template x-for="instNum in 128" :key="instNum">
+                  <option :value="instNum-1" x-text="$store.project.instruments[instNum-1]?.name"></option>
+                </template>
+              </select>
+
+              OCT:&nbsp;<select x-model="octave" class="mr-1">
+                <template x-for="oct in 7" :key="oct">
+                  <option :value="oct" x-text="oct-1"></option>
+                </template>
+              </select>
             </div>
 
             <div id="tracksHeader">

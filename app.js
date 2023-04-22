@@ -15,6 +15,7 @@ export const VERSION = '0.0.12'
 
 Alpine.data('app', () => ({
   version: VERSION,
+  changeView,
 
   async init() {
     console.log('### Starting JS Tracker')
@@ -30,6 +31,17 @@ Alpine.data('viewSong', viewSong)
 
 // IMPORTANT: Init with an empty project and all defaults
 Alpine.store('project', new Project())
-Alpine.store('view', 'patt')
+
+const storedView = localStorage.getItem('view')
+if (!storedView) {
+  changeView('patt')
+} else {
+  Alpine.store('view', storedView)
+}
 
 Alpine.start()
+
+export function changeView(view) {
+  localStorage.setItem('view', view)
+  Alpine.store('view', view)
+}

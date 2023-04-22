@@ -5,37 +5,8 @@ import { Step } from './step.js'
 import { toHex, toNote } from './utils.js'
 
 const BPM_MAGIC = 15
-const keyboardKeys = [
-  'z',
-  's',
-  'x',
-  'd',
-  'c',
-  'v',
-  'g',
-  'b',
-  'h',
-  'n',
-  'j',
-  'm',
-  'q',
-  '2',
-  'w',
-  '3',
-  'e',
-  'r',
-  '5',
-  't',
-  '6',
-  'y',
-  '7',
-  'u',
-  'i',
-  '9',
-  'o',
-  '0',
-  'p',
-]
+// prettier-ignore
+const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
 
 export const viewPatt = () => ({
   stayOnPattern: false,
@@ -45,18 +16,19 @@ export const viewPatt = () => ({
   cursor: {
     step: 0,
     track: 0,
-    column: 3,
+    column: 0,
   },
   activeInst: 0,
   record: false,
   clockTimer: null,
   songPos: 0,
+  octave: 1,
 
   async init() {
     this.activePattern = Alpine.store('project').patterns[0]
     this.currentStep = 0
 
-    // effect to watch the store
+    // Effect to watch the store
     Alpine.effect(() => {
       this.activePattern = Alpine.store('project').patterns[0]
       if (this.clockTimer) this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
@@ -121,22 +93,22 @@ export const viewPatt = () => ({
     if (ctx.state === 'suspended') ctx.resume()
   },
 
-  patternChange(offset) {
-    const newNum = this.activePattern.number + offset
-    if (newNum >= Alpine.store('project').patterns.length) return
-    if (newNum < 0) return
-    this.activePattern = Alpine.store('project').patterns[newNum]
+  patternChange(newPattNum) {
+    if (newPattNum > 255) return
+    if (newPattNum < 0) return
+    this.activePattern = Alpine.store('project').patterns[newPattNum]
+
+    this.$refs.pattSel.value = newPattNum
 
     // Handle switching to a shorter pattern
     if (this.currentStep >= this.activePattern.length) this.currentStep = 0
     if (this.cursor.step >= this.activePattern.length) this.cursor.step = this.activePattern.length - 1
   },
 
-  instChange(offset) {
-    let newNum = this.activeInst + offset
-    if (newNum >= Alpine.store('project').instruments.length) return
-    if (newNum < 0) return
-    this.activeInst = newNum
+  instChange(newInstNum) {
+    if (newInstNum > 128) return
+    if (newInstNum < 0) return
+    this.activeInst = newInstNum
   },
 
   soloTrack(trackNum) {
@@ -289,16 +261,18 @@ export const viewPatt = () => ({
       this.stop()
     }
 
-    // tracker keyboard octave
-    const ki = keyboardKeys.indexOf(e.key)
+    const keyOffset = keyboardKeys.indexOf(e.key)
 
-    if (ki !== -1) {
+    if (keyOffset !== -1) {
       e.preventDefault()
       if (!this.record) return
 
+      // It ends up being a string for some reason
+      this.octave = parseInt(this.octave)
+
       const inst = prj.instruments[this.activeInst]
-      const note = 60 + ki
-      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, note, 64)
+      const noteNum = this.octave * 12 + keyOffset
+      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, noteNum, 64)
     }
   },
 })

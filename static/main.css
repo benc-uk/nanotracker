@@ -181,7 +181,7 @@ button:hover {
 }
 
 button.mini {
-  padding: 4px;
+  padding: 5px;
   width: 30px;
 }
 
@@ -204,9 +204,7 @@ input[type='checkbox'] {
 input,
 select {
   background-color: var(--grey-10);
-  padding: 0.2rem;
-  padding-left: 0.6rem;
-  padding-right: 0.6rem;
+  padding: 0.25rem;
   border: 2px solid var(--green-5);
   color: var(--grey-1);
   border-radius: 4px;

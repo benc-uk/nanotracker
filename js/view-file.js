@@ -35,6 +35,7 @@ export const viewFile = () => ({
 
     Alpine.store('project', prj)
     Alpine.store('view', 'patt')
+    localStorage.setItem('view', 'patt')
   },
 
   async save() {
@@ -46,5 +47,6 @@ export const viewFile = () => ({
   newProj() {
     Alpine.store('project').clearAll()
     Alpine.store('view', 'patt')
+    localStorage.setItem('view', 'patt')
   },
 })
