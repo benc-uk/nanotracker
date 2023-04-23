@@ -276,13 +276,20 @@ export const viewPatt = () => ({
 
     if (keyOffset !== -1) {
       e.preventDefault()
-      if (!this.record) return
 
       // It ends up being a string for some reason
       this.octave = parseInt(this.octave)
 
       const inst = prj.instruments[this.activeInst]
       const noteNum = this.octave * 12 + keyOffset
+      const [audioNode, gainNode] = inst.createPlayNode(noteNum, 64)
+      audioNode.start(0)
+      gainNode.connect(ctx.destination)
+      audioNode.onended = () => {
+        gainNode.disconnect()
+      }
+
+      if (!this.record) return
       this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, noteNum, 64)
     }
   },

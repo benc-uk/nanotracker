@@ -75,7 +75,7 @@
           <div id="tracks">
             <div class="index">
               <template x-for="s in activePattern.length">
-                <div class="step" :id="`step-${s - 1}`" :class="(s - 1) % 4 == 0 && 'white'" x-text="s.toString().padStart(3, '0')"></div>
+                <div class="step" :id="`step-${s - 1}`" :class="(s - 1) % 4 == 0 && 'highlight'" x-text="s.toString().padStart(3, '0')"></div>
               </template>
             </div>
 
@@ -83,10 +83,10 @@
               <div class="track" :class="trk?.muted && 'muted'">
                 <template x-for="stepNum in activePattern.length">
                   <div class="step" :class="stepClass(stepNum - 1, trkNum)">
-                    <div class="note" :class="subStepClass(stepNum - 1, trkNum, 0)" x-text="getStep(stepNum - 1, trkNum).noteString"></div>
-                    <div class="inst" :class="subStepClass(stepNum - 1, trkNum, 1)" x-text="getStep(stepNum - 1, trkNum).instString">00</div>
-                    <div class="vol" :class="subStepClass(stepNum - 1, trkNum, 2)" x-text="getStep(stepNum - 1, trkNum).volString">00</div>
-                    <div class="effect" :class="subStepClass(stepNum - 1, trkNum, 3)" x-text="getStep(stepNum - 1, trkNum).effect1String">0000</div>
+                    <div class="note" :class="subStepClass(stepNum - 1, trkNum, 0)" x-html="getStep(stepNum - 1, trkNum).noteString"></div>
+                    <div class="inst" :class="subStepClass(stepNum - 1, trkNum, 1)" x-text="getStep(stepNum - 1, trkNum).instString"></div>
+                    <div class="vol" :class="subStepClass(stepNum - 1, trkNum, 2)" x-text="getStep(stepNum - 1, trkNum).volString"></div>
+                    <div class="effect" :class="subStepClass(stepNum - 1, trkNum, 3)" x-text="getStep(stepNum - 1, trkNum).effect1String"></div>
                   </div>
                 </template>
               </div>

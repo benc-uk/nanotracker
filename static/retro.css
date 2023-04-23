@@ -179,10 +179,16 @@ nav {
   padding-left: 0;
 }
 
+.index .highlight {
+  color: var(--cyan) !important;
+  background-color: none !important;
+}
+
 .step {
   font-family: 'VT323';
   font-size: 24px;
   display: flex;
+  white-space: pre;
 }
 
 .step > div {
@@ -206,6 +212,7 @@ nav {
 
 .step .inst {
   color: rgb(241, 212, 81);
+  white-space: pre;
 }
 
 .step .vol {
@@ -216,8 +223,9 @@ nav {
   color: rgb(58, 99, 235);
 }
 
-.step .empty {
-  filter: opacity(0.3);
+.fade {
+  filter: opacity(0.4);
+  text-shadow: none;
 }
 
 .step.active {
