@@ -44,18 +44,8 @@ export class Track {
    * @param {Step} step - Step to play on this tracks audio channel
    */
   playStep(step) {
-    if (!step || !step.enabled || !step.instrument || this.muted) return
-
-    // This makes the tracks monophonic and cut off previous notes
-    if (this.activeAudioNode && this.activeOutNode) {
-      this.activeAudioNode.stop(0)
-      this.activeOutNode.disconnect()
+    if (!step || !step.enabled || !step.instrument || this.muted) {
+      return
     }
-
-    const [audioNode, outNode] = step.instrument.createPlayNode(step.note, step.volume)
-    this.activeOutNode = outNode
-    this.activeAudioNode = audioNode
-    this.activeAudioNode.start(0)
-    this.activeOutNode.connect(this.trackOutput)
   }
 }

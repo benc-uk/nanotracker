@@ -3,6 +3,7 @@ TOOL_DIR := .tools/
 BS_PATH := .tools/node_modules/.bin/browser-sync
 ESLINT_PATH := .tools/node_modules/.bin/eslint
 PRETTIER_PATH := .tools/node_modules/.bin/prettier
+ESLINT_USE_FLAT_CONFIG := true
 
 .EXPORT_ALL_VARIABLES:
 .PHONY: help lint install-tools
@@ -27,3 +28,13 @@ serve: ## 🌐 Run with dev HTTP server & hot-reload
 docs: ## 📚 Generate documentation
 	@figlet $@ || true
 	@$(JSDOC_PATH) -c .jsdoc.json -d docs
+
+lint: ## 🔍 Lint & format check only, sets exit code on error for CI
+	@figlet $@ || true
+	@$(ESLINT_PATH) -c ./eslint.config.mjs ./
+	@$(PRETTIER_PATH) **/*.js  --check
+
+lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
+	@figlet $@ || true
+	@$(ESLINT_PATH) -c ./eslint.config.mjs ./ --fix
+	@$(PRETTIER_PATH) **/*.js --write

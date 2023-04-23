@@ -15,8 +15,12 @@ export class Step {
 
   constructor(inst, note, vol) {
     this.volume = vol
-    if (this.volume > 64) this.volume = 64
-    if (this.volume < 0) this.volume = 0
+    if (this.volume > 64) {
+      this.volume = 64
+    }
+    if (this.volume < 0) {
+      this.volume = 0
+    }
 
     this.note = note
     this.instrument = inst

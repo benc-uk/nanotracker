@@ -108,8 +108,6 @@ export class Project {
 
       // Set start pattern
       this.activePattern = this.patterns[0]
-      // set last pattern nextPatternNum to zero
-      this.patterns[this.patterns.length - 1].nextPatternNum = 0
     } catch (err) {
       console.error(err)
     }

@@ -7,13 +7,12 @@ export class Pattern {
   /** @type {Step[][]} first level of array is track num, next is the Step */
   steps = []
 
-  nextPatternNum = 0
-
   constructor(num, len, trackCount) {
     this.length = len
     this.number = num
 
-    // for each track, note we use sparse arrays!
+    // For each track, is an array of step - note we use sparse arrays
+    // There will be many gaps in the arrays where there are no steps
     for (let t = 0; t < trackCount; t++) {
       this.steps[t] = []
     }

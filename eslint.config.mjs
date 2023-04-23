@@ -5,7 +5,7 @@
 
 export default [
   {
-    files: ['**/*.mjs'],
+    files: ['js/*.js', 'app.js'],
     languageOptions: {
       sourceType: 'module',
       ecmaVersion: 'latest',
