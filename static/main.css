@@ -123,12 +123,6 @@ nav li.active {
   color: white;
 }
 
-.step {
-  padding: 0px;
-  margin: 0px;
-  overflow: hidden;
-}
-
 .step > span:nth-child(1) {
   color: rgb(79, 202, 202);
 }

@@ -27,7 +27,7 @@ export class Instrument {
     this.samples = []
   }
 
-  // Get an GainNode that will play this instrument
+  // Get an Audio & GainNode that will play this instrument at the given note & vol
   createPlayNode(note, volume) {
     const gainNode = ctx.createGain()
     gainNode.gain.value = volume / 64

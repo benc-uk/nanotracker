@@ -1,8 +1,7 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { ctx } from '../app.js'
-import { Step } from './step.js'
-import { toHex, toNote } from './utils.js'
+import { Step, emptyStep } from './step.js'
 
 const BPM_MAGIC = 15
 // prettier-ignore
@@ -47,6 +46,7 @@ export const viewPatt = () => ({
       if (this.stopped) return
       const prj = Alpine.store('project')
 
+      // NOTE: Most important line of code in the whole app
       prj.trigPatternStep(this.activePattern, this.currentStep)
 
       this.currentStep++
@@ -119,56 +119,41 @@ export const viewPatt = () => ({
     prj.tracks[trackNum].muted = false
   },
 
-  renderStep(step, stepNum, trkNum, trk) {
-    let prj = Alpine.store('project')
-    let stepClasses = 'step '
-
-    const trackMuted = prj.tracks[trkNum].muted
+  stepClass(stepNum, trkNum) {
     const isRecord = this.cursor.track == trkNum && this.record
-    const isCurrent = this.currentStep == stepNum && !trackMuted
+    const isCurrent = this.currentStep == stepNum
     const isCursorStep = this.cursor.step == stepNum
 
-    stepClasses += !isCurrent && stepNum % 4 == 0 ? 'stripe ' : ''
-    stepClasses += isCursorStep && isRecord ? 'record ' : ''
-    stepClasses += isCursorStep && this.cursor.track == trkNum && !this.record ? 'cursor ' : ''
-    stepClasses += isCurrent ? 'active' : ''
-
-    let instNum = step?.instrument.number
-    if (instNum !== undefined) {
-      instNum++
+    return {
+      stripe: !isCurrent && stepNum % 4 == 0,
+      record: isCursorStep && isRecord,
+      cursor: isCursorStep && this.cursor.track == trkNum && !this.record,
+      active: isCurrent,
     }
+  },
 
-    const noteDisp = toNote(step?.note)
-    const instDisp = toHex(instNum)
-    const volDisp = toHex(step?.volume)
-    const effectDisp = toHex(step?.effect1.type) + '' + toHex(step?.effect1.val1, 1) + '' + toHex(step?.effect1.val2, 1)
+  subStepClass(stepNum, trkNum, column) {
+    if (!this.record) return {}
+    const isRecord = this.record && this.cursor.track == trkNum
+    if (!isRecord) return {}
+    const isCursorStep = this.cursor.step == stepNum
+    if (!isCursorStep) return {}
 
-    let noteClass = ''
-    let instClass = ''
-    let volClass = ''
-    let effectClass = ''
-    if (trackMuted) {
-      noteClass = 'muted'
-      instClass = 'muted'
-      volClass = 'muted'
-      effectClass = 'muted'
-    } else {
-      noteClass = isCursorStep && isRecord && this.cursor.column == 0 && ' recordcol '
-      noteClass += noteDisp == '...' && noteClass == '' ? ' empty ' : ''
-      instClass = isCursorStep && isRecord && this.cursor.column == 1 && ' recordcol '
-      instClass += instDisp == '..' && instClass == '' ? ' empty ' : ''
-      volClass = isCursorStep && isRecord && this.cursor.column == 2 && ' recordcol'
-      volClass += volDisp == '..' && volClass == '' ? ' empty ' : ''
-      effectClass = isCursorStep && isRecord && this.cursor.column == 3 && ' recordcol'
-      effectClass += effectDisp == '....' && effectClass == '' ? ' empty ' : ''
+    return {
+      record: isRecord && isCursorStep && this.cursor.column == column,
     }
+  },
 
-    return `<div class="${stepClasses} step">
-      <div class="${noteClass}">${noteDisp}</div>
-      <div class="${instClass}">${instDisp}</div>
-      <div class="${volClass}">${volDisp}</div>
-      <div class="${effectClass}">${effectDisp}</div>
-    </div>`
+  getStep(stepNum, trkNum) {
+    const step = this.activePattern?.steps[trkNum][stepNum]
+    if (!step) return emptyStep
+    return step
+  },
+
+  isStep(stepNum, trkNum) {
+    const step = this.activePattern?.steps[trkNum][stepNum]
+    if (!step) return false
+    return true
   },
 
   recordMode() {

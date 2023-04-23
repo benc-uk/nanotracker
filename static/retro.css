@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
 :root {
   --grey: #999999;
   --greyl: #aaaaaa;
@@ -178,31 +180,39 @@ nav {
 }
 
 .step {
-  padding: 0;
-  margin: 0;
-  padding: 0px 0px;
-  letter-spacing: -1px;
+  font-family: 'VT323';
+  font-size: 24px;
   display: flex;
-  line-height: 24px;
 }
 
 .step > div {
-  margin-right: 2px;
+  font-family: 'VT323';
+  font-size: 24px;
+  padding: 0 2px;
+  white-space: pre;
 }
 
-.step > div:nth-child(1) {
+.step .note {
   color: rgb(79, 202, 202);
+  padding-left: 4px;
 }
 
-.step > div:nth-child(2) {
+.step .record {
+  color: black !important;
+  background-color: var(--cyan);
+  outline: none;
+  text-shadow: none;
+}
+
+.step .inst {
   color: rgb(241, 212, 81);
 }
 
-.step > div:nth-child(3) {
+.step .vol {
   color: rgb(199, 73, 238);
 }
 
-.step > div:nth-child(4) {
+.step .effect {
   color: rgb(58, 99, 235);
 }
 
@@ -214,12 +224,12 @@ nav {
   background-color: var(--blued);
 }
 
-.stripe {
-  background-color: var(--grey-10);
+.step.stripe {
+  background-color: rgba(0, 255, 255, 0.1);
 }
 
 .cursor {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline: 2px solid rgba(0, 255, 255, 0.5);
 }
 
 .record {
@@ -229,6 +239,10 @@ nav {
   background-color: var(--cyan) !important;
   color: black !important;
   text-shadow: none;
+}
+
+.mb-0 {
+  margin-bottom: 5px;
 }
 
 .mb-1 {

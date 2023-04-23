@@ -1,7 +1,7 @@
 import { ctx } from '../app.js'
 
 export function toHex(v, pad = 2) {
-  const empty = ''.padStart(pad, '.')
+  const empty = ''.padStart(pad, '·')
 
   if (v === undefined) return empty
   if (v == null) return empty
@@ -10,7 +10,7 @@ export function toHex(v, pad = 2) {
 }
 
 export function toNote(noteNum) {
-  const empty = '...'
+  const empty = '···'
 
   if (noteNum === undefined) return empty
   if (noteNum == null) return empty
@@ -20,7 +20,7 @@ export function toNote(noteNum) {
   const note = noteNum % 12
 
   let out = `${notes[note]}${octave}`
-  if (out.length === 2) out += '&nbsp;'
+  if (out.length === 2) out += ' '
   return out
 }
 
