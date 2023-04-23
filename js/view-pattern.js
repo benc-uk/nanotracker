@@ -22,7 +22,7 @@ export const viewPatt = () => ({
   record: false,
   clockTimer: null,
   songPos: 0,
-  octave: 1,
+  octave: 5,
 
   async init() {
     this.activePattern = Alpine.store('project').patterns[0]
@@ -119,29 +119,55 @@ export const viewPatt = () => ({
     prj.tracks[trackNum].muted = false
   },
 
-  renderStep(step, stepNum, trkNum) {
-    let classes = 'step '
+  renderStep(step, stepNum, trkNum, trk) {
+    let prj = Alpine.store('project')
+    let stepClasses = 'step '
+
+    const trackMuted = prj.tracks[trkNum].muted
     const isRecord = this.cursor.track == trkNum && this.record
-    const isCurrent = this.currentStep == stepNum
+    const isCurrent = this.currentStep == stepNum && !trackMuted
     const isCursorStep = this.cursor.step == stepNum
 
-    classes += !isCurrent && stepNum % 4 == 0 ? 'stripe ' : ''
-    classes += isCursorStep && isRecord ? 'record ' : ''
-    classes += isCursorStep && this.cursor.track == trkNum && !this.record ? 'cursor ' : ''
-    classes += isCurrent ? 'active' : ''
+    stepClasses += !isCurrent && stepNum % 4 == 0 ? 'stripe ' : ''
+    stepClasses += isCursorStep && isRecord ? 'record ' : ''
+    stepClasses += isCursorStep && this.cursor.track == trkNum && !this.record ? 'cursor ' : ''
+    stepClasses += isCurrent ? 'active' : ''
 
     let instNum = step?.instrument.number
     if (instNum !== undefined) {
       instNum++
     }
 
-    return `<div class="${classes}">
-      <span class="${isCursorStep && isRecord && this.cursor.column == 0 && 'recordcol'}">${toNote(step?.note)}</span>
-      <span class="${isCursorStep && isRecord && this.cursor.column == 1 && 'recordcol'}">${toHex(instNum)}</span>
-      <span class="${isCursorStep && isRecord && this.cursor.column == 2 && 'recordcol'}">${toHex(step?.volume)}</span>
-      <span class="${isCursorStep && isRecord && this.cursor.column == 3 && 'recordcol'}">
-        ${toHex(step?.effect1.type) + '' + toHex(step?.effect1.val1, 1) + '' + toHex(step?.effect1.val2, 1)}
-      </span>
+    const noteDisp = toNote(step?.note)
+    const instDisp = toHex(instNum)
+    const volDisp = toHex(step?.volume)
+    const effectDisp = toHex(step?.effect1.type) + '' + toHex(step?.effect1.val1, 1) + '' + toHex(step?.effect1.val2, 1)
+
+    let noteClass = ''
+    let instClass = ''
+    let volClass = ''
+    let effectClass = ''
+    if (trackMuted) {
+      noteClass = 'muted'
+      instClass = 'muted'
+      volClass = 'muted'
+      effectClass = 'muted'
+    } else {
+      noteClass = isCursorStep && isRecord && this.cursor.column == 0 && ' recordcol '
+      noteClass += noteDisp == '...' && noteClass == '' ? ' empty ' : ''
+      instClass = isCursorStep && isRecord && this.cursor.column == 1 && ' recordcol '
+      instClass += instDisp == '..' && instClass == '' ? ' empty ' : ''
+      volClass = isCursorStep && isRecord && this.cursor.column == 2 && ' recordcol'
+      volClass += volDisp == '..' && volClass == '' ? ' empty ' : ''
+      effectClass = isCursorStep && isRecord && this.cursor.column == 3 && ' recordcol'
+      effectClass += effectDisp == '....' && effectClass == '' ? ' empty ' : ''
+    }
+
+    return `<div class="${stepClasses} step">
+      <div class="${noteClass}">${noteDisp}</div>
+      <div class="${instClass}">${instDisp}</div>
+      <div class="${volClass}">${volDisp}</div>
+      <div class="${effectClass}">${effectDisp}</div>
     </div>`
   },
 

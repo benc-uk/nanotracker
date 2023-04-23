@@ -9,9 +9,10 @@ import { Project } from './js/project.js'
 
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
+export const previewAudioNode = ctx.createGain()
 
 // CHANGE ME
-export const VERSION = '0.0.12'
+export const VERSION = '0.0.13'
 
 Alpine.data('app', () => ({
   version: VERSION,
@@ -20,6 +21,8 @@ Alpine.data('app', () => ({
   async init() {
     console.log('### Starting JS Tracker')
     console.log(`### Audio state ${ctx.state}`)
+
+    previewAudioNode.connect(ctx.destination)
   },
 }))
 

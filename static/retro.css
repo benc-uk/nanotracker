@@ -1,0 +1,278 @@
+:root {
+  --grey: #999999;
+  --greyl: #aaaaaa;
+  --greyd: #888888;
+  --greyd2: #666666;
+  --hi: #dddddd;
+  --shad: #444444;
+  --nrblack: #111111;
+  --blue: #0000bb;
+  --blued: #000066;
+  --cyan: #33ddff;
+}
+
+@font-face {
+  font-family: 'PT';
+  src: url('protracker.woff2');
+  descent-override: 60%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--blue);
+  text-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+
+body,
+html {
+  background-color: var(--grey);
+  cursor: url('cursor.png'), auto;
+}
+
+* {
+  font-family: 'PT';
+  text-shadow: 2px 2px black;
+  color: white;
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+button {
+  border: 2px solid;
+  background-color: var(--grey);
+  border-color: var(--hi) var(--shad) var(--shad) var(--hi);
+  cursor: url('cursor.png'), auto;
+  margin: 0;
+  padding: 0 6px;
+}
+
+button::content {
+  color: var(--cyan);
+}
+
+button:hover {
+  background-color: var(--greyl);
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+}
+
+button.active {
+  background-color: var(--greyd);
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+}
+
+button.lit {
+  color: var(--blue);
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+  text-shadow: none;
+}
+
+button[disabled] {
+  color: var(--greyd2);
+  text-shadow: none;
+}
+button[disabled]:hover {
+  background-color: var(--grey);
+  border-color: var(--hi) var(--shad) var(--shad) var(--hi);
+}
+
+input,
+select {
+  cursor: url('cursor.png'), auto;
+  padding: 0 0;
+  border: 2px solid;
+  background-color: var(--nrblack);
+  color: var(--cyan);
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+}
+
+input[type='text'],
+input[type='number'] {
+  padding-left: 6px;
+}
+
+input[disabled] {
+  color: var(--grey);
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--cyan);
+  border-radius: 0;
+  border: 2px solid var(--cyan);
+}
+
+option {
+  background-color: var(--nrblack);
+  color: var(--cyan);
+  padding: 0 6px;
+}
+
+nav {
+  display: flex;
+}
+
+.panel {
+  border: 4px solid;
+  border-color: var(--hi) var(--shad) var(--shad) var(--hi);
+  padding: 6px;
+}
+
+.version {
+  margin-left: auto;
+  color: var(--shad);
+  text-shadow: none;
+}
+
+#tracks {
+  display: flex;
+  height: 75vh;
+  overflow-y: scroll;
+}
+#tracks::-webkit-scrollbar {
+  display: none;
+}
+
+.trackHead {
+  flex-grow: 1;
+  margin: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.trackHead:first-of-type {
+  flex-grow: 0;
+  color: var(--grey-9);
+  margin: 0;
+}
+
+.track {
+  flex-grow: 1;
+  display: table;
+  background-color: black;
+  margin: 2px;
+  padding-top: 4px;
+  border: 3px solid;
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+}
+
+.muted {
+  background-color: #222;
+  color: var(--greyd2) !important;
+}
+
+.index {
+  flex-grow: 0;
+  padding-top: 8px;
+  display: table;
+  padding-right: 4px;
+  padding-left: 0;
+}
+
+.step {
+  padding: 0;
+  margin: 0;
+  padding: 0px 0px;
+  letter-spacing: -1px;
+  display: flex;
+  line-height: 24px;
+}
+
+.step > div {
+  margin-right: 2px;
+}
+
+.step > div:nth-child(1) {
+  color: rgb(79, 202, 202);
+}
+
+.step > div:nth-child(2) {
+  color: rgb(241, 212, 81);
+}
+
+.step > div:nth-child(3) {
+  color: rgb(199, 73, 238);
+}
+
+.step > div:nth-child(4) {
+  color: rgb(58, 99, 235);
+}
+
+.step .empty {
+  filter: opacity(0.3);
+}
+
+.step.active {
+  background-color: var(--blued);
+}
+
+.stripe {
+  background-color: var(--grey-10);
+}
+
+.cursor {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.record {
+  outline: 3px solid var(--cyan);
+}
+.recordcol {
+  background-color: var(--cyan) !important;
+  color: black !important;
+  text-shadow: none;
+}
+
+.mb-1 {
+  margin-bottom: 10px;
+}
+
+.mr-1 {
+  margin-right: 10px;
+}
+
+.mr-2 {
+  margin-right: 20px;
+}
+
+.ml-1 {
+  margin-left: 10px;
+}
+
+.row {
+  display: flex;
+}
+
+.rowcentered {
+  display: flex;
+  align-items: center;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sunken {
+  border: 2px solid;
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+}
+
+#sampleView {
+  width: 99%;
+  height: 300px;
+  background-color: black;
+}
+
+#helpText {
+  text-shadow: none;
+  color: black;
+}
