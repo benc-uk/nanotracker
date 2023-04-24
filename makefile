@@ -39,8 +39,8 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@$(ESLINT_PATH) -c ./eslint.config.mjs ./ --fix
 	@$(PRETTIER_PATH) **/*.js --write
 
-build: ## 🏗️ Bundle into dist/
+build: ## 🏗️ Copy files into dist/
 	@figlet $@ || true
 	@mkdir -p dist/
-	@cp index.html app.js dist/
+	@cp index.html app.js help.txt dist/
 	@cp -r js/ static/ samples/ projects/ dist/

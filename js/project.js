@@ -109,7 +109,6 @@ export class Project {
         for (let i = 0; i < patt.length; i += 12) {
           patt.steps[3][i] = new Step(3, 36 + pattNum * 7, 64)
         }
-        this.tracks[1].muted = true
 
         // for (const stepData of pattData.steps) {
         //   const trackNum = stepData[0]

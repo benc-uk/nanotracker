@@ -6,11 +6,12 @@ More details will be coming soon, I mostly promise
 
 === Keyboard Shortcuts ===
 
-Enter:          Play song from current pattern
-Ctrl + Enter:   Play pattern & loop 
-Shift + Enter:  Play pattern from current step
-Escape:         Stop playback
-Space:          Enter record / edit mode
+Space:          Play / stop
+Ctrl + Space:   Enable pattern loop and play
+Shift + Space:  Play from current position
+Enter:          Play line by line
+Escape:         Enter record and edit mode
+
 
 Edit mode keys:
 Delete:         Clear note on current step
