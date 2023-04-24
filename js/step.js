@@ -1,16 +1,4 @@
-// import { Instrument } from './instrument.js'
 import { toHex, toNote } from './utils.js'
-
-export const emptyStep = {
-  // noteString: '···',
-  // volString: '··',
-  // instString: '··',
-  // effect1String: '····',
-  outputString: '··· ·· ·· ····',
-  // allStrings() {
-  //   return this.noteString + ' ' + this.volString + ' ' + this.instString + ' ' + this.effect1String
-  // },
-}
 
 export class Step {
   instNum = -1
@@ -51,7 +39,12 @@ export class Step {
     this.volString = toHex(this.volume)
     this.instString = toHex(this.instNum + 1)
     this.effect1String = toHex(this.effect1.type) + toHex(this.effect1.val1, 1) + toHex(this.effect1.val2, 1)
-    this.outputString = this.noteString + ' ' + this.volString + ' ' + this.instString + ' ' + this.effect1String
+    //this.outputString = this.noteString + ' ' + this.volString + ' ' + this.instString + ' ' + this.effect1String
+  }
+
+  setNote(note) {
+    this.note = note
+    this.updateStrings()
   }
 
   setInst(instNum) {

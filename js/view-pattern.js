@@ -1,11 +1,15 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { ctx } from '../app.js'
-import { Step, emptyStep } from './step.js'
+import { Step } from './step.js'
 
 const BPM_MAGIC = 15
 // prettier-ignore
 const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
+let canvas = null
+let ctx2d = null
+const lineH = 26
+const trackW = 160
 
 export const viewPatt = () => ({
   stayOnPattern: false,
@@ -33,6 +37,17 @@ export const viewPatt = () => ({
       if (this.clockTimer) this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
     })
 
+    // Rerender the pattern when the active pattern changes
+    this.$watch('activePattern', () => {
+      this.renderPattern()
+    })
+    this.$watch('currentStep', () => {
+      this.renderPattern()
+    })
+    this.$watch('cursor', () => {
+      this.renderPattern()
+    })
+
     // Keyboard bindings
     this.bindKeys = this.bindKeys.bind(this)
     window.addEventListener('keydown', this.bindKeys)
@@ -44,44 +59,49 @@ export const viewPatt = () => ({
     this.clockTimer = clock.setTimeout(() => {
       // The main playback logic lives here
       if (this.stopped) return
-      const prj = Alpine.store('project')
-
-      // NOTE: Most important line of code in the whole app
-      prj.trigPatternStep(this.activePattern, this.currentStep)
-
-      this.currentStep++
-
-      if (this.currentStep >= this.activePattern.length) {
-        if (this.stayOnPattern) {
-          // Do nothing when looping same pattern
-        } else {
-          // Advance song position and switch pattern
-          this.songPos++
-          if (this.songPos >= prj.song.length) this.songPos = 0
-          const nextPattNum = prj.song[this.songPos]
-          this.activePattern = prj.patterns[nextPattNum]
-        }
-        this.currentStep = 0
-      }
-
-      this.cursor.step = this.currentStep
-      if (!this.record) {
-        this.followPlayingStep(this.currentStep)
-      }
+      this.playOneStep()
     }, ctx.currentTime)
 
     this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
+
+    canvas = this.$refs.pattCanvas
+    ctx2d = canvas.getContext('2d')
+  },
+
+  playOneStep() {
+    const prj = Alpine.store('project')
+    // NOTE: Most important line of code in the whole app
+    prj.trigPatternStep(this.activePattern, this.currentStep)
+
+    this.currentStep++
+
+    if (this.currentStep >= this.activePattern.length) {
+      if (this.stayOnPattern) {
+        // Do nothing when looping same pattern
+      } else {
+        // Advance song position and switch pattern
+        this.songPos++
+        if (this.songPos >= prj.song.length) this.songPos = 0
+        const nextPattNum = prj.song[this.songPos]
+        this.patternChange(nextPattNum)
+      }
+      this.currentStep = 0
+    }
+
+    this.cursor.step = this.currentStep
+    if (!this.record) {
+      this.followPlayingStep(this.currentStep)
+    }
   },
 
   followPlayingStep(stepNum) {
-    let stepElem = document.querySelector(`#step-${stepNum - 7}`)
-    if (stepElem) stepElem.scrollIntoView()
-    else document.querySelector('#tracks').scrollTop = 0
+    // Width ratio of the pattern view to the pattern canvas
+    const r = this.$refs.pattView.offsetWidth / this.$refs.pattCanvas.width
+    this.$refs.pattView.scrollTop = Math.floor((stepNum - 8) * 26 * r)
   },
 
   play() {
     this.stopped = false
-
     if (ctx.state === 'suspended') ctx.resume()
   },
 
@@ -98,8 +118,6 @@ export const viewPatt = () => ({
     if (newPattNum > 255) return
     if (newPattNum < 0) return
     this.activePattern = Alpine.store('project').patterns[newPattNum]
-
-    this.$refs.pattSel.value = newPattNum
 
     // Handle switching to a shorter pattern
     if (this.currentStep >= this.activePattern.length) this.currentStep = 0
@@ -129,55 +147,82 @@ export const viewPatt = () => ({
     prj.tracks[trackNum].muted = false
   },
 
-  stepClass(stepNum, trkNum) {
-    const isRecord = this.cursor.track == trkNum && this.record
-    const isCurrent = this.currentStep == stepNum
-    const isCursorStep = this.cursor.step == stepNum
-
-    return {
-      stripe: !isCurrent && stepNum % 4 == 0,
-      record: isCursorStep && isRecord,
-      cursor: isCursorStep && this.cursor.track == trkNum && !this.record,
-      active: isCurrent,
-      fade: !this.isStep(stepNum, trkNum) && !(isCursorStep && isRecord),
-    }
-  },
-
-  subStepClass(stepNum, trkNum, column) {
-    if (!this.record) return {}
-    const isRecord = this.record && this.cursor.track == trkNum
-    if (!isRecord) return {}
-    const isCursorStep = this.cursor.step == stepNum
-    if (!isCursorStep) return {}
-
-    return {
-      record: isRecord && isCursorStep && this.cursor.column == column,
-    }
-  },
-
-  getStep(stepNum, trkNum) {
-    const step = this.activePattern?.steps[trkNum][stepNum]
-    if (!step) return emptyStep
-    return step
-  },
-
-  isStep(stepNum, trkNum) {
-    const step = this.activePattern?.steps[trkNum][stepNum]
-    if (!step) return false
-    return true
-  },
-
   recordMode() {
     this.record = !this.record
     if (this.record) {
       this.cursor.column = 0
     }
+    this.renderPattern()
+  },
+
+  renderPattern() {
+    const prj = Alpine.store('project')
+
+    canvas.height = this.activePattern.length * lineH
+    canvas.width = prj.tracks.length * trackW
+
+    // Draw background for active step
+    ctx2d.fillStyle = 'rgba(0, 255, 255, 0.2)'
+    ctx2d.fillRect(0, this.currentStep * lineH, canvas.width, lineH)
+    ctx2d.font = '26px VT323'
+
+    for (let s = 0; s < this.activePattern.length; s++) {
+      if (s % 4 == 0 && s != this.currentStep) {
+        ctx2d.fillStyle = '#131313'
+        ctx2d.fillRect(0, s * lineH, canvas.width, lineH)
+      }
+
+      for (let t = 0; t < prj.tracks.length; t++) {
+        const step = this.activePattern?.steps[t][s]
+        if (!step) {
+          ctx2d.fillStyle = '#555'
+          ctx2d.fillText('··· ·· ·· ····', t * trackW + 2, s * lineH + 20)
+          continue
+        }
+
+        ctx2d.fillStyle = 'rgb(79, 202, 192)'
+        ctx2d.fillText(step.noteString, t * trackW + 2, s * lineH + 20)
+        ctx2d.fillStyle = 'rgb(241, 212, 81)'
+        ctx2d.fillText(step.instString, t * trackW + 2 + 42, s * lineH + 20)
+        ctx2d.fillStyle = 'rgb(199, 73, 238)'
+        ctx2d.fillText(step.volString, t * trackW + 2 + 72, s * lineH + 20)
+        ctx2d.fillStyle = 'rgb(58, 99, 235)'
+        ctx2d.fillText(step.effect1String, t * trackW + 2 + 104, s * lineH + 20)
+      }
+    }
+
+    // Draw bar between tracks
+    for (let t = 0; t < prj.tracks.length; t++) {
+      // if muted, draw gray bar over the track
+      if (prj.tracks[t].muted) {
+        ctx2d.fillStyle = 'rgba(22, 22, 22, 0.8)'
+        ctx2d.fillRect(t * trackW, 0, trackW - 10, canvas.height)
+      }
+      ctx2d.fillStyle = '#999999'
+      ctx2d.fillRect((t + 1) * trackW - 7, 0, 4, canvas.height)
+    }
+
+    // Draw cursor
+
+    ctx2d.strokeStyle = '#0aa'
+    ctx2d.lineWidth = 2
+
+    if (this.record) {
+      ctx2d.fillStyle = '#a20'
+      const curOffset = [0, 42, 72, 104][this.cursor.column]
+      const curWidth = [38, 28, 28, 48][this.cursor.column]
+
+      ctx2d.globalCompositeOperation = 'screen'
+      ctx2d.fillRect(this.cursor.track * trackW + curOffset, this.cursor.step * lineH, curWidth, lineH)
+      ctx2d.strokeStyle = '#a20'
+    }
+
+    ctx2d.globalCompositeOperation = 'normal'
+    ctx2d.strokeRect(this.cursor.track * trackW, this.cursor.step * lineH, trackW - 10, lineH)
   },
 
   // Keys here!
   bindKeys(e) {
-    //if (Alpine.store('view') !== 'patt') return
-
     const prj = Alpine.store('project')
 
     if (e.key === 'ArrowUp') {
@@ -246,7 +291,13 @@ export const viewPatt = () => ({
       this.activePattern.steps[this.cursor.track][this.cursor.step] = null
     }
 
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      this.stop()
+      this.recordMode()
+    }
+
+    if (e.key === ' ' && e.ctrlKey) {
       e.preventDefault()
       this.stayOnPattern = true
       this.currentStep = 0
@@ -255,18 +306,8 @@ export const viewPatt = () => ({
       return
     }
 
-    if (e.key === 'Enter' && e.shiftKey) {
+    if (e.key === ' ' && e.shiftKey) {
       e.preventDefault()
-      this.stayOnPattern = true
-      this.record = false
-      this.play()
-      return
-    }
-
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      this.stayOnPattern = false
-      this.currentStep = 0
       this.record = false
       this.play()
       return
@@ -274,22 +315,37 @@ export const viewPatt = () => ({
 
     if (e.key === ' ') {
       e.preventDefault()
-      this.stop()
-      this.recordMode()
+      if (!this.stopped) {
+        this.stop()
+      } else {
+        this.currentStep = 0
+        this.stayOnPattern = false
+        this.record = false
+        this.play()
+      }
     }
 
-    if (e.key === 'Escape') {
+    if (e.key === 'Enter') {
       e.preventDefault()
-      this.stop()
+      this.playOneStep()
+      return
+    }
+
+    if (this.record && this.cursor.column > 0) {
+      const valInt = parseInt(e.key)
+      console.log(valInt)
+      if (valInt >= 0 && valInt <= 9) {
+        e.preventDefault()
+        this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(valInt - 1)
+      }
+
+      return
     }
 
     const keyOffset = keyboardKeys.indexOf(e.key)
 
     if (keyOffset !== -1) {
       e.preventDefault()
-
-      // It ends up being a string for some reason
-      this.octave = parseInt(this.octave)
 
       const inst = prj.instruments[this.activeInst]
       const noteNum = this.octave * 12 + keyOffset
@@ -302,16 +358,6 @@ export const viewPatt = () => ({
 
       if (!this.record || this.cursor.column != 0) return
       this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(this.activeInst, noteNum, 64)
-    }
-
-    if (this.record || this.cursor.column == 1) {
-      // Get integer value from key pressed
-      const valInt = parseInt(e.key)
-      if (valInt >= 0 && valInt <= 9) {
-        e.preventDefault()
-        if (!this.record || this.cursor.column != 1) return
-        this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(valInt)
-      }
     }
   },
 })

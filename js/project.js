@@ -21,7 +21,7 @@ export class Project {
   tracks = []
 
   /** @type {string} */
-  name = 'New Project'
+  name = 'default'
   trackCount = 0
   tempo = 120
 
@@ -93,7 +93,7 @@ export class Project {
         const patt = this.patterns[pattNum++]
         patt.length = pattData.length
 
-        // fake stuff
+        // TODO: REOMVE! fake stuff for testing
         for (let i = 0; i < patt.length; i += 4) {
           patt.steps[0][i] = new Step(0, 60, 64)
         }
@@ -106,7 +106,10 @@ export class Project {
         for (let i = 0; i < patt.length; i++) {
           patt.steps[2][i] = new Step(2, 60, Math.floor(Math.random() * 12 + 6))
         }
-        patt.steps[3][0] = new Step(3, 60, 64)
+        for (let i = 0; i < patt.length; i += 12) {
+          patt.steps[3][i] = new Step(3, 36 + pattNum * 7, 64)
+        }
+        this.tracks[1].muted = true
 
         // for (const stepData of pattData.steps) {
         //   const trackNum = stepData[0]

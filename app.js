@@ -12,7 +12,7 @@ export const ctx = new AudioContext()
 export const previewAudioNode = ctx.createGain()
 
 // CHANGE ME
-export const VERSION = '0.0.14'
+export const VERSION = '0.0.15'
 
 Alpine.data('app', () => ({
   version: VERSION,

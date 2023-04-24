@@ -11,11 +11,6 @@
 
     <link rel="stylesheet" href="static/retro.css" />
     <script src="app.js" type="module"></script>
-
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" /> -->
   </head>
   <body>
     <div id="app" x-data="app">
@@ -32,13 +27,13 @@
       <div class="panel" id="main">
         <div x-show="$store.view == 'patt'" x-data="viewPatt" id="pattEdit">
           <div class="mb-1 rowcentered">
-            <button @click="stayOnPattern = true; play()">PLAY</button>
-            <button @click="stayOnPattern = false; play()">SONG</button>
-            <button @click="stop">STOP</button>
-            <button @click="recordMode" :class="record && 'lit'">REC</button>
+            <button @click="play()">▶️PLAY</button>
+            <button @click="stayOnPattern = !stayOnPattern" :class="stayOnPattern && 'lit'">🔁LOOP</button>
+            <button @click="stop">⏹️STOP</button>
+            <button @click="recordMode" :class="record && 'lit'">⏺️REC</button>
 
             <span class="ml-1">PAT:</span>
-            <select @change="patternChange($event.target.value)" x-ref="pattSel">
+            <select @change="patternChange($event.target.value)">
               <template x-for="pattNum in 256" :key="pattNum">
                 <option :value="pattNum-1" x-text="pattNum" :selected="activePattern.number==pattNum-1"></option>
               </template>
@@ -65,37 +60,17 @@
             </select>
           </div>
 
-          <div class="rowcentered mb-0">
-            <div class="trackHead">&nbsp;&nbsp;&nbsp;</div>
-            <template x-for="(trk, trkNum) in $store.project.tracks">
-              <div class="trackHead">
-                <span x-text="`T:${trkNum+1}`" class="mr-1"></span>
-                <button class="mini" :class="trk.muted && 'lit'" @click="trk.muted = !trk.muted">M</button>
-                <button class="mini" @click="soloTrack(trkNum)">S</button>
-              </div>
-            </template>
-          </div>
-
-          <div id="tracks">
-            <div class="index">
-              <template x-for="s in activePattern.length">
-                <div class="step" :id="`step-${s - 1}`" :class="(s - 1) % 4 == 0 && 'highlight'" x-text="s.toString().padStart(3, '0')"></div>
+          <div id="pattView" x-ref="pattView">
+            <div class="trackHead" x-ref="trackHead">
+              <template x-for="(trk, trkNum) in $store.project.tracks">
+                <div>
+                  <span x-text="`T:${trkNum+1}`" class="mr-1"></span>
+                  <button class="mini" :class="trk.muted && 'lit'" @click="trk.muted = !trk.muted; renderPattern()">M</button>
+                  <button class="mini" @click="soloTrack(trkNum)">S</button>
+                </div>
               </template>
             </div>
-
-            <template x-for="(trk, trkNum) in $store.project.tracks">
-              <div class="track" :class="trk?.muted && 'muted'">
-                <template x-for="stepNum in activePattern.length">
-                  <!-- :class="stepClass(stepNum - 1, trkNum)"  -->
-                  <div class="step" :class="stepClass(stepNum - 1, trkNum)" x-text="getStep(stepNum - 1, trkNum).outputString">
-                    <!-- <div class="note" :class="subStepClass(stepNum - 1, trkNum, 0)" x-html="getStep(stepNum - 1, trkNum).noteString"></div>
-                      <div class="inst" :class="subStepClass(stepNum - 1, trkNum, 1)" x-text="getStep(stepNum - 1, trkNum).instString"></div>
-                      <div class="vol" :class="subStepClass(stepNum - 1, trkNum, 2)" x-text="getStep(stepNum - 1, trkNum).volString"></div>
-                      <div class="effect" :class="subStepClass(stepNum - 1, trkNum, 3)" x-text="getStep(stepNum - 1, trkNum).effect1String"></div> -->
-                  </div>
-                </template>
-              </div>
-            </template>
+            <canvas id="pattCanvas" width="10" height="10" x-ref="pattCanvas" class="sunken"> </canvas>
           </div>
         </div>
         <!-- end patt view -->
@@ -132,48 +107,49 @@
 
           <canvas class="sunken" id="sampleView" width="1024" height="300" x-ref="sampleView"></canvas>
         </div>
-      </div>
-      <!-- end inst view -->
 
-      <div x-show="$store.view == 'file'" x-data="viewFile">
-        <div class="mb-1">
-          <button @click="newProj">✨ NEW</button>
-          <button @click="save" x-show="fileHandle">💾 SAVE</button>
-          <button @click="load">📂 LOAD</button>
+        <!-- end inst view -->
+
+        <div x-show="$store.view == 'file'" x-data="viewFile">
+          <div class="mb-1">
+            <button @click="newProj">✨ NEW</button>
+            <button @click="save" x-show="fileHandle">💾 SAVE</button>
+            <button @click="load">📂 LOAD</button>
+          </div>
+          <div class="padded">
+            <table>
+              <tr>
+                <th>Project Name</th>
+                <td><input type="text" x-model="$store.project.name" /></td>
+              </tr>
+              <tr>
+                <th>Tempo</th>
+                <td><input type="number" min="60" max="250" x-model="$store.project.tempo" /></td>
+              </tr>
+              <tr>
+                <th>Loaded File</th>
+                <td><input type="text" x-model="filename" disabled /></td>
+              </tr>
+            </table>
+          </div>
         </div>
-        <div class="padded">
-          <table>
-            <tr>
-              <th>Project Name</th>
-              <td><input type="text" x-model="$store.project.name" /></td>
-            </tr>
-            <tr>
-              <th>Tempo</th>
-              <td><input type="number" min="60" max="250" x-model="$store.project.tempo" /></td>
-            </tr>
-            <tr>
-              <th>Loaded File</th>
-              <td><input type="text" x-model="filename" disabled /></td>
-            </tr>
-          </table>
+
+        <div x-show="$store.view == 'help'" x-data="viewHelp">
+          <h1>JS Tracker - <span x-text="version"></span></h1>
+          <h3>&copy; Ben Coleman, 2023<br /><a href="https://github.com/benc-uk/js-tracker">github.com/benc-uk/js-tracker</a></h3>
+          <textarea id="helpText" cols="80" rows="20" x-text="helpText" disabled></textarea>
         </div>
-      </div>
 
-      <div x-show="$store.view == 'help'" x-data="viewHelp">
-        <h1>JS Tracker - <span x-text="version"></span></h1>
-        <h3>&copy; Ben Coleman, 2023<br /><a href="https://github.com/benc-uk/js-tracker">github.com/benc-uk/js-tracker</a></h3>
-        <textarea id="helpText" cols="80" rows="20" x-text="helpText" disabled></textarea>
-      </div>
+        <div x-show="$store.view == 'song'" x-data="viewSong">
+          <h1>Pattern Chain</h1>
+          <input type="text" x-model="$store.project.song" disabled />
+          VERY WIP
+        </div>
 
-      <div x-show="$store.view == 'song'" x-data="viewSong">
-        <h1>Pattern Chain</h1>
-        <input type="text" x-model="$store.project.song" disabled />
-        VERY WIP
-      </div>
-
-      <div x-show="$store.view == 'mixer'">
-        <div class="padded">
-          <h1>NOT YET IMPLEMENTED 🤕</h1>
+        <div x-show="$store.view == 'mixer'">
+          <div class="padded">
+            <h1>NOT YET IMPLEMENTED 🤕</h1>
+          </div>
         </div>
       </div>
     </div>
