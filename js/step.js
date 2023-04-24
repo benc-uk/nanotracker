@@ -1,16 +1,19 @@
-import { Instrument } from './instrument.js'
+// import { Instrument } from './instrument.js'
 import { toHex, toNote } from './utils.js'
 
 export const emptyStep = {
-  noteString: '···',
-  volString: '··',
-  instString: '··',
-  effect1String: '····',
+  // noteString: '···',
+  // volString: '··',
+  // instString: '··',
+  // effect1String: '····',
+  outputString: '··· ·· ·· ····',
+  // allStrings() {
+  //   return this.noteString + ' ' + this.volString + ' ' + this.instString + ' ' + this.effect1String
+  // },
 }
 
 export class Step {
-  /** @type {Instrument} */
-  instrument = null
+  instNum = -1
   volume = 64
   note = 60
   enabled = false
@@ -27,7 +30,7 @@ export class Step {
     val2: 0,
   }
 
-  constructor(inst, note, vol) {
+  constructor(instNum, note, vol) {
     this.volume = vol
     if (this.volume > 64) {
       this.volume = 64
@@ -37,7 +40,7 @@ export class Step {
     }
 
     this.note = note
-    this.instrument = inst
+    this.instNum = instNum
     this.enabled = true
 
     this.updateStrings()
@@ -46,7 +49,13 @@ export class Step {
   updateStrings() {
     this.noteString = toNote(this.note)
     this.volString = toHex(this.volume)
-    this.instString = toHex(this.instrument.number + 1)
+    this.instString = toHex(this.instNum + 1)
     this.effect1String = toHex(this.effect1.type) + toHex(this.effect1.val1, 1) + toHex(this.effect1.val2, 1)
+    this.outputString = this.noteString + ' ' + this.volString + ' ' + this.instString + ' ' + this.effect1String
+  }
+
+  setInst(instNum) {
+    this.instNum = instNum
+    this.updateStrings()
   }
 }

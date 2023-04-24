@@ -43,8 +43,8 @@ export class Track {
    *
    * @param {Step} step - Step to play on this tracks audio channel
    */
-  playStep(step) {
-    if (!step || !step.enabled || !step.instrument || this.muted) {
+  playStep(step, instruments) {
+    if (!step || !step.enabled || step.instNum < 0 || this.muted) {
       return
     }
 
@@ -54,7 +54,8 @@ export class Track {
       this.activeOutNode.disconnect()
     }
 
-    const [audioNode, outNode] = step.instrument.createPlayNode(step.note, step.volume)
+    const inst = instruments[step.instNum]
+    const [audioNode, outNode] = inst.createPlayNode(step.note, step.volume)
     this.activeOutNode = outNode
     this.activeAudioNode = audioNode
     this.activeAudioNode.start(0)

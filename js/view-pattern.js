@@ -53,8 +53,9 @@ export const viewPatt = () => ({
 
       if (this.currentStep >= this.activePattern.length) {
         if (this.stayOnPattern) {
-          // Do nothing
+          // Do nothing when looping same pattern
         } else {
+          // Advance song position and switch pattern
           this.songPos++
           if (this.songPos >= prj.song.length) this.songPos = 0
           const nextPattNum = prj.song[this.songPos]
@@ -111,6 +112,15 @@ export const viewPatt = () => ({
     this.activeInst = newInstNum
   },
 
+  pattLenChange(lenDelta) {
+    const newLen = this.activePattern.length + lenDelta
+    if (newLen > 128) return
+    if (newLen < 1) return
+    this.activePattern.length = newLen
+    if (this.currentStep >= this.activePattern.length) this.currentStep = 0
+    if (this.cursor.step >= this.activePattern.length) this.cursor.step = this.activePattern.length - 1
+  },
+
   soloTrack(trackNum) {
     const prj = Alpine.store('project')
     for (let track of prj.tracks) {
@@ -129,6 +139,7 @@ export const viewPatt = () => ({
       record: isCursorStep && isRecord,
       cursor: isCursorStep && this.cursor.track == trkNum && !this.record,
       active: isCurrent,
+      fade: !this.isStep(stepNum, trkNum) && !(isCursorStep && isRecord),
     }
   },
 
@@ -289,8 +300,18 @@ export const viewPatt = () => ({
         gainNode.disconnect()
       }
 
-      if (!this.record) return
-      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(inst, noteNum, 64)
+      if (!this.record || this.cursor.column != 0) return
+      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(this.activeInst, noteNum, 64)
+    }
+
+    if (this.record || this.cursor.column == 1) {
+      // Get integer value from key pressed
+      const valInt = parseInt(e.key)
+      if (valInt >= 0 && valInt <= 9) {
+        e.preventDefault()
+        if (!this.record || this.cursor.column != 1) return
+        this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(valInt)
+      }
     }
   },
 })

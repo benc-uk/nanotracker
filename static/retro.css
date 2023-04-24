@@ -172,11 +172,9 @@ nav {
 }
 
 .index {
-  flex-grow: 0;
   padding-top: 8px;
   display: table;
   padding-right: 4px;
-  padding-left: 0;
 }
 
 .index .highlight {
@@ -195,19 +193,13 @@ nav {
   font-family: 'VT323';
   font-size: 24px;
   padding: 0 2px;
+  display: flex;
   white-space: pre;
 }
 
 .step .note {
   color: rgb(79, 202, 202);
   padding-left: 4px;
-}
-
-.step .record {
-  color: black !important;
-  background-color: var(--cyan);
-  outline: none;
-  text-shadow: none;
 }
 
 .step .inst {
@@ -223,8 +215,18 @@ nav {
   color: rgb(58, 99, 235);
 }
 
-.fade {
-  filter: opacity(0.4);
+.step .record {
+  color: black !important;
+  background-color: var(--cyan);
+  outline: none;
+  text-shadow: none;
+}
+
+.fade .note,
+.fade .inst,
+.fade .vol,
+.fade .effect {
+  filter: opacity(33%);
   text-shadow: none;
 }
 
@@ -236,17 +238,16 @@ nav {
   background-color: rgba(0, 255, 255, 0.1);
 }
 
+.muted .step {
+  filter: grayscale(50%) opacity(50%) contrast(50%);
+}
+
 .cursor {
   outline: 2px solid rgba(0, 255, 255, 0.5);
 }
 
 .record {
   outline: 3px solid var(--cyan);
-}
-.recordcol {
-  background-color: var(--cyan) !important;
-  color: black !important;
-  text-shadow: none;
 }
 
 .mb-0 {

@@ -40,11 +40,15 @@
             <span class="ml-1">PAT:</span>
             <select @change="patternChange($event.target.value)" x-ref="pattSel">
               <template x-for="pattNum in 256" :key="pattNum">
-                <option :value="pattNum-1" x-text="pattNum"></option>
+                <option :value="pattNum-1" x-text="pattNum" :selected="activePattern.number==pattNum-1"></option>
               </template>
             </select>
             <button @click="patternChange(activePattern.number-1)" class="mini">-</button>
             <button @click="patternChange(activePattern.number+1)" class="mini">+</button>
+
+            <span class="ml-1">LEN:</span><input type="text" x-model="activePattern.length" disabled size="4" />
+            <button @click="pattLenChange(-4)" class="mini">-</button>
+            <button @click="pattLenChange(+4)" class="mini">+</button>
 
             <span class="ml-1">INS:</span>
             <select @change="instChange($event.target.value)">
@@ -82,11 +86,12 @@
             <template x-for="(trk, trkNum) in $store.project.tracks">
               <div class="track" :class="trk?.muted && 'muted'">
                 <template x-for="stepNum in activePattern.length">
-                  <div class="step" :class="stepClass(stepNum - 1, trkNum)">
-                    <div class="note" :class="subStepClass(stepNum - 1, trkNum, 0)" x-html="getStep(stepNum - 1, trkNum).noteString"></div>
-                    <div class="inst" :class="subStepClass(stepNum - 1, trkNum, 1)" x-text="getStep(stepNum - 1, trkNum).instString"></div>
-                    <div class="vol" :class="subStepClass(stepNum - 1, trkNum, 2)" x-text="getStep(stepNum - 1, trkNum).volString"></div>
-                    <div class="effect" :class="subStepClass(stepNum - 1, trkNum, 3)" x-text="getStep(stepNum - 1, trkNum).effect1String"></div>
+                  <!-- :class="stepClass(stepNum - 1, trkNum)"  -->
+                  <div class="step" :class="stepClass(stepNum - 1, trkNum)" x-text="getStep(stepNum - 1, trkNum).outputString">
+                    <!-- <div class="note" :class="subStepClass(stepNum - 1, trkNum, 0)" x-html="getStep(stepNum - 1, trkNum).noteString"></div>
+                      <div class="inst" :class="subStepClass(stepNum - 1, trkNum, 1)" x-text="getStep(stepNum - 1, trkNum).instString"></div>
+                      <div class="vol" :class="subStepClass(stepNum - 1, trkNum, 2)" x-text="getStep(stepNum - 1, trkNum).volString"></div>
+                      <div class="effect" :class="subStepClass(stepNum - 1, trkNum, 3)" x-text="getStep(stepNum - 1, trkNum).effect1String"></div> -->
                   </div>
                 </template>
               </div>
@@ -125,7 +130,7 @@
             </div>
           </div>
 
-          <canvas class="sunken" id="sampleView" width="1024" height="240" x-ref="sampleView"></canvas>
+          <canvas class="sunken" id="sampleView" width="1024" height="300" x-ref="sampleView"></canvas>
         </div>
       </div>
       <!-- end inst view -->

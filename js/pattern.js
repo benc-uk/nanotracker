@@ -7,6 +7,8 @@ export class Pattern {
   /** @type {Step[][]} first level of array is track num, next is the Step */
   steps = []
 
+  domView = null
+
   constructor(num, len, trackCount) {
     this.length = len
     this.number = num

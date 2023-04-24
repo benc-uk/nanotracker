@@ -22,6 +22,13 @@ export const viewInst = () => ({
     const buffer = prj.instruments[this.selectedInstNum].samples[this.selectedSampNum].buffer
     if (!buffer) return
 
+    // Draw middle ine
+    ctx.beginPath()
+    ctx.moveTo(0, canvas.height / 2)
+    ctx.lineTo(canvas.width, canvas.height / 2)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
+    ctx.stroke()
+
     // Draw the buffer as a waveform on the canvas
     const data = buffer.getChannelData(0)
     const step = Math.ceil(data.length / canvas.width)

@@ -93,17 +93,28 @@ export class Project {
         const patt = this.patterns[pattNum++]
         patt.length = pattData.length
 
-        for (const stepData of pattData.steps) {
-          const trackNum = stepData[0]
-          const stepNum = stepData[1]
-          const inst = this.instruments[stepData[2]]
-          if (!inst) {
-            console.log(`### WARNING! Instrument ${stepData[2]} not found`)
-            continue
-          }
-
-          patt.steps[trackNum][stepNum] = new Step(inst, stepData[3], stepData[4])
+        // fake stuff
+        for (let i = 0; i < patt.length; i += 4) {
+          patt.steps[0][i] = new Step(0, 60, 64)
         }
+        for (let i = 0; i < patt.length; i += 5) {
+          patt.steps[0][i] = new Step(0, 60, 64)
+        }
+        for (let i = 4; i < patt.length; i += 8) {
+          patt.steps[1][i] = new Step(1, 60, 64)
+        }
+        for (let i = 0; i < patt.length; i++) {
+          patt.steps[2][i] = new Step(2, 60, Math.floor(Math.random() * 12 + 6))
+        }
+        patt.steps[3][0] = new Step(3, 60, 64)
+
+        // for (const stepData of pattData.steps) {
+        //   const trackNum = stepData[0]
+        //   const stepNum = stepData[1]
+        //   const inst = stepData[2]
+
+        //   patt.steps[trackNum][stepNum] = new Step(inst, stepData[3], stepData[4])
+        // }
       }
 
       // Set start pattern
@@ -121,7 +132,7 @@ export class Project {
     // Get the current step for each track
     for (const track of this.tracks) {
       const step = patt.steps[track.number][stepNum]
-      track.playStep(step)
+      track.playStep(step, this.instruments)
     }
   }
 }
