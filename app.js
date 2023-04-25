@@ -9,20 +9,16 @@ import { Project } from './js/project.js'
 
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
-export const previewAudioNode = ctx.createGain()
 
 // CHANGE ME
-export const VERSION = '0.0.15'
+export const VERSION = '0.0.16'
 
 Alpine.data('app', () => ({
   version: VERSION,
   changeView,
 
   async init() {
-    console.log('### Starting JS Tracker')
-    console.log(`### Audio state ${ctx.state}`)
-
-    previewAudioNode.connect(ctx.destination)
+    console.log('### 🎵 Starting JS Tracker ')
   },
 }))
 
@@ -37,9 +33,9 @@ Alpine.store('project', new Project(8))
 
 const storedView = localStorage.getItem('view')
 if (!storedView) {
-  changeView('patt')
+  changeView('inst')
 } else {
-  Alpine.store('view', storedView)
+  changeView(storedView)
 }
 
 Alpine.start()

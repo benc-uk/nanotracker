@@ -55,7 +55,7 @@ export class Project {
   clearInstruments() {
     this.instruments = []
     for (let i = 0; i < MAX_INSTRUMENTS; i++) {
-      this.instruments.push(new Instrument(i, 'Unnamed ' + i))
+      this.instruments.push(new Instrument(i, '-'))
     }
   }
 

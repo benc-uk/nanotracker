@@ -6,6 +6,7 @@ import { Step } from './step.js'
 const BPM_MAGIC = 15
 // prettier-ignore
 const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
+
 let canvas = null
 let ctx2d = null
 const lineH = 26
@@ -223,6 +224,7 @@ export const viewPatt = () => ({
 
   // Keys here!
   bindKeys(e) {
+    // if (Alpine.store('view') !== 'patt') returnx
     const prj = Alpine.store('project')
 
     if (e.key === 'ArrowUp') {

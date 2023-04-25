@@ -16,16 +16,18 @@
     <div id="app" x-data="app">
       <nav class="panel">
         <button :class="$store.view == 'file' && 'active'" @click="changeView('file')">Project</button>
-        <button :class="$store.view == 'patt' && 'active'" @click="changeView('patt')">Patterns</button>
+        <button :class="$store.view == 'patt' && 'active'" @click="changeView('patt')">Editor</button>
         <button :class="$store.view == 'song' && 'active'" @click="changeView('song')">Song</button>
         <button :class="$store.view == 'inst' && 'active'" @click="changeView('inst')">Instruments</button>
         <button :class="$store.view == 'mixer' && 'active'" @click="changeView('mixer')">Mixer</button>
+        <button :class="$store.view == 'midi' && 'active'" @click="changeView('midi')">MIDI</button>
+        <button :class="$store.view == 'pref' && 'active'" @click="changeView('pref')">Prefs</button>
         <button :class="$store.view == 'help' && 'active'" @click="changeView('help')">Help</button>
         <div class="version" x-text="version"></div>
       </nav>
 
       <div class="panel" id="main">
-        <div x-show="$store.view == 'patt'" x-data="viewPatt" id="pattEdit">
+        <div x-show="$store.view == 'patt'" x-data="viewPatt" id="pattEdit" @instchange.window="activeInst = $event.detail">
           <div class="mb-1 rowcentered">
             <button @click="play()">▶️PLAY</button>
             <button @click="stayOnPattern = !stayOnPattern" :class="stayOnPattern && 'lit'">🔁LOOP</button>

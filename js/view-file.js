@@ -24,8 +24,6 @@ export const viewFile = () => ({
       const prj = await loadXM(data, ctx)
 
       Alpine.store('project', prj)
-      Alpine.store('view', 'patt')
-      localStorage.setItem('view', 'patt')
     } catch (err) {
       console.error(err)
     }

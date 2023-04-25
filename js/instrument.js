@@ -19,7 +19,7 @@ export class Instrument {
 
     this.samples = []
     for (let i = 0; i < MAX_SAMPLES; i++) {
-      this.samples.push(new Sample(i, 'empty'))
+      this.samples.push(new Sample(i, '-'))
     }
   }
 

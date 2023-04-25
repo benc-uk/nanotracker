@@ -16,7 +16,7 @@ export async function loadXM(data, ctx) {
   const prj = new Project(trackCount)
   const name = String.fromCharCode(...new Uint8Array(data, 17, 20))
   prj.name = name.replace(/\0/g, '')
-  console.log('LOADING module name:', prj.name)
+  console.log('### 💽 Loading XM module name:', prj.name)
 
   // Offset past the pattern data to the start of the instrument data
   let instStartOffset = 0
@@ -105,7 +105,7 @@ export async function loadXM(data, ctx) {
     pattOffset += pattHeadLen + pattDataSize
   }
 
-  // Read instruments
+  // Read all instruments
   let instOffset = 0
   for (let i = 0; i < instCount; i++) {
     // Read first 29 bytes of instrument header, when 0 samples this is all we need
@@ -120,28 +120,27 @@ export async function loadXM(data, ctx) {
     prj.instruments[i].name = instNameClean
 
     if (instSampCount == 0) {
-      console.log(' instrument has no samples, skipping')
+      console.log(' instrument has no samples')
       instOffset += instHeadSize
       continue
     }
 
-    //instSampCount = 1 // HACK: TODO: this is a hack to only load 1 sample per instrument
-
-    // We have 1 or more samples
-    // Read rest of instrument header, resizes the data view
+    // When 1+ samples, read rest of instrument header, resizes the data view
     instHeader = new DataView(data, headerSize + 60 + instStartOffset + instOffset, instHeadSize)
     const sampleHeadSize = instHeader.getUint32(29, true)
+    console.log(` sampleHeadSize:${sampleHeadSize}`)
 
+    let samplesStartOffset = baseOffset + instStartOffset + instOffset + instHeadSize
     let sampleLenTotal = 0
+    let samples = []
+
+    // First pass, read all sample headers
     for (let s = 0; s < instSampCount; s++) {
-      console.log(` --- SAMPLE ${s}`)
-      const sampleHead = new DataView(data, baseOffset + instStartOffset + instOffset + instHeadSize + s * sampleHeadSize, sampleHeadSize)
+      const sampleHead = new DataView(data, samplesStartOffset + s * sampleHeadSize, sampleHeadSize)
       const sampleDataLen = sampleHead.getUint32(0, true)
-      const sampleVolume = sampleHead.getUint8(12)
-      const samplePan = sampleHead.getUint8(15)
       const sampleDataType = sampleHead.getUint8(17)
       const sampleType = sampleHead.getUint8(14)
-      const sampleIs16bit = (sampleType & 16) === 16
+      const sampleIs16bit = (sampleType & 16) === 16 // 16bit flag is in bit 4
       const sampleName = String.fromCharCode(...new Uint8Array(sampleHead.buffer, sampleHead.byteOffset + 18, 22))
       const sampleNameClean = sampleName.replace(/\0/g, '')
       if (sampleDataType != 0) {
@@ -149,26 +148,31 @@ export async function loadXM(data, ctx) {
         continue
       }
 
-      // get bit 4 from sampleType
+      samples.push({
+        sampleDataLen,
+        sampleIs16bit,
+        sampleNameClean,
+        index: s,
+      })
 
-      console.log(`  sampleName: ${toHex(sampleNameClean)} 16bit:${sampleIs16bit}`)
+      console.log(` ${s} name: ${toHex(sampleNameClean)} ${sampleIs16bit ? '16bit' : '8bit'} len:${sampleDataLen}`)
 
-      // Read sample data
+      // Advance past this sample header
+      sampleLenTotal += sampleHeadSize
+    }
+
+    // Second pass, read all sample data which follows the headers
+    for (let sample of samples) {
       try {
-        const sampArray = new Uint8Array(
-          data,
-          baseOffset + instStartOffset + instOffset + instHeadSize + instSampCount * sampleHeadSize,
-          sampleDataLen
-        )
-
-        const sample = new Sample(s, sampleNameClean)
-        const audioBuffer = await ctx.createBuffer(1, sampleDataLen, 22050)
+        const sampArray = new Uint8Array(data, samplesStartOffset + sampleLenTotal, sample.sampleDataLen)
+        const audioBuffer = await ctx.createBuffer(1, sample.sampleDataLen, 22050)
         const channelData = audioBuffer.getChannelData(0)
 
         let old = 0
-        if (sampleIs16bit) {
+        if (sample.sampleIs16bit) {
           // This is hacky, but it works
-          for (let i = 0; i < sampleDataLen; i += 2) {
+          for (let i = 0; i < sample.sampleDataLen; i += 2) {
+            // Glue together 2 bytes into a 16 bit value
             let val = sampArray[i] + (sampArray[i + 1] << 8) + old
 
             // No idea why this is needed, copied from elsewhere
@@ -178,7 +182,7 @@ export async function loadXM(data, ctx) {
             channelData[i / 2] = val / 32768
           }
         } else {
-          for (let i = 0; i < sampleDataLen; i++) {
+          for (let i = 0; i < sample.sampleDataLen; i++) {
             let val = sampArray[i] + old
 
             // No idea why this is needed, copied from elsewhere
@@ -189,15 +193,16 @@ export async function loadXM(data, ctx) {
           }
         }
 
-        sample.buffer = audioBuffer
-        prj.instruments[i].samples[s] = sample
+        // Move to next sample data block
+        sampleLenTotal += sample.sampleDataLen
+
+        const sampObj = new Sample(sample.index, sample.sampleNameClean)
+        sampObj.buffer = audioBuffer
+        prj.instruments[i].samples[sample.index] = sampObj
       } catch (err) {
         console.error('Error reading sample data!')
         console.error(err)
       }
-
-      // Advance past this sample
-      sampleLenTotal += sampleDataLen + sampleHeadSize
     }
 
     // Move to next instrument

@@ -6,9 +6,15 @@ export const viewInst = () => ({
   selectedSampNum: null,
 
   init() {
-    this.$watch('selectedInstNum', () => this.drawSample())
-
+    this.$watch('selectedInstNum', (newInst) => {
+      this.drawSample()
+      this.$dispatch('instchange', newInst)
+    })
     this.$watch('selectedSampNum', () => this.drawSample())
+
+    // Keyboard bindings
+    this.bindKeys = this.bindKeys.bind(this)
+    window.addEventListener('keydown', this.bindKeys)
   },
 
   drawSample() {
