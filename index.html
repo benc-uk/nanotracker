@@ -35,7 +35,7 @@
             <span class="ml-1">PAT:</span>
             <select @change="patternChange($event.target.value)">
               <template x-for="pattNum in 256" :key="pattNum">
-                <option :value="pattNum-1" x-text="pattNum" :selected="activePattern.number==pattNum-1"></option>
+                <option :value="pattNum-1" x-text="pattNum-1" :selected="activePattern.number==pattNum-1"></option>
               </template>
             </select>
             <button @click="patternChange(activePattern.number-1)" class="mini">-</button>

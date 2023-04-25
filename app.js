@@ -33,7 +33,7 @@ Alpine.data('viewInst', viewInst)
 Alpine.data('viewSong', viewSong)
 
 // IMPORTANT: Init with an empty project and all defaults
-Alpine.store('project', new Project())
+Alpine.store('project', new Project(8))
 
 const storedView = localStorage.getItem('view')
 if (!storedView) {

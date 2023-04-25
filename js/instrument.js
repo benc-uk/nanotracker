@@ -1,7 +1,7 @@
 import { ctx } from '../app.js'
 import { Sample } from './sample.js'
 
-const MAX_SAMPLES = 1
+const MAX_SAMPLES = 16
 
 export class Instrument {
   /** @type {AudioBuffer} */
@@ -30,7 +30,7 @@ export class Instrument {
   // Get an Audio & GainNode that will play this instrument at the given note & vol
   createPlayNode(note, volume) {
     const gainNode = ctx.createGain()
-    gainNode.gain.value = volume / 64
+    gainNode.gain.value = 1.0 //volume ? volume : 1
 
     const audioNode = ctx.createBufferSource()
     audioNode.buffer = this.samples[0].buffer

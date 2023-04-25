@@ -1,4 +1,6 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
+import { loadXM } from './xm-loader.js'
+import { ctx } from '../app.js'
 
 export const viewFile = () => ({
   filename: 'none',
@@ -6,32 +8,39 @@ export const viewFile = () => ({
 
   async init() {
     // TODO: REMOVE placeholder code for testing
-    this.loadDemo()
+
+    this.$nextTick(async () => {
+      await this.loadDemoXM()
+    })
   },
 
-  async loadDemo() {
+  async loadDemoXM() {
     try {
-      const prj = Alpine.store('project')
+      const filename = 'demo.xm'
+      const resp = await fetch('projects/' + filename)
+      const data = await resp.arrayBuffer()
+      this.filename = filename
 
-      const resp = await fetch('projects/demo.json')
-      const data = await resp.text()
-      this.filename = 'demo.json'
+      const prj = await loadXM(data, ctx)
 
-      await prj.parseJSON(data)
       Alpine.store('project', prj)
+      Alpine.store('view', 'patt')
+      localStorage.setItem('view', 'patt')
     } catch (err) {
       console.error(err)
     }
   },
 
   async load() {
+    const prj = Alpine.store('project')
+
     const [fileHandle] = await window.showOpenFilePicker()
     this.fileHandle = fileHandle
     this.filename = fileHandle.name
     this.file = await fileHandle.getFile()
 
-    const data = await this.file.text()
-    await prj.parseJSON(data)
+    const data = await this.file.arrayBuffer()
+    await prj.loadXM(data, ctx)
 
     Alpine.store('project', prj)
     Alpine.store('view', 'patt')

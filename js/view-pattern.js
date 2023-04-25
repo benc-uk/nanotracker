@@ -97,7 +97,7 @@ export const viewPatt = () => ({
   followPlayingStep(stepNum) {
     // Width ratio of the pattern view to the pattern canvas
     const r = this.$refs.pattView.offsetWidth / this.$refs.pattCanvas.width
-    this.$refs.pattView.scrollTop = Math.floor((stepNum - 8) * 26 * r)
+    this.$refs.pattView.scrollTop = Math.floor((stepNum - 8) * lineH * r)
   },
 
   play() {
