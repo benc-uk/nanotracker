@@ -1,53 +1,61 @@
 import { toHex, toNote } from './utils.js'
 
+/**
+ * A single step in a pattern
+ */
 export class Step {
+  /** @type {number} */
   instNum = null
+  /** @type {number} */
   volume = null
+  /** @type {number} */
   note = null
-  enabled = false
+  /** @type {boolean} */
   noteOff = false
+  /** @type {string} */
+  efxCmd = null
+  /** @type {number} */
+  efxVal1 = null
+  /** @type {number} */
+  efxVal2 = null
 
-  // A string representation of the step, memoize for performance
+  /** @type {string} */
   noteString = '···'
   volString = '··'
   instString = '··'
-  effect1String = '····'
+  efxString = '····'
 
-  effect1 = {
-    type: 0,
-    val1: 0,
-    val2: 0,
-  }
-
-  // Empty "null" step
+  // Create an empty "null" step, with no note or instrument
   constructor() {
     this.note = null
     this.instNum = null
     this.volume = null
-    this.enabled = true
-    this.effect1 = null
+    this.efxCmd = null
+    this.efxVal1 = null
+    this.efxVal2 = null
 
-    this.updateStrings()
+    this.#updateStrings()
   }
 
-  updateStrings() {
+  #updateStrings() {
     this.noteString = toNote(this.note)
     if (this.noteOff) this.noteString = '==='
     this.volString = this.volume != null ? toHex(Math.floor(this.volume * 64)) : '··'
     this.instString = toHex(this.instNum)
-    this.effect1String = this.effect1 ? toHex(this.effect1.type) + toHex(this.effect1.val1, 1) + toHex(this.effect1.val2, 1) : '····'
+    this.efxString = toHex(this.efxCmd) + toHex(this.efxVal1, 1) + toHex(this.efxVal2, 1)
   }
 
   setNoteOff() {
     this.noteOff = true
-    this.updateStrings()
+    this.#updateStrings()
     return this
   }
 
   setNote(note) {
     if (note < 0) note = 0
     this.note = note
-    this.updateStrings()
+    this.nodeOff = false
+    this.#updateStrings()
     return this
   }
 
@@ -56,7 +64,7 @@ export class Step {
     if (instNum > 127) instNum = 127
 
     this.instNum = instNum
-    this.updateStrings()
+    this.#updateStrings()
     return this
   }
 
@@ -64,7 +72,7 @@ export class Step {
     if (vol < 0) vol = 0
     if (vol > 1) vol = 1
     this.volume = vol
-    this.updateStrings()
+    this.#updateStrings()
     return this
   }
 }

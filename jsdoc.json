@@ -1,0 +1,6 @@
+{
+  "source": {
+    "include": ["app"],
+    "includePattern": ".+\\.js?$"
+  }
+}

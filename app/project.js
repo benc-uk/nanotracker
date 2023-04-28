@@ -1,13 +1,10 @@
 import { Instrument } from './instrument.js'
 import { Pattern } from './pattern.js'
 import { Track } from './track.js'
-import { Sample } from './sample.js'
-import { Step } from './step.js'
-import { loadSampleURL, toHex } from './utils.js'
 
 const MAX_INSTRUMENTS = 128
 const MAX_PATTERNS = 256
-export const DEFAULT_TRACK_COUNT = 8
+const DEFAULT_TRACK_COUNT = 8
 
 /** Project class, of which there is a single instance */
 export class Project {
@@ -23,7 +20,9 @@ export class Project {
   /** @type {string} */
   name = 'default'
   trackCount = 0
-  tempo = 120
+
+  speed = 6 // Ticks per step/row
+  bpm = 125 // Sets overall speed of ticks
 
   // Pattern chain
   song = [0]

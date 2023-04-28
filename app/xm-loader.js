@@ -7,16 +7,18 @@ import { toHex } from './utils.js'
 export async function loadXM(data, ctx) {
   // Read the XM header
   const header = new DataView(data, 0, 80)
-  const pattCount = header.getUint16(70, true)
-  const headerSize = header.getUint32(60, true)
   const trackCount = header.getUint16(68, true)
-  const instCount = header.getUint16(72, true)
-  console.log('trackCount: ', trackCount)
 
   const prj = new Project(trackCount)
   const name = String.fromCharCode(...new Uint8Array(data, 17, 20))
   prj.name = name.replace(/\0/g, '')
   console.log('### 💽 Loading XM module name:', prj.name)
+
+  const headerSize = header.getUint32(60, true)
+  const pattCount = header.getUint16(70, true)
+  const instCount = header.getUint16(72, true)
+  prj.speed = header.getUint16(76, true)
+  prj.bpm = header.getUint16(78, true)
 
   // Offset past the pattern data to the start of the instrument data
   let instStartOffset = 0
@@ -114,8 +116,6 @@ export async function loadXM(data, ctx) {
     let instSampCount = instHeader.getUint16(27, true)
     const instName = String.fromCharCode(...new Uint8Array(instHeader.buffer, instHeader.byteOffset + 4, 22))
     const instNameClean = instName.replace(/\0/g, '')
-    console.log(`--- INSTRUMENT ${i}`)
-    console.log(` name:'${instNameClean}' instHeadSize:${instHeadSize}  samples:${instSampCount}`)
 
     prj.instruments[i].name = instNameClean
 
@@ -128,7 +128,6 @@ export async function loadXM(data, ctx) {
     // When 1+ samples, read rest of instrument header, resizes the data view
     instHeader = new DataView(data, headerSize + 60 + instStartOffset + instOffset, instHeadSize)
     const sampleHeadSize = instHeader.getUint32(29, true)
-    console.log(` sampleHeadSize:${sampleHeadSize}`)
 
     let samplesStartOffset = baseOffset + instStartOffset + instOffset + instHeadSize
     let sampleLenTotal = 0
@@ -155,7 +154,7 @@ export async function loadXM(data, ctx) {
         index: s,
       })
 
-      console.log(` ${s} name: ${toHex(sampleNameClean)} ${sampleIs16bit ? '16bit' : '8bit'} len:${sampleDataLen}`)
+      console.log(`${i}:${s} name: ${toHex(sampleNameClean)} ${sampleIs16bit ? '16bit' : '8bit'} len:${sampleDataLen}`)
 
       // Advance past this sample header
       sampleLenTotal += sampleHeadSize

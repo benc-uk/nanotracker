@@ -4,7 +4,7 @@ export class Pattern {
   number = 0
   length = 16
 
-  /** @type {Step[][]} first level of array is track num, next is the Step */
+  /** @type {Step[][]} */
   steps = []
 
   domView = null

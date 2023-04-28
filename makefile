@@ -3,10 +3,11 @@ TOOL_DIR := .tools/
 BS_PATH := .tools/node_modules/.bin/browser-sync
 ESLINT_PATH := .tools/node_modules/.bin/eslint
 PRETTIER_PATH := .tools/node_modules/.bin/prettier
+JSDOC_PATH := .tools/node_modules/.bin/jsdoc
 ESLINT_USE_FLAT_CONFIG := true
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help lint install-tools
+.PHONY: help lint install-tools docs serve build
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)
@@ -27,7 +28,7 @@ serve: ## 🌐 Run with dev HTTP server & hot-reload
 
 docs: ## 📚 Generate documentation
 	@figlet $@ || true
-	@$(JSDOC_PATH) -c .jsdoc.json -d docs
+	@$(JSDOC_PATH) -c ./jsdoc.json -d docs
 
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
@@ -42,5 +43,5 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 build: ## 🏗️ Copy files into dist/
 	@figlet $@ || true
 	@mkdir -p dist/
-	@cp index.html app.js help.txt dist/
-	@cp -r js/ static/ samples/ projects/ dist/
+	@cp index.html help.txt dist/
+	@cp -r app/ static/ samples/ projects/ dist/

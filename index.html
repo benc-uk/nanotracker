@@ -9,8 +9,8 @@
 
     <script src="//sebpiq.github.io/WAAClock/dist/WAAClock-latest.js"></script>
 
-    <link rel="stylesheet" href="static/retro.css" />
-    <script src="app.js" type="module"></script>
+    <link rel="stylesheet" href="static/app.css" />
+    <script src="app/main.js" type="module"></script>
   </head>
   <body>
     <div id="app" x-data="app">
@@ -125,8 +125,12 @@
                 <td><input type="text" x-model="$store.project.name" /></td>
               </tr>
               <tr>
-                <th>Tempo</th>
-                <td><input type="number" min="60" max="250" x-model="$store.project.tempo" /></td>
+                <th>BPM</th>
+                <td><input type="number" min="60" max="250" x-model="$store.project.bpm" /></td>
+              </tr>
+              <tr>
+                <th>Speed</th>
+                <td><input type="number" min="1" max="50" x-model="$store.project.speed" /></td>
               </tr>
               <tr>
                 <th>Loaded File</th>

@@ -10,17 +10,21 @@ What is a "tracker"? It's a type of sequencer for creating music based on sample
 
 # Features
 
-- Extremely basic tracker feature set
+- Extremely basic tracker feature set, still WIP
 
 ### Roadmap & Todo list
 
+In progress:
+- Loading XM files
+- Finish pattern editor (instm, volume and effects)
+
+Todo:
+- Saving XM files
 - Sample and instrument editing
 - Mixer and tracker/master effects
 - Step effects
-- Finish pattern editor (instm, volume and effects)
 - Lots more keys
 - Song & pattern chain editor
-- Loading XM files
 - Loading XMI
 - MIDI 
   - input support

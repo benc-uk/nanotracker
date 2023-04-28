@@ -1,4 +1,4 @@
-import { ctx } from '../app.js'
+import { ctx } from './main.js'
 
 export function toHex(v, pad = 2) {
   const empty = ''.padStart(pad, '·')
@@ -27,7 +27,8 @@ export function toNote(noteNum) {
 /**
  * Load sample file from URL
  *
- * @param {string} url - URL of sample file
+ * @param {string} url - URL or path of sample file
+ * @returns {Promise<AudioBuffer>} - AudioBuffer
  */
 export async function loadSampleURL(url) {
   try {

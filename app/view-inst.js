@@ -1,5 +1,5 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
-import { ctx } from '../app.js'
+import { ctx } from './main.js'
 
 export const viewInst = () => ({
   selectedInstNum: null,
@@ -11,10 +11,6 @@ export const viewInst = () => ({
       this.$dispatch('instchange', newInst)
     })
     this.$watch('selectedSampNum', () => this.drawSample())
-
-    // Keyboard bindings
-    this.bindKeys = this.bindKeys.bind(this)
-    window.addEventListener('keydown', this.bindKeys)
   },
 
   drawSample() {

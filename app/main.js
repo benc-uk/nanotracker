@@ -1,17 +1,17 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
-import { viewFile } from './js/view-file.js'
-import { viewPatt } from './js/view-pattern.js'
-import { viewHelp } from './js/view-help.js'
-import { viewInst } from './js/view-inst.js'
-import { viewSong } from './js/view-song.js'
-import { Project } from './js/project.js'
+import { viewFile } from './view-file.js'
+import { viewPatt } from './view-pattern.js'
+import { viewHelp } from './view-help.js'
+import { viewInst } from './view-inst.js'
+import { viewSong } from './view-song.js'
+import { Project } from './project.js'
 
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
 
 // CHANGE ME
-export const VERSION = '0.0.16'
+export const VERSION = '0.0.17'
 
 Alpine.data('app', () => ({
   version: VERSION,

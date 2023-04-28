@@ -1,4 +1,4 @@
-import { ctx } from '../app.js'
+import { ctx } from './main.js'
 import { Step } from './step.js'
 
 export class Track {
@@ -44,7 +44,7 @@ export class Track {
    * @param {Step} step - Step to play on this tracks audio channel
    */
   playStep(step, instruments) {
-    if (!step || !step.enabled || step.instNum == null || this.muted) {
+    if (!step || step.instNum == null || this.muted) {
       return
     }
 
@@ -54,7 +54,7 @@ export class Track {
       this.activeOutNode.disconnect()
     }
 
-    const inst = instruments[step.instNum]
+    const inst = instruments[step.instNum - 1]
     if (!inst) {
       //console.log('No instrument found for step', step)
       return

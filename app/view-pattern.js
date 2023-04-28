@@ -1,16 +1,22 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
-import { ctx } from '../app.js'
+import { ctx } from './main.js'
 import { Step } from './step.js'
 
-const BPM_MAGIC = 15
 // prettier-ignore
 const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
 
+// Part of the core playback logic
+let ticks = 0
+let tickMagic = 2.2
+
 let canvas = null
 let ctx2d = null
+
+// Magic numbers for the pattern view
 const lineH = 26
 const trackW = 160
+const font = '26px VT323'
 
 export const viewPatt = () => ({
   stayOnPattern: false,
@@ -35,7 +41,12 @@ export const viewPatt = () => ({
     // Effect to watch the store
     Alpine.effect(() => {
       this.activePattern = Alpine.store('project').patterns[0]
-      if (this.clockTimer) this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
+      if (this.clockTimer) {
+        console.log(`Set clock tick: BPM: ${Alpine.store('project').bpm} Speed: ${Alpine.store('project').speed}`)
+
+        const tickRate = tickMagic / Alpine.store('project').bpm
+        this.clockTimer.repeat(tickRate)
+      }
     })
 
     // Rerender the pattern when the active pattern changes
@@ -60,18 +71,26 @@ export const viewPatt = () => ({
     this.clockTimer = clock.setTimeout(() => {
       // The main playback logic lives here
       if (this.stopped) return
-      this.playOneStep()
+
+      // We need to keep track of the number of ticks
+      ticks++
+      if (ticks > Alpine.store('project').speed) {
+        ticks = 0
+        this.playCurrentRow()
+      }
     }, ctx.currentTime)
 
-    this.clockTimer.repeat(BPM_MAGIC / Alpine.store('project').tempo)
+    const tickRate = tickMagic / Alpine.store('project').bpm
+    this.clockTimer.repeat(tickRate)
 
     canvas = this.$refs.pattCanvas
     ctx2d = canvas.getContext('2d')
   },
 
-  playOneStep() {
+  // NOTE: Most important line of code in the whole app
+  playCurrentRow() {
     const prj = Alpine.store('project')
-    // NOTE: Most important line of code in the whole app
+
     prj.trigPatternStep(this.activePattern, this.currentStep)
 
     this.currentStep++
@@ -97,8 +116,8 @@ export const viewPatt = () => ({
 
   followPlayingStep(stepNum) {
     // Width ratio of the pattern view to the pattern canvas
-    const r = this.$refs.pattView.offsetWidth / this.$refs.pattCanvas.width
-    this.$refs.pattView.scrollTop = Math.floor((stepNum - 8) * lineH * r)
+    const ratio = this.$refs.pattView.offsetWidth / this.$refs.pattCanvas.width
+    this.$refs.pattView.scrollTop = Math.floor((stepNum - 8) * lineH * ratio)
   },
 
   play() {
@@ -165,7 +184,7 @@ export const viewPatt = () => ({
     // Draw background for active step
     ctx2d.fillStyle = 'rgba(0, 255, 255, 0.2)'
     ctx2d.fillRect(0, this.currentStep * lineH, canvas.width, lineH)
-    ctx2d.font = '26px VT323'
+    ctx2d.font = font
 
     for (let s = 0; s < this.activePattern.length; s++) {
       if (s % 4 == 0 && s != this.currentStep) {
@@ -188,7 +207,7 @@ export const viewPatt = () => ({
         ctx2d.fillStyle = 'rgb(199, 73, 238)'
         ctx2d.fillText(step.volString, t * trackW + 2 + 72, s * lineH + 20)
         ctx2d.fillStyle = 'rgb(58, 99, 235)'
-        ctx2d.fillText(step.effect1String, t * trackW + 2 + 104, s * lineH + 20)
+        ctx2d.fillText(step.efxString, t * trackW + 2 + 104, s * lineH + 20)
       }
     }
 
@@ -329,7 +348,7 @@ export const viewPatt = () => ({
 
     if (e.key === 'Enter') {
       e.preventDefault()
-      this.playOneStep()
+      this.playCurrentRow()
       return
     }
 
@@ -351,7 +370,7 @@ export const viewPatt = () => ({
 
       const inst = prj.instruments[this.activeInst]
       const noteNum = this.octave * 12 + keyOffset
-      const [audioNode, gainNode] = inst.createPlayNode(noteNum, 64)
+      const [audioNode, gainNode] = inst.createPlayNode(noteNum, 1.0)
       audioNode.start(0)
       gainNode.connect(ctx.destination)
       audioNode.onended = () => {

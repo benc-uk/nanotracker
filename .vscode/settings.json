@@ -7,6 +7,7 @@
     ".prettier*": true,
     "eslint.*": true,
     "*config.json": true,
+    "jsdoc.json": true,
   },
   "explorer.excludeGitIgnore": true
 }

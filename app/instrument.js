@@ -1,12 +1,11 @@
-import { ctx } from '../app.js'
+import { ctx } from './main.js'
 import { Sample } from './sample.js'
 
 const MAX_SAMPLES = 16
 
+/** Instrument holds multiple samples and many other parameters */
 export class Instrument {
-  /** @type {AudioBuffer} */
-  sample = null
-  rootNote = 60
+  rootNote = 48
   number = 0
   name = 'Unnamed'
   /** @type {Sample[]} */
@@ -30,7 +29,7 @@ export class Instrument {
   // Get an Audio & GainNode that will play this instrument at the given note & vol
   createPlayNode(note, volume) {
     const gainNode = ctx.createGain()
-    gainNode.gain.value = 1.0 //volume ? volume : 1
+    gainNode.gain.value = 1.0 //volume ? volume : 1.0
 
     const audioNode = ctx.createBufferSource()
     audioNode.buffer = this.samples[0].buffer

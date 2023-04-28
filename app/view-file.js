@@ -1,6 +1,6 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 import { loadXM } from './xm-loader.js'
-import { ctx } from '../app.js'
+import { ctx } from './main.js'
 
 export const viewFile = () => ({
   filename: 'none',
