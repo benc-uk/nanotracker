@@ -20,6 +20,7 @@ const curOffsets = [2, 43, 43 + fontW, 74, 74 + fontW, 106, 105 + fontW, 104 + f
 
 let previewGainNode
 let previewAudioNode
+let keyDown = false
 
 export const viewPatt = (clock) => ({
   loopPattern: false,
@@ -429,22 +430,25 @@ export const viewPatt = (clock) => ({
     if (keyOffset !== -1) {
       e.preventDefault()
 
-      const inst = prj.instruments[this.activeInst]
-      const noteNum = this.octave * 12 + keyOffset
-      if (previewAudioNode && previewGainNode) {
-        previewAudioNode.stop()
-        previewAudioNode.disconnect()
-        previewGainNode.disconnect()
-      }
-      const [an, gn] = inst.createPlayNode(noteNum, 1.0)
-      previewAudioNode = an
-      previewGainNode = gn
-      previewAudioNode.start()
-      previewGainNode.connect(masterOut)
+      // preview note
+      if (!keyDown) {
+        const inst = prj.instruments[this.activeInst]
+        const noteNum = this.octave * 12 + keyOffset
+        if (previewAudioNode && previewGainNode) {
+          previewAudioNode.stop()
+          previewAudioNode.disconnect()
+          previewGainNode.disconnect()
+        }
+        const [an, gn] = inst.createPlayNode(noteNum, 1.0)
+        previewAudioNode = an
+        previewGainNode = gn
+        previewAudioNode.start()
+        previewGainNode.connect(masterOut)
 
-      previewAudioNode.onended = () => {
-        previewGainNode.disconnect()
-        previewAudioNode.disconnect()
+        previewAudioNode.onended = () => {
+          previewGainNode.disconnect()
+          previewAudioNode.disconnect()
+        }
       }
 
       if (!this.record || this.cursor.column != 0) return
@@ -455,9 +459,12 @@ export const viewPatt = (clock) => ({
       this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(noteNum)
       this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(this.activeInst) + 1)
     }
+
+    keyDown = true
   },
 
   bindKeysUp(e) {
+    keyDown = false
     if (previewAudioNode && previewGainNode) {
       previewAudioNode.stop()
       previewAudioNode.disconnect()
