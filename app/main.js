@@ -11,8 +11,14 @@ import { Clock } from './clock.js'
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
 
+// Master output
+export const masterOut = ctx.createGain()
+masterOut.connect(ctx.destination)
+
 // CHANGE ME
-export const VERSION = '0.0.17'
+export const VERSION = '0.0.18'
+
+const newProject = new Project(8)
 
 Alpine.data('app', () => ({
   version: VERSION,
@@ -22,7 +28,8 @@ Alpine.data('app', () => ({
   async init() {
     console.log('### 🎵 Starting JS Tracker ')
 
-    this.clock = new Clock(ctx, 6, 125)
+    // Create a clock to drive the sequencer, the values here are immediately overwritten
+    this.clock = new Clock(ctx, newProject.speed, newProject.bpm)
   },
 }))
 
@@ -33,7 +40,7 @@ Alpine.data('viewInst', viewInst)
 Alpine.data('viewSong', viewSong)
 
 // IMPORTANT: Init with an empty project and all defaults
-Alpine.store('project', new Project(8))
+Alpine.store('project', newProject)
 
 const storedView = localStorage.getItem('view')
 if (!storedView) {

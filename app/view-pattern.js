@@ -2,9 +2,11 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { ctx } from './main.js'
 import { Step } from './step.js'
+import { toHex } from './utils.js'
 
 // prettier-ignore
 const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
+const hexKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f']
 
 let canvas = null
 let ctx2d = null
@@ -51,6 +53,7 @@ export const viewPatt = (clock) => ({
       this.renderPattern()
     })
     this.$watch('cursor', () => {
+      this.followPlayingStep(this.cursor.step)
       this.renderPattern()
     })
 
@@ -61,12 +64,13 @@ export const viewPatt = (clock) => ({
     canvas = this.$refs.pattCanvas
     ctx2d = canvas.getContext('2d')
 
+    // Listen for clock ticks and play
     window.addEventListener('clockTick', () => {
       if (!this.stopped) this.playCurrentRow()
     })
   },
 
-  // NOTE: Most important line of code in the whole app
+  // Really important, this is where playback happens
   playCurrentRow() {
     const prj = Alpine.store('project')
 
@@ -93,6 +97,7 @@ export const viewPatt = (clock) => ({
     }
   },
 
+  // Move the pattern view to follow the given step
   followPlayingStep(stepNum) {
     // Width ratio of the pattern view to the pattern canvas
     const ratio = this.$refs.pattView.offsetWidth / this.$refs.pattCanvas.width
@@ -165,32 +170,42 @@ export const viewPatt = (clock) => ({
     ctx2d.fillRect(0, this.currentStep * lineH, canvas.width, lineH)
     ctx2d.font = font
 
+    const indexW = ctx2d.measureText('00').width + 6
+    // Draw the step row index on the left
     for (let s = 0; s < this.activePattern.length; s++) {
+      // Draw background stripe for every 4th step
       if (s % 4 == 0 && s != this.currentStep) {
         ctx2d.fillStyle = '#131313'
-        ctx2d.fillRect(0, s * lineH, canvas.width, lineH)
+        ctx2d.fillRect(0, indexW + (s - 1) * lineH, canvas.width, lineH)
       }
+
+      // Side index numbers
+      ctx2d.fillStyle = '#ddd'
+      if (s % 4 == 0) ctx2d.fillStyle = '#ffff00'
+      ctx2d.fillText(toHex(s), 0, s * lineH + 20)
 
       for (let t = 0; t < prj.tracks.length; t++) {
         const step = this.activePattern?.steps[t][s]
         if (!step) {
           ctx2d.fillStyle = '#555'
-          ctx2d.fillText('··· ·· ·· ···', t * trackW + 2, s * lineH + 20)
+          ctx2d.fillText('··· ·· ·· ···', t * trackW + 2 + indexW, s * lineH + 20)
           continue
         }
 
         ctx2d.fillStyle = 'rgb(79, 202, 192)'
-        ctx2d.fillText(step.noteString, t * trackW + 2, s * lineH + 20)
+        ctx2d.fillText(step.noteString, t * trackW + 2 + indexW, s * lineH + 20)
         ctx2d.fillStyle = 'rgb(241, 212, 81)'
-        ctx2d.fillText(step.instString, t * trackW + 2 + 42, s * lineH + 20)
+        ctx2d.fillText(step.instString, t * trackW + 2 + 42 + indexW, s * lineH + 20)
         ctx2d.fillStyle = 'rgb(199, 73, 238)'
-        ctx2d.fillText(step.volString, t * trackW + 2 + 72, s * lineH + 20)
+        ctx2d.fillText(step.volString, t * trackW + 2 + 72 + indexW, s * lineH + 20)
         ctx2d.fillStyle = 'rgb(58, 99, 235)'
-        ctx2d.fillText(step.efxString, t * trackW + 2 + 104, s * lineH + 20)
+        ctx2d.fillText(step.efxString, t * trackW + 2 + 104 + indexW, s * lineH + 20)
       }
     }
 
     // Draw bar between tracks
+    ctx2d.fillStyle = '#999999'
+    ctx2d.fillRect(indexW - 4, 0, 4, canvas.height)
     for (let t = 0; t < prj.tracks.length; t++) {
       // if muted, draw gray bar over the track
       if (prj.tracks[t].muted) {
@@ -198,7 +213,7 @@ export const viewPatt = (clock) => ({
         ctx2d.fillRect(t * trackW, 0, trackW - 10, canvas.height)
       }
       ctx2d.fillStyle = '#999999'
-      ctx2d.fillRect((t + 1) * trackW - 7, 0, 4, canvas.height)
+      ctx2d.fillRect((t + 1) * trackW - 7 + indexW, 0, 4, canvas.height)
     }
 
     // Draw cursor
@@ -230,7 +245,6 @@ export const viewPatt = (clock) => ({
       if (this.cursor.step <= 0) {
         this.cursor.step = 0
       }
-      this.followPlayingStep(this.cursor.step)
     }
 
     if (e.key === 'ArrowDown') {
@@ -239,7 +253,6 @@ export const viewPatt = (clock) => ({
       if (this.cursor.step >= this.activePattern.length) {
         this.cursor.step = this.activePattern.length - 1
       }
-      this.followPlayingStep(this.cursor.step)
     }
 
     if (e.key === 'ArrowLeft') {
@@ -332,14 +345,67 @@ export const viewPatt = (clock) => ({
       return
     }
 
+    if (e.key === 'Home') {
+      e.preventDefault()
+      this.cursor.step = 0
+      return
+    }
+
+    if (e.key === 'PageDown') {
+      e.preventDefault()
+      this.cursor.step += 16
+      if (this.cursor.step >= this.activePattern.length) {
+        this.cursor.step = this.activePattern.length - 1
+      }
+      return
+    }
+
+    if (e.key === 'PageUp') {
+      e.preventDefault()
+      this.cursor.step -= 16
+      if (this.cursor.step < 0) {
+        this.cursor.step = 0
+      }
+      return
+    }
+
+    if (e.key === 'End') {
+      e.preventDefault()
+      this.cursor.step = this.activePattern.length - 1
+      this.followPlayingStep(this.cursor.step)
+      return
+    }
+
     if (this.record && this.cursor.column > 0 && e.key !== 'Delete') {
-      const valInt = parseInt(e.key)
-      if (valInt >= 0 && valInt <= 9) {
+      if (hexKeys.indexOf(e.key) > -1) {
         e.preventDefault()
+
         if (!this.activePattern.steps[this.cursor.track][this.cursor.step]) {
           this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step()
         }
-        this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(valInt - 1)
+
+        let instHex = toHex(this.activePattern.steps[this.cursor.track][this.cursor.step].instNum)
+        let volHex = toHex(this.activePattern.steps[this.cursor.track][this.cursor.step].volume * 64)
+        switch (this.cursor.column) {
+          case 1:
+            instHex = e.key + instHex[1]
+            this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(instHex, 16))
+            break
+          case 2:
+            instHex = instHex[0] + e.key
+            this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(instHex, 16))
+            break
+          case 3:
+            volHex = e.key + volHex[1]
+            if (parseInt(volHex, 16) > 64) volHex = '40'
+            this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(parseInt(volHex, 16) / 64)
+            break
+          case 4:
+            volHex = volHex[0] + e.key
+            if (parseInt(volHex, 16) > 64) volHex = '40'
+            this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(parseInt(volHex, 16) / 64)
+            break
+        }
       }
 
       return

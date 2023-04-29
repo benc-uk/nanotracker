@@ -60,9 +60,6 @@ export class Step {
   }
 
   setInst(instNum) {
-    if (instNum < 0) instNum = 0
-    if (instNum > 127) instNum = 127
-
     this.instNum = instNum
     this.updateStrings()
     return this

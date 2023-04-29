@@ -1,4 +1,4 @@
-import { ctx } from './main.js'
+import { ctx, masterOut } from './main.js'
 import { Step } from './step.js'
 
 export class Track {
@@ -16,6 +16,8 @@ export class Track {
 
   nodeList = []
 
+  volume = 1.0
+
   /**
    * @param {number} num - Track number
    * @param {number} totalTracks - Total number of tracks in the project
@@ -28,8 +30,8 @@ export class Track {
     this.trackOutput = ctx.createGain()
 
     // TODO: Not sure if this is the best way to do this
-    this.trackOutput.gain.value = 1.0 / totalTracks
-    this.trackOutput.connect(ctx.destination)
+    this.trackOutput.gain.value = this.volume
+    this.trackOutput.connect(masterOut)
 
     this.activeAudioNode = null
     this.activeOutNode = null
