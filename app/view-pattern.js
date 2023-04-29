@@ -6,20 +6,18 @@ import { Step } from './step.js'
 // prettier-ignore
 const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
 
-// Part of the core playback logic
-let ticks = 0
-let tickMagic = 2.2
-
 let canvas = null
 let ctx2d = null
 
 // Magic numbers for the pattern view
 const lineH = 26
-const trackW = 160
+const trackW = 148
 const font = '26px VT323'
+const fontW = 11
+const curOffsets = [2, 43, 43 + fontW, 74, 74 + fontW, 106, 105 + fontW, 104 + fontW * 2]
 
-export const viewPatt = () => ({
-  stayOnPattern: false,
+export const viewPatt = (clock) => ({
+  loopPattern: false,
   stopped: true,
   activePattern: null,
   currentStep: 0,
@@ -41,12 +39,8 @@ export const viewPatt = () => ({
     // Effect to watch the store
     Alpine.effect(() => {
       this.activePattern = Alpine.store('project').patterns[0]
-      if (this.clockTimer) {
-        console.log(`Set clock tick: BPM: ${Alpine.store('project').bpm} Speed: ${Alpine.store('project').speed}`)
-
-        const tickRate = tickMagic / Alpine.store('project').bpm
-        this.clockTimer.repeat(tickRate)
-      }
+      clock.updateRepeat(Alpine.store('project').bpm)
+      clock.updateTickSpeed(Alpine.store('project').speed)
     })
 
     // Rerender the pattern when the active pattern changes
@@ -64,27 +58,12 @@ export const viewPatt = () => ({
     this.bindKeys = this.bindKeys.bind(this)
     window.addEventListener('keydown', this.bindKeys)
 
-    // The main clock!
-    const clock = new WAAClock(ctx)
-    clock.start()
-
-    this.clockTimer = clock.setTimeout(() => {
-      // The main playback logic lives here
-      if (this.stopped) return
-
-      // We need to keep track of the number of ticks
-      ticks++
-      if (ticks > Alpine.store('project').speed) {
-        ticks = 0
-        this.playCurrentRow()
-      }
-    }, ctx.currentTime)
-
-    const tickRate = tickMagic / Alpine.store('project').bpm
-    this.clockTimer.repeat(tickRate)
-
     canvas = this.$refs.pattCanvas
     ctx2d = canvas.getContext('2d')
+
+    window.addEventListener('clockTick', () => {
+      if (!this.stopped) this.playCurrentRow()
+    })
   },
 
   // NOTE: Most important line of code in the whole app
@@ -96,7 +75,7 @@ export const viewPatt = () => ({
     this.currentStep++
 
     if (this.currentStep >= this.activePattern.length) {
-      if (this.stayOnPattern) {
+      if (this.loopPattern) {
         // Do nothing when looping same pattern
       } else {
         // Advance song position and switch pattern
@@ -196,7 +175,7 @@ export const viewPatt = () => ({
         const step = this.activePattern?.steps[t][s]
         if (!step) {
           ctx2d.fillStyle = '#555'
-          ctx2d.fillText('··· ·· ·· ····', t * trackW + 2, s * lineH + 20)
+          ctx2d.fillText('··· ·· ·· ···', t * trackW + 2, s * lineH + 20)
           continue
         }
 
@@ -223,17 +202,16 @@ export const viewPatt = () => ({
     }
 
     // Draw cursor
-
     ctx2d.strokeStyle = '#0aa'
     ctx2d.lineWidth = 2
 
     if (this.record) {
       ctx2d.fillStyle = '#a20'
-      const curOffset = [0, 42, 72, 104][this.cursor.column]
-      const curWidth = [38, 28, 28, 48][this.cursor.column]
+      const curOffset = curOffsets[this.cursor.column]
+      const width = this.cursor.column == 0 ? fontW * 3 : fontW
 
       ctx2d.globalCompositeOperation = 'screen'
-      ctx2d.fillRect(this.cursor.track * trackW + curOffset, this.cursor.step * lineH, curWidth, lineH)
+      ctx2d.fillRect(this.cursor.track * trackW + curOffset, this.cursor.step * lineH, width, lineH)
       ctx2d.strokeStyle = '#a20'
     }
 
@@ -243,8 +221,8 @@ export const viewPatt = () => ({
 
   // Keys here!
   bindKeys(e) {
-    // if (Alpine.store('view') !== 'patt') returnx
     const prj = Alpine.store('project')
+    const keyOffset = keyboardKeys.indexOf(e.key)
 
     if (e.key === 'ArrowUp') {
       e.preventDefault()
@@ -290,11 +268,11 @@ export const viewPatt = () => ({
 
       if (this.record) {
         this.cursor.column++
-        if (this.cursor.column > 3) {
+        if (this.cursor.column > 7) {
           this.cursor.track++
           if (this.cursor.track >= prj.trackCount) {
             this.cursor.track = prj.trackCount - 1
-            this.cursor.column = 3
+            this.cursor.column = 7
           } else {
             this.cursor.column = 0
           }
@@ -306,12 +284,6 @@ export const viewPatt = () => ({
       if (this.cursor.track >= prj.trackCount) this.cursor.track = prj.trackCount - 1
     }
 
-    if (e.key === 'Delete') {
-      e.preventDefault()
-      if (!this.record) return
-      this.activePattern.steps[this.cursor.track][this.cursor.step] = null
-    }
-
     if (e.key === 'Escape') {
       e.preventDefault()
       this.stop()
@@ -320,7 +292,7 @@ export const viewPatt = () => ({
 
     if (e.key === ' ' && e.ctrlKey) {
       e.preventDefault()
-      this.stayOnPattern = true
+      this.loopPattern = true
       this.currentStep = 0
       this.record = false
       this.play()
@@ -340,7 +312,7 @@ export const viewPatt = () => ({
         this.stop()
       } else {
         this.currentStep = 0
-        this.stayOnPattern = false
+        this.loopPattern = false
         this.record = false
         this.play()
       }
@@ -352,18 +324,39 @@ export const viewPatt = () => ({
       return
     }
 
-    if (this.record && this.cursor.column > 0) {
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      this.cursor.track++
+      if (this.cursor.track >= prj.trackCount) this.cursor.track = 0
+      this.cursor.column = 0
+      return
+    }
+
+    if (this.record && this.cursor.column > 0 && e.key !== 'Delete') {
       const valInt = parseInt(e.key)
-      console.log(valInt)
       if (valInt >= 0 && valInt <= 9) {
         e.preventDefault()
+        if (!this.activePattern.steps[this.cursor.track][this.cursor.step]) {
+          this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step()
+        }
         this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(valInt - 1)
       }
 
       return
     }
 
-    const keyOffset = keyboardKeys.indexOf(e.key)
+    if (e.key === 'Delete') {
+      e.preventDefault()
+      if (!this.record) return
+
+      if (this.cursor.column == 0) {
+        this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(null)
+      }
+      if (this.cursor.column == 1) {
+        this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(null)
+        this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(null)
+      }
+    }
 
     if (keyOffset !== -1) {
       e.preventDefault()
@@ -378,7 +371,12 @@ export const viewPatt = () => ({
       }
 
       if (!this.record || this.cursor.column != 0) return
-      this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step(this.activeInst, noteNum, 64)
+
+      if (!this.activePattern.steps[this.cursor.track][this.cursor.step]) {
+        this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step()
+      }
+      this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(noteNum)
+      this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(this.activeInst) + 1)
     }
   },
 })

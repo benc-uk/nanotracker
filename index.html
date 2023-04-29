@@ -27,10 +27,10 @@
       </nav>
 
       <div class="panel" id="main">
-        <div x-show="$store.view == 'patt'" x-data="viewPatt" id="pattEdit" @instchange.window="activeInst = $event.detail">
+        <div x-show="$store.view == 'patt'" x-data="viewPatt(clock)" id="pattEdit" @instchange.window="activeInst = $event.detail">
           <div class="mb-1 rowcentered">
             <button @click="play()">▶️PLAY</button>
-            <button @click="stayOnPattern = !stayOnPattern" :class="stayOnPattern && 'lit'">🔁LOOP</button>
+            <button @click="loopPattern = !loopPattern" :class="loopPattern && 'lit'">🔁LOOP</button>
             <button @click="stop">⏹️STOP</button>
             <button @click="recordMode" :class="record && 'lit'">⏺️REC</button>
 

@@ -29,7 +29,7 @@ export async function loadXM(data, ctx) {
   // Read patterns
   let pattOffset = 0
   for (let p = 0; p < pattCount; p++) {
-    console.log(`--- PATTERN ${p}`)
+    console.log(`PATTERN: ${p}`)
     const pattHeader = new DataView(data, baseOffset + pattOffset, 9)
     const pattHeadLen = pattHeader.getUint32(0, true)
     const pattLen = pattHeader.getUint16(5, true)
@@ -110,6 +110,7 @@ export async function loadXM(data, ctx) {
   // Read all instruments
   let instOffset = 0
   for (let i = 0; i < instCount; i++) {
+    console.log(`INSTRUMENT: ${i}`)
     // Read first 29 bytes of instrument header, when 0 samples this is all we need
     let instHeader = new DataView(data, baseOffset + instStartOffset + instOffset, 29)
     const instHeadSize = instHeader.getUint32(0, true)
@@ -131,30 +132,30 @@ export async function loadXM(data, ctx) {
 
     let samplesStartOffset = baseOffset + instStartOffset + instOffset + instHeadSize
     let sampleLenTotal = 0
+
+    // Array of sample headers, each object holding fields for each sample
     let samples = []
 
     // First pass, read all sample headers
     for (let s = 0; s < instSampCount; s++) {
       const sampleHead = new DataView(data, samplesStartOffset + s * sampleHeadSize, sampleHeadSize)
-      const sampleDataLen = sampleHead.getUint32(0, true)
       const sampleDataType = sampleHead.getUint8(17)
-      const sampleType = sampleHead.getUint8(14)
-      const sampleIs16bit = (sampleType & 16) === 16 // 16bit flag is in bit 4
-      const sampleName = String.fromCharCode(...new Uint8Array(sampleHead.buffer, sampleHead.byteOffset + 18, 22))
-      const sampleNameClean = sampleName.replace(/\0/g, '')
+      const rawName = String.fromCharCode(...new Uint8Array(sampleHead.buffer, sampleHead.byteOffset + 18, 22))
       if (sampleDataType != 0) {
         console.log(`WARNING! Sample is not type 0, ADPCM not supported!`)
         continue
       }
 
       samples.push({
-        sampleDataLen,
-        sampleIs16bit,
-        sampleNameClean,
+        dataLen: sampleHead.getUint32(0, true),
+        volume: sampleHead.getUint8(12),
+        fineTune: sampleHead.getInt8(13),
+        pan: sampleHead.getUint8(15),
+        is16bit: (sampleHead.getUint8(14) & 16) === 16,
+        type: sampleHead.getUint8(14),
+        name: rawName.replace(/\0/g, ''),
         index: s,
       })
-
-      console.log(`${i}:${s} name: ${toHex(sampleNameClean)} ${sampleIs16bit ? '16bit' : '8bit'} len:${sampleDataLen}`)
 
       // Advance past this sample header
       sampleLenTotal += sampleHeadSize
@@ -163,14 +164,14 @@ export async function loadXM(data, ctx) {
     // Second pass, read all sample data which follows the headers
     for (let sample of samples) {
       try {
-        const sampArray = new Uint8Array(data, samplesStartOffset + sampleLenTotal, sample.sampleDataLen)
-        const audioBuffer = await ctx.createBuffer(1, sample.sampleDataLen, 22050)
+        const sampArray = new Uint8Array(data, samplesStartOffset + sampleLenTotal, sample.dataLen)
+        const audioBuffer = await ctx.createBuffer(1, sample.dataLen, ctx.sampleRate)
         const channelData = audioBuffer.getChannelData(0)
 
         let old = 0
-        if (sample.sampleIs16bit) {
+        if (sample.is16bit) {
           // This is hacky, but it works
-          for (let i = 0; i < sample.sampleDataLen; i += 2) {
+          for (let i = 0; i < sample.dataLen; i += 2) {
             // Glue together 2 bytes into a 16 bit value
             let val = sampArray[i] + (sampArray[i + 1] << 8) + old
 
@@ -181,7 +182,7 @@ export async function loadXM(data, ctx) {
             channelData[i / 2] = val / 32768
           }
         } else {
-          for (let i = 0; i < sample.sampleDataLen; i++) {
+          for (let i = 0; i < sample.dataLen; i++) {
             let val = sampArray[i] + old
 
             // No idea why this is needed, copied from elsewhere
@@ -193,10 +194,16 @@ export async function loadXM(data, ctx) {
         }
 
         // Move to next sample data block
-        sampleLenTotal += sample.sampleDataLen
+        sampleLenTotal += sample.dataLen
 
-        const sampObj = new Sample(sample.index, sample.sampleNameClean)
+        const sampObj = new Sample(sample.index, sample.name)
         sampObj.buffer = audioBuffer
+        sampObj.is16bit = sample.is16bit
+        sampObj.volume = sample.volume / 64.0
+        sampObj.fineTune = sample.fineTune
+        sampObj.pan = (sample.pan - 128) / 128.0
+        console.log(`  SAMPLE: ${sampObj.toString()}`)
+
         prj.instruments[i].samples[sample.index] = sampObj
       } catch (err) {
         console.error('Error reading sample data!')

@@ -23,7 +23,7 @@ export class Step {
   noteString = '···'
   volString = '··'
   instString = '··'
-  efxString = '····'
+  efxString = '···'
 
   // Create an empty "null" step, with no note or instrument
   constructor() {
@@ -34,20 +34,20 @@ export class Step {
     this.efxVal1 = null
     this.efxVal2 = null
 
-    this.#updateStrings()
+    this.updateStrings()
   }
 
-  #updateStrings() {
+  updateStrings() {
     this.noteString = toNote(this.note)
     if (this.noteOff) this.noteString = '==='
     this.volString = this.volume != null ? toHex(Math.floor(this.volume * 64)) : '··'
     this.instString = toHex(this.instNum)
-    this.efxString = toHex(this.efxCmd) + toHex(this.efxVal1, 1) + toHex(this.efxVal2, 1)
+    this.efxString = this.efxCmd ? this.efxCmd : '·' + toHex(this.efxVal1, 1) + toHex(this.efxVal2, 1)
   }
 
   setNoteOff() {
     this.noteOff = true
-    this.#updateStrings()
+    this.updateStrings()
     return this
   }
 
@@ -55,7 +55,7 @@ export class Step {
     if (note < 0) note = 0
     this.note = note
     this.nodeOff = false
-    this.#updateStrings()
+    this.updateStrings()
     return this
   }
 
@@ -64,7 +64,7 @@ export class Step {
     if (instNum > 127) instNum = 127
 
     this.instNum = instNum
-    this.#updateStrings()
+    this.updateStrings()
     return this
   }
 
@@ -72,7 +72,7 @@ export class Step {
     if (vol < 0) vol = 0
     if (vol > 1) vol = 1
     this.volume = vol
-    this.#updateStrings()
+    this.updateStrings()
     return this
   }
 }

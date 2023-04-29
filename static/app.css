@@ -11,6 +11,7 @@
   --blue: #0000bb;
   --blued: #000066;
   --cyan: #33ddff;
+  --on: #aa226d;
 }
 
 @font-face {
@@ -70,7 +71,7 @@ button.active {
 }
 
 button.lit {
-  color: var(--blue);
+  color: var(--on);
   border-color: var(--shad) var(--hi) var(--hi) var(--shad);
   text-shadow: none;
 }

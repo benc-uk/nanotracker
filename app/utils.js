@@ -15,12 +15,11 @@ export function toNote(noteNum) {
   if (noteNum === undefined) return empty
   if (noteNum == null) return empty
 
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G', 'A', 'A#', 'B']
+  const notes = ['C-', 'C#', 'D-', 'D#', 'E-', 'F-', 'F#', 'G-', 'G-', 'A-', 'A#', 'B-']
   const octave = Math.floor(noteNum / 12) - 1
   const note = noteNum % 12
 
   let out = `${notes[note]}${octave}`
-  if (out.length === 2) out += ' '
   return out
 }
 
@@ -42,4 +41,8 @@ export async function loadSampleURL(url) {
   } catch (err) {
     console.error(err)
   }
+}
+
+export function getSampleRateForPeriod(period) {
+  return 8363 * Math.pow(2, (4608 - period) / 768)
 }

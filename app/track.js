@@ -14,13 +14,21 @@ export class Track {
   /** @type {GainNode} */
   trackOutput
 
-  constructor(num) {
+  nodeList = []
+
+  /**
+   * @param {number} num - Track number
+   * @param {number} totalTracks - Total number of tracks in the project
+   * */
+  constructor(num, totalTracks) {
     this.number = num
     this.muted = false
     this.trackOutput = null
 
     this.trackOutput = ctx.createGain()
-    this.trackOutput.gain.value = 1.0
+
+    // TODO: Not sure if this is the best way to do this
+    this.trackOutput.gain.value = 1.0 / totalTracks
     this.trackOutput.connect(ctx.destination)
 
     this.activeAudioNode = null
@@ -33,8 +41,9 @@ export class Track {
 
   stop() {
     if (this.activeAudioNode && this.activeOutNode) {
-      this.activeAudioNode.stop(0)
+      this.activeAudioNode.stop(50)
       this.activeOutNode.disconnect()
+      this.activeAudioNode.disconnect()
     }
   }
 
@@ -50,13 +59,12 @@ export class Track {
 
     // This makes the tracks monophonic and cut off previous notes
     if (this.activeAudioNode && this.activeOutNode) {
-      this.activeAudioNode.stop(0)
-      this.activeOutNode.disconnect()
+      this.activeOutNode.gain.setValueAtTime(0, ctx.currentTime + 50)
+      this.activeAudioNode.stop(50)
     }
 
     const inst = instruments[step.instNum - 1]
     if (!inst) {
-      //console.log('No instrument found for step', step)
       return
     }
 

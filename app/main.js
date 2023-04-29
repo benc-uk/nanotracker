@@ -6,6 +6,7 @@ import { viewHelp } from './view-help.js'
 import { viewInst } from './view-inst.js'
 import { viewSong } from './view-song.js'
 import { Project } from './project.js'
+import { Clock } from './clock.js'
 
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
@@ -16,9 +17,12 @@ export const VERSION = '0.0.17'
 Alpine.data('app', () => ({
   version: VERSION,
   changeView,
+  clock: null,
 
   async init() {
     console.log('### 🎵 Starting JS Tracker ')
+
+    this.clock = new Clock(ctx, 6, 125)
   },
 }))
 

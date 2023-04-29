@@ -21,11 +21,11 @@ export class Project {
   name = 'default'
   trackCount = 0
 
-  speed = 6 // Ticks per step/row
-  bpm = 125 // Sets overall speed of ticks
+  speed = 3 // Ticks per step/row
+  bpm = 125 // Sets overall speed of ticks, 125 = 50hz
 
   // Pattern chain
-  song = [0]
+  song = []
 
   // Create an new project with 256 empty patterns
   // And empty bank of 128 instruments
@@ -33,7 +33,7 @@ export class Project {
     this.trackCount = trackCount
 
     for (let i = 0; i < trackCount; i++) {
-      const t = new Track(i)
+      const t = new Track(i, trackCount)
       this.tracks.push(t)
     }
 
@@ -41,7 +41,7 @@ export class Project {
     this.clearPatterns()
 
     this.name = 'New Project'
-    this.song = [0]
+    this.song = [0, 1]
   }
 
   clearPatterns() {
