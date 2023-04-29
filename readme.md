@@ -19,6 +19,9 @@ In progress:
 - Finish pattern editor (instm, volume and effects)
 
 Todo:
+- Note preview when recording / not recording
+- Sample finetune
+- Sample root note
 - Saving XM files
 - Sample and instrument editing
 - Mixer and tracker/master effects

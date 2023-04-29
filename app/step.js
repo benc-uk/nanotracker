@@ -39,7 +39,7 @@ export class Step {
 
   updateStrings() {
     this.noteString = toNote(this.note)
-    if (this.noteOff) this.noteString = '==='
+    if (this.noteOff) this.noteString = ' ▭'
     this.volString = this.volume != null ? toHex(Math.floor(this.volume * 64)) : '··'
     this.instString = toHex(this.instNum)
     this.efxString = this.efxCmd ? this.efxCmd : '·' + toHex(this.efxVal1, 1) + toHex(this.efxVal2, 1)
@@ -54,7 +54,7 @@ export class Step {
   setNote(note) {
     if (note < 0) note = 0
     this.note = note
-    this.nodeOff = false
+    this.noteOff = false
     this.updateStrings()
     return this
   }

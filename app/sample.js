@@ -1,7 +1,7 @@
 export const SAMP_MODE_NONE = 0
 export const SAMP_MODE_FORWARD = 1
 export const SAMP_MODE_PINGPONG = 2
-export const SAMP_MODE_ONESHOT = 3
+// export const SAMP_MODE_ONESHOT = 3
 
 /** Wrapper around AudioBuffer with a name */
 export class Sample {
@@ -25,7 +25,7 @@ export class Sample {
   relativeNote = 0
 
   loopStart = 0
-  loopEnd = 0
+  loopLen = 0
   loopMode = SAMP_MODE_NONE
 
   is16Bit = false
@@ -37,6 +37,6 @@ export class Sample {
   }
 
   toString() {
-    return `${this.name} (${this.number}) vol:${this.volume} pan:${this.pan} fine:${this.fineTune}`
+    return `${this.name} (${this.number}) vol:${this.volume} pan:${this.pan} fine:${this.fineTune} loopStr:${this.loopStart} loopEnd:${this.loopLen} mode:${this.loopMode}`
   }
 }

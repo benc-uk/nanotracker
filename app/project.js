@@ -62,11 +62,11 @@ export class Project {
    * @param {Pattern} patt
    * @param {number} stepNum
    */
-  trigPatternStep(patt, stepNum) {
+  trigPatternRow(patt, stepNum) {
     // Get the current step for each track
     for (const track of this.tracks) {
       const step = patt.steps[track.number][stepNum]
-      track.playStep(step, this.instruments)
+      track.activateStep(step, this.instruments)
     }
   }
 }

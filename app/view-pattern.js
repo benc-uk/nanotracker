@@ -1,6 +1,6 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
-import { ctx } from './main.js'
+import { ctx, masterOut } from './main.js'
 import { Step } from './step.js'
 import { toHex } from './utils.js'
 
@@ -17,6 +17,9 @@ const trackW = 148
 const font = '26px VT323'
 const fontW = 11
 const curOffsets = [2, 43, 43 + fontW, 74, 74 + fontW, 106, 105 + fontW, 104 + fontW * 2]
+
+let previewGainNode
+let previewAudioNode
 
 export const viewPatt = (clock) => ({
   loopPattern: false,
@@ -60,6 +63,7 @@ export const viewPatt = (clock) => ({
     // Keyboard bindings
     this.bindKeys = this.bindKeys.bind(this)
     window.addEventListener('keydown', this.bindKeys)
+    window.addEventListener('keyup', this.bindKeysUp)
 
     canvas = this.$refs.pattCanvas
     ctx2d = canvas.getContext('2d')
@@ -74,7 +78,7 @@ export const viewPatt = (clock) => ({
   playCurrentRow() {
     const prj = Alpine.store('project')
 
-    prj.trigPatternStep(this.activePattern, this.currentStep)
+    prj.trigPatternRow(this.activePattern, this.currentStep)
 
     this.currentStep++
 
@@ -111,11 +115,9 @@ export const viewPatt = (clock) => ({
 
   stop() {
     this.stopped = true
-    for (const t of Alpine.store('project').tracks) {
-      t.stop()
+    for (const track of Alpine.store('project').tracks) {
+      track.stop()
     }
-
-    if (ctx.state === 'suspended') ctx.resume()
   },
 
   patternChange(newPattNum) {
@@ -226,12 +228,12 @@ export const viewPatt = (clock) => ({
       const width = this.cursor.column == 0 ? fontW * 3 : fontW
 
       ctx2d.globalCompositeOperation = 'screen'
-      ctx2d.fillRect(this.cursor.track * trackW + curOffset, this.cursor.step * lineH, width, lineH)
+      ctx2d.fillRect(this.cursor.track * trackW + curOffset + indexW, this.cursor.step * lineH, width, lineH)
       ctx2d.strokeStyle = '#a20'
     }
 
     ctx2d.globalCompositeOperation = 'normal'
-    ctx2d.strokeRect(this.cursor.track * trackW, this.cursor.step * lineH, trackW - 10, lineH)
+    ctx2d.strokeRect(this.cursor.track * trackW + indexW, this.cursor.step * lineH, trackW - 10, lineH)
   },
 
   // Keys here!
@@ -429,11 +431,20 @@ export const viewPatt = (clock) => ({
 
       const inst = prj.instruments[this.activeInst]
       const noteNum = this.octave * 12 + keyOffset
-      const [audioNode, gainNode] = inst.createPlayNode(noteNum, 1.0)
-      audioNode.start(0)
-      gainNode.connect(ctx.destination)
-      audioNode.onended = () => {
-        gainNode.disconnect()
+      if (previewAudioNode && previewGainNode) {
+        previewAudioNode.stop()
+        previewAudioNode.disconnect()
+        previewGainNode.disconnect()
+      }
+      const [an, gn] = inst.createPlayNode(noteNum, 1.0)
+      previewAudioNode = an
+      previewGainNode = gn
+      previewAudioNode.start()
+      previewGainNode.connect(masterOut)
+
+      previewAudioNode.onended = () => {
+        previewGainNode.disconnect()
+        previewAudioNode.disconnect()
       }
 
       if (!this.record || this.cursor.column != 0) return
@@ -443,6 +454,14 @@ export const viewPatt = (clock) => ({
       }
       this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(noteNum)
       this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(this.activeInst) + 1)
+    }
+  },
+
+  bindKeysUp(e) {
+    if (previewAudioNode && previewGainNode) {
+      previewAudioNode.stop()
+      previewAudioNode.disconnect()
+      previewGainNode.disconnect()
     }
   },
 })

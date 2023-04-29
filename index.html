@@ -67,7 +67,7 @@
               <template x-for="(trk, trkNum) in $store.project.tracks">
                 <div>
                   <span x-text="`T:${trkNum+1}`" class="mr-1"></span>
-                  <button class="mini" :class="trk.muted && 'lit'" @click="trk.muted = !trk.muted; renderPattern()">M</button>
+                  <button class="mini" :class="trk.muted && 'lit'" @click="trk.setMute(!trk.muted); renderPattern()">M</button>
                   <button class="mini" @click="soloTrack(trkNum)">S</button>
                 </div>
               </template>

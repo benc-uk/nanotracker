@@ -110,13 +110,14 @@ export async function loadXM(data, ctx) {
   // Read all instruments
   let instOffset = 0
   for (let i = 0; i < instCount; i++) {
-    console.log(`INSTRUMENT: ${i}`)
     // Read first 29 bytes of instrument header, when 0 samples this is all we need
     let instHeader = new DataView(data, baseOffset + instStartOffset + instOffset, 29)
     const instHeadSize = instHeader.getUint32(0, true)
     let instSampCount = instHeader.getUint16(27, true)
     const instName = String.fromCharCode(...new Uint8Array(instHeader.buffer, instHeader.byteOffset + 4, 22))
     const instNameClean = instName.replace(/\0/g, '')
+
+    console.log(`INSTRUMENT: ${instNameClean} (${i})`)
 
     prj.instruments[i].name = instNameClean
 
@@ -152,7 +153,9 @@ export async function loadXM(data, ctx) {
         fineTune: sampleHead.getInt8(13),
         pan: sampleHead.getUint8(15),
         is16bit: (sampleHead.getUint8(14) & 16) === 16,
-        type: sampleHead.getUint8(14),
+        typeMode: sampleHead.getUint8(14),
+        loopStart: sampleHead.getUint32(4, true),
+        loopLen: sampleHead.getUint32(8, true),
         name: rawName.replace(/\0/g, ''),
         index: s,
       })
@@ -165,27 +168,33 @@ export async function loadXM(data, ctx) {
     for (let sample of samples) {
       try {
         const sampArray = new Uint8Array(data, samplesStartOffset + sampleLenTotal, sample.dataLen)
-        const audioBuffer = await ctx.createBuffer(1, sample.dataLen, ctx.sampleRate)
-        const channelData = audioBuffer.getChannelData(0)
+        let audioBuffer
 
         let old = 0
         if (sample.is16bit) {
+          // Note we divide by 2 here, since we're reading 16 bit samples
+          audioBuffer = await ctx.createBuffer(1, sample.dataLen / 2, ctx.sampleRate)
+          const channelData = audioBuffer.getChannelData(0)
+
           // This is hacky, but it works
           for (let i = 0; i < sample.dataLen; i += 2) {
             // Glue together 2 bytes into a 16 bit value
             let val = sampArray[i] + (sampArray[i + 1] << 8) + old
 
-            // No idea why this is needed, copied from elsewhere
+            // Copied from github.com/steffest/BassoonTracker
             if (val < -32768) val += 65536
             else if (val > 32767) val -= 65536
             old = val
-            channelData[i / 2] = val / 32768
+            channelData[i / 2] = val / 32768 // also div by 2 here
           }
         } else {
+          audioBuffer = await ctx.createBuffer(1, sample.dataLen, ctx.sampleRate)
+          const channelData = audioBuffer.getChannelData(0)
+
           for (let i = 0; i < sample.dataLen; i++) {
             let val = sampArray[i] + old
 
-            // No idea why this is needed, copied from elsewhere
+            // Copied from github.com/steffest/BassoonTracker
             if (val < -128) val += 256
             else if (val > 127) val -= 256
             old = val
@@ -202,6 +211,9 @@ export async function loadXM(data, ctx) {
         sampObj.volume = sample.volume / 64.0
         sampObj.fineTune = sample.fineTune
         sampObj.pan = (sample.pan - 128) / 128.0
+        sampObj.loopMode = sample.typeMode & ~(1 << 4) // Mask off 4th bit
+        sampObj.loopStart = sample.loopStart / sample.dataLen
+        sampObj.loopLen = sample.loopLen / sample.dataLen
         console.log(`  SAMPLE: ${sampObj.toString()}`)
 
         prj.instruments[i].samples[sample.index] = sampObj

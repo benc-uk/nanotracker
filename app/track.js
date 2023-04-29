@@ -42,10 +42,19 @@ export class Track {
   }
 
   stop() {
-    if (this.activeAudioNode && this.activeOutNode) {
-      this.activeAudioNode.stop(50)
+    if (this.activeAudioNode || this.activeOutNode) {
+      this.activeAudioNode.stop(0)
       this.activeOutNode.disconnect()
       this.activeAudioNode.disconnect()
+    }
+  }
+
+  setMute(mute) {
+    this.muted = mute
+    if (mute) {
+      this.trackOutput.gain.value = 0
+    } else {
+      this.trackOutput.gain.value = this.volume
     }
   }
 
@@ -54,15 +63,25 @@ export class Track {
    *
    * @param {Step} step - Step to play on this tracks audio channel
    */
-  playStep(step, instruments) {
-    if (!step || step.instNum == null || this.muted) {
+  activateStep(step, instruments) {
+    if (!step) {
+      return
+    }
+
+    if (step.noteOff) {
+      this.stop()
+      return
+    }
+
+    if (step.volume != null && this.activeOutNode && step.note == null) {
+      this.activeOutNode.gain.value = step.volume
       return
     }
 
     // This makes the tracks monophonic and cut off previous notes
     if (this.activeAudioNode && this.activeOutNode) {
-      this.activeOutNode.gain.setValueAtTime(0, ctx.currentTime + 50)
-      this.activeAudioNode.stop(50)
+      this.activeAudioNode.disconnect()
+      this.activeOutNode.disconnect()
     }
 
     const inst = instruments[step.instNum - 1]
@@ -73,7 +92,7 @@ export class Track {
     const [audioNode, outNode] = inst.createPlayNode(step.note, step.volume)
     this.activeOutNode = outNode
     this.activeAudioNode = audioNode
-    this.activeAudioNode.start(0)
+    this.activeAudioNode.start()
     this.activeOutNode.connect(this.trackOutput)
   }
 }

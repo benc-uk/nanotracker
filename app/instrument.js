@@ -1,5 +1,5 @@
 import { ctx } from './main.js'
-import { Sample } from './sample.js'
+import { SAMP_MODE_FORWARD, Sample } from './sample.js'
 
 const MAX_SAMPLES = 16
 
@@ -44,6 +44,12 @@ export class Instrument {
 
     audioNode.buffer = this.samples[0].buffer
     audioNode.detune.value = (note - this.rootNote) * 100
+
+    if (samp.loopMode === SAMP_MODE_FORWARD) {
+      audioNode.loop = true
+      audioNode.loopStart = samp.loopStart * audioNode.buffer.duration
+      audioNode.loopEnd = (samp.loopStart + samp.loopLen) * audioNode.buffer.duration
+    }
 
     // TODO: Support finetune
     // TODO: Support relative note
