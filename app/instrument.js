@@ -1,11 +1,10 @@
 import { ctx } from './main.js'
-import { SAMP_MODE_FORWARD, Sample } from './sample.js'
+import { SAMP_MODE_NONE, Sample } from './sample.js'
 
 const MAX_SAMPLES = 16
 
 /** Instrument holds multiple samples and many other parameters */
 export class Instrument {
-  rootNote = 60
   number = 0
   name = 'Unnamed'
   /** @type {Sample[]} */
@@ -26,14 +25,14 @@ export class Instrument {
   }
 
   // Get an Audio & GainNode that will play this instrument at the given note & vol
-  createPlayNode(note, volume) {
+  createPlayNodes(noteNum, volume) {
     // TODO: Support multiple samples, hard coded to first sample for now
     /** @type {Sample} */
     const samp = this.samples[0]
 
     const gainNode = ctx.createGain()
     gainNode.gain.value = volume ? volume : 1.0
-    gainNode.gain.value *= samp.volume
+    gainNode.gain.value *= samp.volume // Scale by sample volume
 
     const audioNode = ctx.createBufferSource()
     audioNode.channelCount = 1
@@ -43,17 +42,21 @@ export class Instrument {
     panNode.pan.value = samp.pan
 
     audioNode.buffer = this.samples[0].buffer
-    audioNode.detune.value = (note - this.rootNote) * 100
 
-    if (samp.loopMode === SAMP_MODE_FORWARD) {
+    // This shit is insane ¯\_(ツ)_/¯
+    // But it works, I think
+    const notePeriod = 7680 - (noteNum + samp.relativeNote - 1) * 64
+    const rate = (8363 * Math.pow(2, (4608 - notePeriod) / 768)) / ctx.sampleRate
+    audioNode.playbackRate.value = rate
+
+    // BUG: PingPong mode is not implemented, treated the same as normal loops
+    if (samp.loopMode >= SAMP_MODE_NONE) {
       audioNode.loop = true
       audioNode.loopStart = samp.loopStart * audioNode.buffer.duration
       audioNode.loopEnd = (samp.loopStart + samp.loopLen) * audioNode.buffer.duration
     }
 
     // TODO: Support finetune
-    // TODO: Support relative note
-    // TODO: Support loop start/end & loop modes
 
     audioNode.connect(panNode)
     panNode.connect(gainNode)

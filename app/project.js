@@ -8,6 +8,17 @@ const DEFAULT_TRACK_COUNT = 8
 
 /** Project class, of which there is a single instance */
 export class Project {
+  /** @type {string} */
+  name = 'default'
+
+  trackCount = 0 // Total number of tracks or channels in the project
+
+  speed = 3 // Ticks per step/row
+  bpm = 125 // Sets overall speed of ticks, 125 = 50hz
+
+  /** @type {number[]} */
+  song = [] // Pattern chain
+
   /** @type {Instrument[]} */
   instruments = []
 
@@ -17,18 +28,8 @@ export class Project {
   /** @type {Track[]} */
   tracks = []
 
-  /** @type {string} */
-  name = 'default'
-  trackCount = 0
-
-  speed = 3 // Ticks per step/row
-  bpm = 125 // Sets overall speed of ticks, 125 = 50hz
-
-  // Pattern chain
-  song = []
-
   // Create an new project with 256 empty patterns
-  // And empty bank of 128 instruments
+  // And empty bank of 128 instruments, and 8 tracks
   constructor(trackCount = DEFAULT_TRACK_COUNT) {
     this.trackCount = trackCount
 
@@ -41,7 +42,7 @@ export class Project {
     this.clearPatterns()
 
     this.name = 'New Project'
-    this.song = [0, 1]
+    this.song = [0]
   }
 
   clearPatterns() {
@@ -59,6 +60,7 @@ export class Project {
   }
 
   /**
+   * Small but important function that is called to play rows
    * @param {Pattern} patt
    * @param {number} stepNum
    */

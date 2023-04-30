@@ -11,19 +11,28 @@ export async function loadXM(data, ctx) {
 
   const prj = new Project(trackCount)
   const name = String.fromCharCode(...new Uint8Array(data, 17, 20))
-  prj.name = name.replace(/\0/g, '')
-  console.log('### 💽 Loading XM module name:', prj.name)
+  prj.name = name.replace(/\0/g, '').trim()
+  console.log('### 💽 Loading XM module:', prj.name)
 
   const headerSize = header.getUint32(60, true)
   const pattCount = header.getUint16(70, true)
   const instCount = header.getUint16(72, true)
+
   prj.speed = header.getUint16(76, true)
   prj.bpm = header.getUint16(78, true)
+
+  // Read the song pattern chain
+  const songLength = header.getUint16(64, true)
+  const pattOrderTable = new Uint8Array(data, 80, 256)
+  prj.song = []
+  for (let i = 0; i < songLength; i++) {
+    prj.song.push(pattOrderTable[i])
+  }
 
   // Offset past the pattern data to the start of the instrument data
   let instStartOffset = 0
 
-  // Base offset past the header to the start of the pattern data
+  // Base offset past the header to the start of rest of the data (patterns, instruments, etc)
   let baseOffset = headerSize + 60
 
   // Read patterns
@@ -48,52 +57,59 @@ export async function loadXM(data, ctx) {
     for (let byteIndex = 0; byteIndex < pattDataSize; byteIndex++) {
       const byte = pattData.getUint8(byteIndex)
 
-      let jump = 0
+      let noteByteJump = 0 // Used by compressed note data
+      let noteByte = 0
+      let instByte = 0
+      let volByte = 0
       // Read compressed note data, if MSB is set
       if (byte >> 7 === 1) {
-        let noteByte = 0
-        let instByte = 0
-        let volByte = 0
         if ((byte & 1) === 1) {
           noteByte = pattData.getUint8(byteIndex + 1)
-          jump++
+          noteByteJump++
         }
         if ((byte & 2) === 2) {
-          instByte = pattData.getUint8(byteIndex + 1 + jump)
-          jump++
+          instByte = pattData.getUint8(byteIndex + 1 + noteByteJump)
+          noteByteJump++
         }
         if ((byte & 4) === 4) {
-          volByte = pattData.getUint8(byteIndex + 1 + jump)
-          jump++
+          volByte = pattData.getUint8(byteIndex + 1 + noteByteJump)
+          noteByteJump++
         }
+        // TODO: Read effect data
         if ((byte & 8) === 8) {
-          jump++
+          noteByteJump++
         }
         if ((byte & 16) === 16) {
-          jump++
+          noteByteJump++
         }
-        byteIndex += jump
 
-        if (jump > 0) {
-          // Volume column is complex, and has multiple commands
-          let stepVol = null
-
-          if (volByte >= 16 && volByte <= 80) {
-            // This simple volume set command
-            stepVol = (volByte - 16) / 64.0 // Convert to 0-1 range
-          }
-
-          const step = new Step()
-          if (noteByte > 0 && noteByte != 97) step.setNote(noteByte + 11)
-          if (noteByte == 97) step.setNoteOff()
-          if (instByte > 0) step.setInst(instByte)
-          if (stepVol != null) step.setVol(stepVol)
-
-          prj.patterns[p].steps[trackIndex][stepIndex] = step
-        }
+        byteIndex += noteByteJump
       } else {
-        console.log('WARNING: uncompressed note data skipped: ', byte.toString(2).padStart(8, '0'))
+        // console.log(`WARNING: uncompressed note data ${trackIndex + 1},${stepIndex}: `, byte.toString(2).padStart(8, '0'))
+        // Handle uncompressed note data
+        noteByte = pattData.getUint8(byteIndex + 0)
+        instByte = pattData.getUint8(byteIndex + 1)
+        volByte = pattData.getUint8(byteIndex + 2)
+        // TODO: Read effect data
+
+        byteIndex += 4
       }
+
+      // Volume column is complex, and has multiple commands
+      let stepVol = null
+
+      if (volByte >= 16 && volByte <= 80) {
+        // This simple volume set command
+        stepVol = (volByte - 16) / 64.0 // Convert to 0-1 range
+      }
+
+      const step = new Step()
+      if (noteByte > 0 && noteByte != 97) step.setNote(noteByte)
+      if (noteByte == 97) step.setNoteOff()
+      if (instByte > 0) step.setInst(instByte)
+      if (stepVol != null) step.setVol(stepVol)
+
+      prj.patterns[p].steps[trackIndex][stepIndex] = step
 
       // Move to next step in pattern, across tracks and rows
       trackIndex++
@@ -142,6 +158,7 @@ export async function loadXM(data, ctx) {
       const sampleHead = new DataView(data, samplesStartOffset + s * sampleHeadSize, sampleHeadSize)
       const sampleDataType = sampleHead.getUint8(17)
       const rawName = String.fromCharCode(...new Uint8Array(sampleHead.buffer, sampleHead.byteOffset + 18, 22))
+      sampleLenTotal += sampleHeadSize
       if (sampleDataType != 0) {
         console.log(`WARNING! Sample is not type 0, ADPCM not supported!`)
         continue
@@ -151,6 +168,7 @@ export async function loadXM(data, ctx) {
         dataLen: sampleHead.getUint32(0, true),
         volume: sampleHead.getUint8(12),
         fineTune: sampleHead.getInt8(13),
+        relNote: sampleHead.getInt8(16),
         pan: sampleHead.getUint8(15),
         is16bit: (sampleHead.getUint8(14) & 16) === 16,
         typeMode: sampleHead.getUint8(14),
@@ -161,7 +179,6 @@ export async function loadXM(data, ctx) {
       })
 
       // Advance past this sample header
-      sampleLenTotal += sampleHeadSize
     }
 
     // Second pass, read all sample data which follows the headers
@@ -169,11 +186,12 @@ export async function loadXM(data, ctx) {
       try {
         const sampArray = new Uint8Array(data, samplesStartOffset + sampleLenTotal, sample.dataLen)
         let audioBuffer
+        const sampleRate = ctx.sampleRate
 
         let old = 0
         if (sample.is16bit) {
           // Note we divide by 2 here, since we're reading 16 bit samples
-          audioBuffer = await ctx.createBuffer(1, sample.dataLen / 2, ctx.sampleRate)
+          audioBuffer = await ctx.createBuffer(1, sample.dataLen / 2, sampleRate)
           const channelData = audioBuffer.getChannelData(0)
 
           // This is hacky, but it works
@@ -188,7 +206,7 @@ export async function loadXM(data, ctx) {
             channelData[i / 2] = val / 32768 // also div by 2 here
           }
         } else {
-          audioBuffer = await ctx.createBuffer(1, sample.dataLen, ctx.sampleRate)
+          audioBuffer = await ctx.createBuffer(1, sample.dataLen, sampleRate)
           const channelData = audioBuffer.getChannelData(0)
 
           for (let i = 0; i < sample.dataLen; i++) {
@@ -210,6 +228,8 @@ export async function loadXM(data, ctx) {
         sampObj.is16bit = sample.is16bit
         sampObj.volume = sample.volume / 64.0
         sampObj.fineTune = sample.fineTune
+        console.log(`  SAMPLERN: ${sample.relNote}`)
+        sampObj.relativeNote = sample.relNote
         sampObj.pan = (sample.pan - 128) / 128.0
         sampObj.loopMode = sample.typeMode & ~(1 << 4) // Mask off 4th bit
         sampObj.loopStart = sample.loopStart / sample.dataLen

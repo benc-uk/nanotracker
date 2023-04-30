@@ -134,7 +134,7 @@ nav {
 }
 
 #pattView {
-  height: 75vh;
+  height: 85vh;
   overflow-y: scroll;
   overflow-x: hidden;
 }

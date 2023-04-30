@@ -1,4 +1,4 @@
-# JS Tracker (working name)
+# NanoTracker
 
 This is a project create a music tracker in using Alpine.JS plus modern ES6 JavaScript & HTML5. It runs entirely in the browser and uses several of the more recent browser APIs such as Web Audio, FileSystem and MIDI
 
@@ -15,25 +15,24 @@ What is a "tracker"? It's a type of sequencer for creating music based on sample
 ### Roadmap & Todo list
 
 In progress:
-- Loading XM files
-- Finish pattern editor (instm, volume and effects)
-
-Todo:
-- Note preview when recording / not recording
+- Loading XM files... (ONGOING!)
+- Finish pattern editor (effects)
 - Sample finetune
-- Sample root note
-- Saving XM files
 - Sample and instrument editing
+  
+Todo:
+- Sample vibrato 
+- Saving XM files
 - Mixer and tracker/master effects
-- Step effects
+- XM Vol effects
+- XM Step effects
 - Lots more keys
 - Song & pattern chain editor
-- Loading XMI
+- Loading XMI (?)
 - MIDI 
   - input support
   - output
   - clock and transport
-
 
 # Hosted Version
 

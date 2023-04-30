@@ -22,13 +22,13 @@ export class Sample {
 
   fineTune = 0
 
-  relativeNote = 0
-
   loopStart = 0
   loopLen = 0
   loopMode = SAMP_MODE_NONE
 
   is16Bit = false
+
+  relativeNote = 0
 
   // Create a empty sample with no audio data
   constructor(num, name) {
@@ -37,6 +37,6 @@ export class Sample {
   }
 
   toString() {
-    return `${this.name} (${this.number}) vol:${this.volume} pan:${this.pan} fine:${this.fineTune} loopStr:${this.loopStart} loopEnd:${this.loopLen} mode:${this.loopMode}`
+    return `${this.name} (${this.number}) vol:${this.volume} rel:${this.relativeNote}`
   }
 }

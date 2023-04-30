@@ -16,7 +16,7 @@ export const viewFile = () => ({
 
   async loadDemoXM() {
     try {
-      const filename = 'demo.xm'
+      const filename = 'universalnetwork2_real.xm'
       const resp = await fetch('projects/' + filename)
       const data = await resp.arrayBuffer()
       this.filename = filename

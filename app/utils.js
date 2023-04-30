@@ -1,31 +1,39 @@
 import { ctx } from './main.js'
 
-export function toHex(v, pad = 2) {
+/**
+ * Converts to HEX strings with optional padding
+ * @param {number} num Number to convert
+ * @returns HEX string
+ */
+export function toHex(num, pad = 2) {
   const empty = ''.padStart(pad, '·')
 
-  if (v === undefined) return empty
-  if (v == null) return empty
+  if (num === undefined) return empty
+  if (num == null) return empty
 
-  return v.toString(16).padStart(pad, '0').toLocaleUpperCase()
+  return num.toString(16).padStart(pad, '0').toLocaleUpperCase()
 }
 
+/**
+ * Convert a tracker note number to a string
+ * @param {number} noteNum Raw tracker note number 1~96
+ * @returns String representation of note
+ */
 export function toNote(noteNum) {
   const empty = '···'
 
   if (noteNum === undefined) return empty
   if (noteNum == null) return empty
 
-  const notes = ['C-', 'C#', 'D-', 'D#', 'E-', 'F-', 'F#', 'G-', 'G-', 'A-', 'A#', 'B-']
-  const octave = Math.floor(noteNum / 12) - 1
-  const note = noteNum % 12
+  const notes = ['C-', 'C#', 'D-', 'D#', 'E-', 'F-', 'F#', 'G-', 'G#', 'A-', 'A#', 'B-']
+  const octave = Math.floor((noteNum - 1) / 12)
+  const note = (noteNum - 1) % 12
 
-  let out = `${notes[note]}${octave}`
-  return out
+  return `${notes[note]}${octave}`
 }
 
 /**
  * Load sample file from URL
- *
  * @param {string} url - URL or path of sample file
  * @returns {Promise<AudioBuffer>} - AudioBuffer
  */

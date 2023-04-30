@@ -16,7 +16,7 @@ export const masterOut = ctx.createGain()
 masterOut.connect(ctx.destination)
 
 // CHANGE ME
-export const VERSION = '0.0.18'
+export const VERSION = '0.0.19'
 
 const newProject = new Project(8)
 

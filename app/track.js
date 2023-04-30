@@ -89,7 +89,7 @@ export class Track {
       return
     }
 
-    const [audioNode, outNode] = inst.createPlayNode(step.note, step.volume)
+    const [audioNode, outNode] = inst.createPlayNodes(step.note, step.volume)
     this.activeOutNode = outNode
     this.activeAudioNode = audioNode
     this.activeAudioNode.start()

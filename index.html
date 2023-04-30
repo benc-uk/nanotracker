@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JS Tracker</title>
+    <title>NanoTracker</title>
     <link rel="shortcut icon" href="static/icon.png" type="image/png" />
 
-    <script src="//sebpiq.github.io/WAAClock/dist/WAAClock-latest.js"></script>
+    <script src="lib/WAAClock.js"></script>
 
     <link rel="stylesheet" href="static/app.css" />
     <script src="app/main.js" type="module"></script>
@@ -141,15 +141,18 @@
         </div>
 
         <div x-show="$store.view == 'help'" x-data="viewHelp">
-          <h1>JS Tracker - <span x-text="version"></span></h1>
-          <h3>&copy; Ben Coleman, 2023<br /><a href="https://github.com/benc-uk/js-tracker">github.com/benc-uk/js-tracker</a></h3>
+          <h1>NanoTracker - <span x-text="version"></span></h1>
+          <h3>&copy; Ben Coleman, 2023<br /><a href="https://github.com/benc-uk/nanotracker">github.com/benc-uk/nanotracker</a></h3>
           <textarea id="helpText" cols="80" rows="20" x-text="helpText" disabled></textarea>
         </div>
 
         <div x-show="$store.view == 'song'" x-data="viewSong">
-          <h1>Pattern Chain</h1>
-          <input type="text" x-model="$store.project.song" disabled />
-          VERY WIP
+          <h2>Length <span x-text="$store.project.song.length"></span></h2>
+          <select size="16">
+            <template x-for="(p, pi) in $store.project.song">
+              <option :value="p" x-text="pi.toString().padStart(2, '0')+':   '+toHex(p)+'   &nbsp;'"></option>
+            </template>
+          </select>
         </div>
 
         <div x-show="$store.view == 'mixer'">
