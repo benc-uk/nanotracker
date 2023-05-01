@@ -50,7 +50,7 @@ export class Instrument {
     audioNode.playbackRate.value = rate
 
     // BUG: PingPong mode is not implemented, treated the same as normal loops
-    if (samp.loopMode >= SAMP_MODE_NONE) {
+    if (samp.loopMode > SAMP_MODE_NONE) {
       audioNode.loop = true
       audioNode.loopStart = samp.loopStart * audioNode.buffer.duration
       audioNode.loopEnd = (samp.loopStart + samp.loopLen) * audioNode.buffer.duration

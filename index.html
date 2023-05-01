@@ -80,30 +80,61 @@
         <div x-show="$store.view == 'inst'" x-data="viewInst">
           <div class="row padded mb-1">
             <div class="col mr-2">
-              <h3 for="instSel">Instruments</h3>
+              <h3>Instruments</h3>
               <div class="row padded-sm">
                 <button @click="" disabled>LOAD</button>
                 <button @click="" :disabled="selectedInstNum == null">ZAP</button>
                 <button @click="" :disabled="selectedInstNum == null">SAVE</button>
               </div>
 
-              <select size="10" x-model="selectedInstNum">
+              <select size="5" x-model="selectedInstNum">
                 <template x-for="(inst, index) in $store.project?.instruments" :key="index">
                   <option :value="index" x-text="inst.name"></option>
                 </template>
               </select>
             </div>
 
-            <div class="col">
-              <h3 for="sampSel">Samples</h3>
+            <div class="col mr-2">
+              <h3>Samples</h3>
               <div class="row padded-sm">
                 <button @click="loadSample" :disabled="selectedSampNum == null">LOAD</button>
               </div>
-              <select size="10" style="width: 200px" x-model="selectedSampNum">
+              <select size="5" style="width: 200px" x-model="selectedSampNum">
                 <template x-for="(samp, index) in $store.project.instruments[selectedInstNum]?.samples">
                   <option :value="index" x-text="samp.name"></option>
                 </template>
               </select>
+            </div>
+
+            <div class="col" x-show="sample">
+              <h3>Parameters</h3>
+              <div class="row">
+                <label for="vol" class="w2">VOL</label>
+                <input id="vol" type="range" min="0" max="64" x-model="sampleVol" />
+                <span class="ml-1" x-text="sampleVol"></span>
+              </div>
+              <div class="row">
+                <label for="pan" class="w2">PAN</label>
+                <input id="pan" type="range" min="-128" max="128" x-model="samplePan" />
+                <span class="ml-1" x-text="samplePan"></span>
+              </div>
+              <div class="row">
+                <label for="rel" class="w2">REL</label>
+                <input id="rel" type="range" min="-48" max="71" x-model="sampleRelNote" />
+                <span class="ml-1" x-text="sampleRelNote"></span>
+              </div>
+              <div class="row">
+                <label for="vol" class="w2">LOOP</label>
+                <button x-text="loopModeText" @click="changeMode">OFF</button>
+              </div>
+              <!-- <div class="row">
+                <label for="loopStart" class="w2">START</label>
+                <input class="ml-1" id="loopStart" type="range" />
+              </div>
+              <div class="row">
+                <label for="loopEnd" class="w2">END</label>
+                <input class="ml-1" id="loopEnd" type="range" />
+              </div> -->
             </div>
           </div>
 

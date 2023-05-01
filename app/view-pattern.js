@@ -2,7 +2,7 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { ctx } from './main.js'
 import { toHex } from './utils.js'
-import { editorKeys, editorKeysUp } from './key-bindings.js'
+import { editorKeys, keysUp } from './key-bindings.js'
 
 let canvas = null
 let ctx2d = null
@@ -55,7 +55,7 @@ export const viewPatt = (clock) => ({
 
     // Keyboard bindings
     window.addEventListener('keydown', editorKeys.bind(this))
-    window.addEventListener('keyup', editorKeysUp.bind(this))
+    window.addEventListener('keyup', keysUp.bind(this))
 
     canvas = this.$refs.pattCanvas
     ctx2d = canvas.getContext('2d')

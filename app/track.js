@@ -64,7 +64,10 @@ export class Track {
    * @param {Step} step - Step to play on this tracks audio channel
    */
   activateStep(step, instruments) {
-    if (!step) {
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO: !! MAJOR !! This logic needs to be reworked
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (!step || !step.note) {
       return
     }
 

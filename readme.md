@@ -41,3 +41,15 @@ It's hosted & running from GitHub pages here https://tracker.benco.io/
 # Running Locally
 
 I wouldn't bother
+
+# Implementation Notes
+
+The process of trying to implement XM parsing and compatibility resulted in bouncing off a LOT of 1990s weirdness, bugs & edge cases which have since become enshrined as standards. On top of all this, the documentation is ancient and missing a lot of important details. Here's a brain dump of things I tripped over:
+
+- Reading XM pattern data, the order of data is by tracks/channels, then steps/rows. So if you have an 6 channel file, the step number will increase by 1 after each 6 note block read.
+- Reading compressed/uncompressed pattern data:
+  - Compressed data has a 1 in the MSB of the first byte along with the bit flags, however the actual data is in the subsequent 1~4 bytes (varies).
+  - Uncompressed data has a 0 in the MSB, this byte also contains the note data, there will always be 4 bytes following it. This format is only used when a step has note + inst + vol + effect data
+- XM files hold sample data "as is", no sample-rate conversion takes place, and no information about the sample-rate is stored in the XM file.
+  - A side effect of this means, all the deeply strange note period and frequency stuff can't be ignored 😖. You you may need to divide the resulting frequency by the output sample rate.  
+- Reading sample data is not explained correctly by the docs AT ALL and it's deeply weird. Look at the source of xm-loader.js for some help.

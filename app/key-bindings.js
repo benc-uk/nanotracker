@@ -207,24 +207,7 @@ export function editorKeys(e) {
 
     // preview note
     if (!previewKeyDown) {
-      const inst = prj.instruments[this.activeInst]
-      const noteNum = this.octave * 12 + keyOffset
-      if (previewAudioNode && previewGainNode) {
-        previewAudioNode.stop()
-        previewAudioNode.disconnect()
-        previewGainNode.disconnect()
-      }
-      const [an, gn] = inst.createPlayNode(noteNum, 1.0)
-      previewAudioNode = an
-      previewGainNode = gn
-      previewAudioNode.start()
-      previewGainNode.connect(masterOut)
-
-      previewAudioNode.onended = () => {
-        previewGainNode.disconnect()
-        previewAudioNode.disconnect()
-      }
-
+      previewInst(prj.instruments[this.activeInst], this.octave * 12 + keyOffset)
       previewKeyDown = true
     }
 
@@ -238,14 +221,50 @@ export function editorKeys(e) {
   }
 }
 
-export function editorKeysUp(e) {
-  if (Alpine.store('view') !== 'patt') return
-  e.preventDefault()
-
+export function keysUp(e) {
   previewKeyDown = false
+
   if (previewAudioNode && previewGainNode) {
     previewAudioNode.stop()
     previewAudioNode.disconnect()
     previewGainNode.disconnect()
+  }
+}
+
+export function instKeys(e) {
+  if (Alpine.store('view') !== 'inst') return
+
+  const keyOffset = keyboardKeys.indexOf(e.key)
+  const octave = 5
+
+  if (keyOffset !== -1) {
+    e.preventDefault()
+
+    // Preview note
+    if (!previewKeyDown) {
+      previewInst(Alpine.store('project').instruments[this.selectedInstNum], octave * 12 + keyOffset)
+      previewKeyDown = true
+    }
+  }
+}
+
+function previewInst(inst, noteNum) {
+  if (!inst) return
+
+  if (previewAudioNode && previewGainNode) {
+    previewAudioNode.stop()
+    previewAudioNode.disconnect()
+    previewGainNode.disconnect()
+  }
+
+  const [an, gn] = inst.createPlayNodes(noteNum, 1.0)
+  previewAudioNode = an
+  previewGainNode = gn
+  previewAudioNode.start()
+  previewGainNode.connect(masterOut)
+
+  previewAudioNode.onended = () => {
+    previewGainNode.disconnect()
+    previewAudioNode.disconnect()
   }
 }

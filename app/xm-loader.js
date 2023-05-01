@@ -188,13 +188,13 @@ export async function loadXM(data, ctx) {
         let audioBuffer
         const sampleRate = ctx.sampleRate
 
-        let old = 0
+        let old = 0 // Data is in a delta format, so have to track of the prev value
         if (sample.is16bit) {
           // Note we divide by 2 here, since we're reading 16 bit samples
           audioBuffer = await ctx.createBuffer(1, sample.dataLen / 2, sampleRate)
           const channelData = audioBuffer.getChannelData(0)
 
-          // This is hacky, but it works
+          // This is hacky as Uint16Array was being a dick
           for (let i = 0; i < sample.dataLen; i += 2) {
             // Glue together 2 bytes into a 16 bit value
             let val = sampArray[i] + (sampArray[i + 1] << 8) + old
@@ -228,7 +228,6 @@ export async function loadXM(data, ctx) {
         sampObj.is16bit = sample.is16bit
         sampObj.volume = sample.volume / 64.0
         sampObj.fineTune = sample.fineTune
-        console.log(`  SAMPLERN: ${sample.relNote}`)
         sampObj.relativeNote = sample.relNote
         sampObj.pan = (sample.pan - 128) / 128.0
         sampObj.loopMode = sample.typeMode & ~(1 << 4) // Mask off 4th bit
