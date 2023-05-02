@@ -44,4 +44,4 @@ build: ## 🏗️ Copy files into dist/
 	@figlet $@ || true
 	@mkdir -p dist/
 	@cp index.html help.txt dist/
-	@cp -r app/ static/ samples/ projects/ dist/
+	@cp -r app/ static/ projects/ lib/ dist/
