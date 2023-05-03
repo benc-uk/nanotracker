@@ -7,6 +7,7 @@ import { viewInst } from './view-inst.js'
 import { viewSong } from './view-song.js'
 import { Project } from './project.js'
 import { Clock } from './clock.js'
+import { loadXM } from './xm-loader.js'
 
 /** @type {AudioContext} */
 export const ctx = new AudioContext()
@@ -16,7 +17,7 @@ export const masterOut = ctx.createGain()
 masterOut.connect(ctx.destination)
 
 // CHANGE ME
-export const VERSION = '0.0.19'
+export const VERSION = '0.0.20'
 
 const newProject = new Project(8)
 
@@ -26,10 +27,26 @@ Alpine.data('app', () => ({
   clock: null,
 
   async init() {
-    console.log('### 🎵 Starting JS Tracker ')
+    console.log(`### 🎵 Starting NanoTracker v${VERSION} 🎵`)
 
     // Create a clock to drive the sequencer, the values here are immediately overwritten
     this.clock = new Clock(ctx, newProject.speed, newProject.bpm)
+
+    this.$refs.dialog.classList.remove('hidden')
+
+    // TODO: Remove test code
+    try {
+      const filename = 'electro.xm'
+      const resp = await fetch('projects/' + filename)
+      const data = await resp.arrayBuffer()
+      this.filename = filename
+
+      const prj = await loadXM(data, ctx)
+
+      Alpine.store('project', prj)
+    } catch (err) {
+      console.error(err)
+    }
   },
 }))
 

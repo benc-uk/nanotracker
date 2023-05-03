@@ -9,10 +9,9 @@
   --hi: #dddddd;
   --shad: #444444;
   --nrblack: #111111;
-  --blue: #0000bb;
-  --blued: #000066;
+  --purple: rgb(228, 169, 59);
   --cyan: #33ddff;
-  --on: #aa226d;
+  --on: #e66e29;
 }
 
 @font-face {
@@ -25,8 +24,8 @@ h1,
 h2,
 h3,
 h4 {
-  color: var(--blue);
-  text-shadow: none;
+  color: var(--cyan);
+  text-shadow: 2px 2px black;
   padding: 0;
   margin: 0;
 }
@@ -74,7 +73,7 @@ button.active {
 button.lit {
   color: var(--on);
   border-color: var(--shad) var(--hi) var(--hi) var(--shad);
-  text-shadow: none;
+  /* text-shadow: none; */
 }
 
 button[disabled] {
@@ -125,7 +124,7 @@ nav {
 .panel {
   border: 4px solid;
   border-color: var(--hi) var(--shad) var(--shad) var(--hi);
-  padding: 6px;
+  padding: 4px;
 }
 
 .version {
@@ -229,4 +228,28 @@ nav {
 
 .w5 {
   width: 300px;
+}
+
+.dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  padding: 20px;
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.3);
+  background-color: var(--grey);
+}
+
+.dialog h3 {
+  text-align: center;
+}
+
+.dialog button {
+  margin: 0 auto;
+  display: block;
+}
+
+.hidden {
+  display: none;
 }

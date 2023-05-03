@@ -10,6 +10,7 @@ export const viewInst = () => ({
   /** @type {Sample} */
   sample: null,
   drawingLoop: false,
+  sampleMode: true,
 
   init() {
     window.addEventListener('keydown', instKeys.bind(this))
@@ -183,24 +184,29 @@ export const viewInst = () => ({
   },
 
   async loadSample() {
-    const prj = Alpine.store('project')
-    const [fileHandle] = await window.showOpenFilePicker()
-    const file = await fileHandle.getFile()
-    const data = await file.arrayBuffer()
-    const audioBuffer = await ctx.decodeAudioData(data)
+    try {
+      const prj = Alpine.store('project')
+      const [fileHandle] = await window.showOpenFilePicker()
+      const file = await fileHandle.getFile()
+      const data = await file.arrayBuffer()
+      const audioBuffer = await ctx.decodeAudioData(data)
 
-    let inst = prj.instruments[this.selectedInstNum]
-    if (inst.name == '-') inst.name = file.name.replace('.wav', '')
-    if (inst.name.length > 22) inst.name = inst.name.substring(0, 22)
+      let inst = prj.instruments[this.selectedInstNum]
+      if (inst.name == '-') inst.name = file.name.replace('.wav', '')
+      if (inst.name.length > 22) inst.name = inst.name.substring(0, 22)
 
-    let samp = inst.samples[this.selectedSampNum]
-    samp.name = file.name
-    samp.buffer = audioBuffer
+      let samp = inst.samples[this.selectedSampNum]
+      samp.name = file.name
+      samp.buffer = audioBuffer
 
-    if (samp.name.length > 22) {
-      samp.name = samp.name.substring(0, 22)
+      if (samp.name.length > 22) {
+        samp.name = samp.name.substring(0, 22)
+      }
+
+      this.drawSample()
+    } catch (err) {
+      Alpine.store('error', err)
+      console.error(err)
     }
-
-    this.drawSample()
   },
 })

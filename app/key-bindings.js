@@ -2,6 +2,7 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { masterOut } from './main.js'
 import { Step } from './step.js'
+import { toHex } from './utils.js'
 
 // prettier-ignore
 const keyboardKeys = ['z','s','x','d','c','v','g','b','h','n','j','m','q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p']
@@ -193,21 +194,23 @@ export function editorKeys(e) {
     e.preventDefault()
     if (!this.record) return
 
-    if (this.cursor.column == 0) {
+    if (this.cursor.column >= 0 && this.cursor.column <= 2) {
       this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(null)
-    }
-    if (this.cursor.column == 1) {
       this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(null)
-      this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(null)
+    }
+
+    if (this.cursor.column >= 3 && this.cursor.column <= 4) {
+      this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(null)
     }
   }
 
   if (keyOffset !== -1) {
     e.preventDefault()
+    const noteNum = (this.octave - 1) * 12 + (keyOffset + 1)
 
-    // preview note
+    // Preview note
     if (!previewKeyDown) {
-      previewInst(prj.instruments[this.activeInst], this.octave * 12 + keyOffset)
+      previewInst(prj.instruments[this.activeInst], noteNum)
       previewKeyDown = true
     }
 
@@ -216,6 +219,7 @@ export function editorKeys(e) {
     if (!this.activePattern.steps[this.cursor.track][this.cursor.step]) {
       this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step()
     }
+
     this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(noteNum)
     this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(this.activeInst) + 1)
   }

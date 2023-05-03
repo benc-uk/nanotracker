@@ -14,6 +14,13 @@
   </head>
   <body>
     <div id="app" x-data="app">
+      <!-- error dialog -->
+      <div class="dialog panel hidden" x-show="$store.error" x-ref="dialog">
+        <h3>ERROR</h3>
+        <p x-text="$store.error"></p>
+        <button @click="$store.error = null">OK</button>
+      </div>
+
       <nav class="panel">
         <button :class="$store.view == 'file' && 'active'" @click="changeView('file')">Project</button>
         <button :class="$store.view == 'patt' && 'active'" @click="changeView('patt')">Editor</button>
@@ -82,9 +89,9 @@
             <div class="col mr-2">
               <h3>Instruments</h3>
               <div class="row padded-sm">
-                <button @click="" disabled>LOAD</button>
-                <button @click="" :disabled="selectedInstNum == null">ZAP</button>
-                <button @click="" :disabled="selectedInstNum == null">SAVE</button>
+                <button @click="alert('Not implemented yet 🤕')" disabled>LOAD</button>
+                <button @click="alert('Not implemented yet 🤕')" :disabled="selectedInstNum == null">ZAP</button>
+                <button @click="alert('Not implemented yet 🤕')" :disabled="selectedInstNum == null">SAVE</button>
               </div>
 
               <select size="5" class="w5" x-model="selectedInstNum">
@@ -98,6 +105,7 @@
               <h3>Samples</h3>
               <div class="row padded-sm">
                 <button @click="loadSample" :disabled="selectedSampNum == null">LOAD</button>
+                <button @click="alert('Not implemented yet 🤕')" :disabled="selectedSampNum == null">ZAP</button>
               </div>
               <select size="5" class="w5" x-model="selectedSampNum">
                 <template x-for="(samp, index) in $store.project.instruments[selectedInstNum]?.samples">
@@ -132,6 +140,11 @@
                 <label for="vol" class="w2">LOOP</label>
                 <button x-text="sampleLoopMode" @click="incSampleLoopMode()">OFF</button>
               </div>
+            </div>
+
+            <div style="margin-left: auto">
+              MODE:
+              <button @click="sampleMode = !sampleMode" x-text="sampleMode?'SAMPLE':'INST'"></button>
             </div>
           </div>
 

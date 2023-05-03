@@ -40,7 +40,7 @@ lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@$(ESLINT_PATH) -c ./eslint.config.mjs ./ --fix
 	@$(PRETTIER_PATH) **/*.js --write
 
-build: ## 🏗️ Copy files into dist/
+build: ## 📦 Copy files into dist/
 	@figlet $@ || true
 	@mkdir -p dist/
 	@cp index.html help.txt dist/
