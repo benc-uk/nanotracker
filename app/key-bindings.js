@@ -263,8 +263,8 @@ function previewInst(inst, noteNum) {
   previewAudioNode.start()
   previewGainNode.connect(masterOut)
 
-  previewAudioNode.onended = () => {
-    previewGainNode.disconnect()
-    previewAudioNode.disconnect()
-  }
+  // previewAudioNode.onended = () => {
+  //   previewGainNode.disconnect()
+  //   previewAudioNode.disconnect()
+  // }
 }

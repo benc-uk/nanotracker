@@ -15,10 +15,9 @@ What is a "tracker"? It's a type of sequencer for creating music based on sample
 ### Roadmap & Todo list
 
 In progress:
-- Loading XM files... (ONGOING!)
+- Loading XM files... ONGOING!
 - Finish pattern editor (effects)
-- Sample finetune
-- Sample and instrument editing
+- Sample and instrument editing... ONGOING!
   
 Todo:
 - Sample vibrato 

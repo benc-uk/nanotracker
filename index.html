@@ -87,7 +87,7 @@
                 <button @click="" :disabled="selectedInstNum == null">SAVE</button>
               </div>
 
-              <select size="5" x-model="selectedInstNum">
+              <select size="5" class="w5" x-model="selectedInstNum">
                 <template x-for="(inst, index) in $store.project?.instruments" :key="index">
                   <option :value="index" x-text="inst.name"></option>
                 </template>
@@ -99,7 +99,7 @@
               <div class="row padded-sm">
                 <button @click="loadSample" :disabled="selectedSampNum == null">LOAD</button>
               </div>
-              <select size="5" style="width: 200px" x-model="selectedSampNum">
+              <select size="5" class="w5" x-model="selectedSampNum">
                 <template x-for="(samp, index) in $store.project.instruments[selectedInstNum]?.samples">
                   <option :value="index" x-text="samp.name"></option>
                 </template>
@@ -119,22 +119,19 @@
                 <span class="ml-1" x-text="samplePan"></span>
               </div>
               <div class="row">
-                <label for="rel" class="w2">REL</label>
+                <label for="rel" class="w2">NOTE</label>
                 <input id="rel" type="range" min="-48" max="71" x-model="sampleRelNote" />
                 <span class="ml-1" x-text="sampleRelNote"></span>
               </div>
               <div class="row">
-                <label for="vol" class="w2">LOOP</label>
-                <button x-text="loopModeText" @click="changeMode">OFF</button>
-              </div>
-              <!-- <div class="row">
-                <label for="loopStart" class="w2">START</label>
-                <input class="ml-1" id="loopStart" type="range" />
+                <label for="fine" class="w2">FINE</label>
+                <input id="fine" type="range" min="-128" max="127" x-model="sampleFine" />
+                <span class="ml-1" x-text="sampleFine"></span>
               </div>
               <div class="row">
-                <label for="loopEnd" class="w2">END</label>
-                <input class="ml-1" id="loopEnd" type="range" />
-              </div> -->
+                <label for="vol" class="w2">LOOP</label>
+                <button x-text="sampleLoopMode" @click="incSampleLoopMode()">OFF</button>
+              </div>
             </div>
           </div>
 

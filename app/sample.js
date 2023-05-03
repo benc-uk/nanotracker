@@ -18,7 +18,7 @@ export class Sample {
   volume = 1
 
   /** @type {number} Pan of this sample, 0-1 range */
-  pan = 128
+  pan = 0
 
   /** @type {number} Fine tune of this sample, -128 to 127 */
   fineTune = 0
@@ -45,6 +45,6 @@ export class Sample {
   }
 
   toString() {
-    return `${this.name} (${this.number}) vol:${this.volume} rel:${this.relativeNote}`
+    return `${this.name} (${this.number}) vol:${this.volume} mode:${this.loopMode}`
   }
 }

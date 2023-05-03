@@ -44,8 +44,8 @@ export class Instrument {
     audioNode.buffer = this.samples[0].buffer
 
     // This shit is insane ¯\_(ツ)_/¯
-    // But it works, I think
-    const notePeriod = 7680 - (noteNum + samp.relativeNote - 1) * 64
+    // But it works, I think...
+    const notePeriod = 7680 - (noteNum + samp.relativeNote - 1 + samp.fineTune / 256) * 64
     const rate = (8363 * Math.pow(2, (4608 - notePeriod) / 768)) / ctx.sampleRate
     audioNode.playbackRate.value = rate
 
@@ -55,8 +55,6 @@ export class Instrument {
       audioNode.loopStart = samp.loopStart * audioNode.buffer.duration
       audioNode.loopEnd = (samp.loopStart + samp.loopLen) * audioNode.buffer.duration
     }
-
-    // TODO: Support finetune
 
     audioNode.connect(panNode)
     panNode.connect(gainNode)

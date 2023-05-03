@@ -9,10 +9,7 @@ export const viewInst = () => ({
   selectedSampNum: null,
   /** @type {Sample} */
   sample: null,
-  sampleVol: 1,
-  samplePan: 0.5,
-  sampleRelNote: 0,
-  sampleLoopMode: SAMP_MODE_NONE,
+  drawingLoop: false,
 
   init() {
     window.addEventListener('keydown', instKeys.bind(this))
@@ -27,55 +24,67 @@ export const viewInst = () => ({
       this.sample = Alpine.store('project').instruments[this.selectedInstNum].samples[s]
     })
 
-    this.$watch('sampleVol', (v) => {
-      this.sample.volume = v / 64
-    })
-
-    this.$watch('samplePan', (p) => {
-      this.sample.pan = p / 128
-    })
-
-    this.$watch('sampleRelNote', (n) => {
-      this.sample.relativeNote = parseInt(n)
-    })
-
-    this.$watch('sampleLoopMode', (m) => {
-      this.sample.loopMode = parseInt(m)
-      this.drawSample()
-    })
-
     this.$watch('sample', () => {
-      this.sampleVol = this.sample.volume * 64
-      this.samplePan = this.sample.pan * 128
-      this.sampleRelNote = this.sample.relativeNote
-      this.sampleLoopMode = this.sample.loopMode
       this.drawSample()
     })
 
-    // TODO: Improve the UX of this
-    this.$refs.sampleView.addEventListener('click', (e) => {
+    this.$refs.sampleView.addEventListener('mousedown', (e) => {
+      if (!this.sample) return
+      if (this.sample.loopMode == SAMP_MODE_NONE) return
+
+      this.drawingLoop = true
       const canvas = this.$refs.sampleView
 
-      // Clicks in upper half set loop start, lower half set loop end
-      if (e.offsetY < canvas.offsetHeight / 2) {
-        this.sample.loopStart = e.offsetX / canvas.offsetWidth
-      } else {
-        let end = e.offsetX / canvas.offsetWidth
-        if (end < this.sample.loopStart) end = this.sample.loopStart
-        this.sample.loopLen = end - this.sample.loopStart
-      }
+      this.sample.loopStart = e.offsetX / canvas.offsetWidth
+      this.sample.loopLen = this.drawSample()
+    })
 
+    this.$refs.sampleView.addEventListener('mousemove', (e) => {
+      if (!this.drawingLoop || !this.sample) return
+      if (this.sample.loopMode == SAMP_MODE_NONE) return
+
+      const canvas = this.$refs.sampleView
+      let end = e.offsetX / canvas.offsetWidth
+      if (end < this.sample.loopStart) end = canvas.offsetWidth
+      this.sample.loopLen = end - this.sample.loopStart
       this.drawSample()
+    })
+
+    this.$refs.sampleView.addEventListener('mouseup', () => {
+      this.drawingLoop = false
+    })
+
+    this.$refs.sampleView.addEventListener('mouseleave', () => {
+      this.drawingLoop = false
     })
   },
 
-  changeMode() {
-    this.sampleLoopMode++
-    if (this.sampleLoopMode > SAMP_MODE_PINGPONG) this.sampleLoopMode = SAMP_MODE_NONE
+  get sampleVol() {
+    return this.sample?.volume * 64
   },
 
-  get loopModeText() {
-    switch (this.sampleLoopMode) {
+  set sampleVol(v) {
+    this.sample.volume = v / 64
+  },
+
+  get samplePan() {
+    return this.sample?.pan * 128
+  },
+
+  set samplePan(p) {
+    this.sample.pan = p / 128
+  },
+
+  get sampleRelNote() {
+    return this.sample?.relativeNote
+  },
+
+  set sampleRelNote(n) {
+    this.sample.relativeNote = parseInt(n)
+  },
+
+  get sampleLoopMode() {
+    switch (this.sample?.loopMode) {
       case SAMP_MODE_NONE:
         return 'None'
       case SAMP_MODE_FORWARD:
@@ -83,6 +92,23 @@ export const viewInst = () => ({
       case SAMP_MODE_PINGPONG:
         return 'Ping Pong'
     }
+  },
+
+  incSampleLoopMode() {
+    this.sample.loopMode++
+    if (this.sample.loopMode > SAMP_MODE_PINGPONG) this.sample.loopMode = SAMP_MODE_NONE
+    if (this.sample.loopMode == SAMP_MODE_FORWARD) {
+      this.sample.loopStart = 0
+      this.sample.loopLen = 1
+    }
+  },
+
+  get sampleFine() {
+    return this.sample?.fineTune
+  },
+
+  set sampleFine(f) {
+    this.sample.fineTune = parseInt(f)
   },
 
   drawSample() {
@@ -107,24 +133,41 @@ export const viewInst = () => ({
     const step = Math.ceil(data.length / canvas.width)
     const amp = canvas.height / 2
     ctx.fillStyle = '#00bb00'
-    for (let i = 0; i < canvas.width; i++) {
+    ctx.strokeStyle = '#00bb00'
+
+    let x = 0
+    for (; x < canvas.width; x++) {
       let min = 1.0
       let max = -1.0
+      let datum = -30
       for (let j = 0; j < step; j++) {
-        const datum = data[i * step + j]
+        datum = data[x * step + j]
         if (datum < min) min = datum
         if (datum > max) max = datum
       }
-      ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp))
+      if (datum === undefined) break
+
+      ctx.fillRect(x, amp, 1, min * amp)
+      ctx.fillRect(x, amp, 1, max * amp)
     }
 
-    if (this.sampleLoopMode !== SAMP_MODE_NONE) {
-      const loopStart = this.sample.loopStart * canvas.width
-      const loopEnd = (this.sample.loopStart + this.sample.loopLen) * canvas.width
+    if (this.sample?.loopMode !== SAMP_MODE_NONE) {
+      let loopStart = this.sample.loopStart * canvas.width
+      let loopEnd = (this.sample.loopStart + this.sample.loopLen) * canvas.width
+      if (loopEnd > x) loopEnd = x
+
       ctx.fillStyle = 'rgba(0, 255, 255, 0.25)'
       ctx.fillRect(loopStart, 0, loopEnd - loopStart, canvas.height)
 
-      // draw loop start/end lines
+      // Show start & end seconds
+      const startSecs = this.sample.loopStart * buffer.duration
+      const endSecs = (this.sample.loopStart + this.sample.loopLen) * buffer.duration
+      ctx.font = '12px monospace'
+      ctx.fillStyle = 'rgba(50, 255, 255, 1)'
+      ctx.fillText(startSecs.toFixed(2), loopStart + 2, 12)
+      ctx.fillText(endSecs.toFixed(2), loopEnd - 2 - 30, canvas.height - 4)
+
+      // Draw loop start/end lines
       ctx.beginPath()
       ctx.moveTo(loopStart, 0)
       ctx.lineTo(loopStart, canvas.height)
@@ -146,9 +189,17 @@ export const viewInst = () => ({
     const data = await file.arrayBuffer()
     const audioBuffer = await ctx.decodeAudioData(data)
 
-    prj.instruments[this.selectedInstNum].name = file.name.replace('.wav', '')
-    prj.instruments[this.selectedInstNum].samples[this.selectedSampNum].name = file.name
-    prj.instruments[this.selectedInstNum].samples[this.selectedSampNum].buffer = audioBuffer
+    let inst = prj.instruments[this.selectedInstNum]
+    if (inst.name == '-') inst.name = file.name.replace('.wav', '')
+    if (inst.name.length > 22) inst.name = inst.name.substring(0, 22)
+
+    let samp = inst.samples[this.selectedSampNum]
+    samp.name = file.name
+    samp.buffer = audioBuffer
+
+    if (samp.name.length > 22) {
+      samp.name = samp.name.substring(0, 22)
+    }
 
     this.drawSample()
   },
