@@ -72,4 +72,8 @@ export class Step {
     this.updateStrings()
     return this
   }
+
+  isEmpty() {
+    return this.note == null && this.instNum == null && this.volume == null && this.efxCmd == null
+  }
 }

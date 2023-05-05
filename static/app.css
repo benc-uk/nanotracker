@@ -80,6 +80,7 @@ button[disabled] {
   color: var(--greyd2);
   text-shadow: none;
 }
+
 button[disabled]:hover {
   background-color: var(--grey);
   border-color: var(--hi) var(--shad) var(--shad) var(--hi);
@@ -104,11 +105,14 @@ input[disabled] {
   color: var(--grey);
 }
 
-input:focus,
-select:focus {
+input:focus {
   outline: 2px solid var(--cyan);
   border-radius: 0;
   border: 2px solid var(--cyan);
+}
+
+select:focus {
+  outline: none;
 }
 
 option {
@@ -137,6 +141,10 @@ nav {
   height: 85vh;
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+.vh70 {
+  height: 70vh !important;
 }
 
 #pattCanvas {

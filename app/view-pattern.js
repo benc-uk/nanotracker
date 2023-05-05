@@ -27,23 +27,27 @@ export const viewPatt = (clock) => ({
   activeInst: 0,
   record: false,
   clockTimer: null,
-  songPos: 0,
   octave: 5,
+  stepJump: 4,
+  toHex,
+  songControls: false,
+  songPos: 0,
 
   async init() {
     this.activePattern = Alpine.store('project').patterns[0]
     this.currentStep = 0
 
     // Effect to watch the store
+    // TODO: Move to main?
     Alpine.effect(() => {
-      this.activePattern = Alpine.store('project').patterns[Alpine.store('project').song[0]]
-      clock.updateRepeat(Alpine.store('project').bpm)
-      clock.updateTickSpeed(Alpine.store('project').speed)
+      const prj = Alpine.store('project')
+      this.activePattern = prj.patterns[prj.song[0]]
     })
 
     // Rerender the pattern when the active pattern changes
     this.$watch('activePattern', () => {
       this.renderPattern()
+      Alpine.store('activePattNum', this.activePattern.number)
     })
     this.$watch('currentStep', () => {
       this.renderPattern()
@@ -129,7 +133,7 @@ export const viewPatt = (clock) => ({
   },
 
   pattLenChange(lenDelta) {
-    const newLen = this.activePattern.length + lenDelta
+    const newLen = this.activePattern.length + parseInt(lenDelta)
     if (newLen > 128) return
     if (newLen < 1) return
     this.activePattern.length = newLen
@@ -155,6 +159,7 @@ export const viewPatt = (clock) => ({
 
   renderPattern() {
     const prj = Alpine.store('project')
+    if (!this.activePattern) return
 
     canvas.height = this.activePattern.length * lineH
     canvas.width = prj.tracks.length * trackW
@@ -180,7 +185,7 @@ export const viewPatt = (clock) => ({
 
       for (let t = 0; t < prj.tracks.length; t++) {
         const step = this.activePattern?.steps[t][s]
-        if (!step) {
+        if (!step || step.isEmpty()) {
           ctx2d.fillStyle = '#555'
           ctx2d.fillText('··· ·· ·· ···', t * trackW + 2 + indexW, s * lineH + 20)
           continue
@@ -226,5 +231,10 @@ export const viewPatt = (clock) => ({
 
     ctx2d.globalCompositeOperation = 'normal'
     ctx2d.strokeRect(this.cursor.track * trackW + indexW, this.cursor.step * lineH, trackW - 10, lineH)
+  },
+
+  changeSongPos(e) {
+    this.songPos = e.target.selectedIndex
+    this.patternChange(Alpine.store('project').song[this.songPos])
   },
 })

@@ -40,4 +40,14 @@ export const viewFile = () => ({
     Alpine.store('project', prj)
     Alpine.store('view', 'patt')
   },
+
+  bpmChange(delta) {
+    let newBpm = Alpine.store('project').bpm + parseInt(delta)
+    Alpine.store('project').bpm = newBpm >= 50 && newBpm <= 250 ? newBpm : Alpine.store('project').bpm
+  },
+
+  speedChange(delta) {
+    let newSpeed = Alpine.store('project').speed + parseInt(delta)
+    Alpine.store('project').speed = newSpeed >= 1 && newSpeed <= 50 ? newSpeed : Alpine.store('project').speed
+  },
 })

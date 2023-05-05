@@ -13,7 +13,7 @@ export class Project {
 
   trackCount = 0 // Total number of tracks or channels in the project
 
-  speed = 3 // Ticks per step/row
+  speed = 6 // Ticks per step/row
   bpm = 125 // Sets overall speed of ticks, 125 = 50hz
 
   /** @type {number[]} */

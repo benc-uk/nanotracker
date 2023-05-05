@@ -24,7 +24,7 @@
       <nav class="panel">
         <button :class="$store.view == 'file' && 'active'" @click="changeView('file')">Project</button>
         <button :class="$store.view == 'patt' && 'active'" @click="changeView('patt')">Editor</button>
-        <button :class="$store.view == 'song' && 'active'" @click="changeView('song')">Song</button>
+        <!-- <button :class="$store.view == 'song' && 'active'" @click="changeView('song')">Song</button> -->
         <button :class="$store.view == 'inst' && 'active'" @click="changeView('inst')">Instruments</button>
         <button :class="$store.view == 'mixer' && 'active'" @click="changeView('mixer')">Mixer</button>
         <button :class="$store.view == 'midi' && 'active'" @click="changeView('midi')">MIDI</button>
@@ -39,9 +39,9 @@
             <button @click="play()">▶️PLAY</button>
             <button @click="loopPattern = !loopPattern" :class="loopPattern && 'lit'">🔁LOOP</button>
             <button @click="stop">⏹️STOP</button>
-            <button @click="recordMode" :class="record && 'lit'">⏺️REC</button>
+            <button @click="recordMode" class="mr-1" :class="record && 'lit'">⏺️REC</button>
 
-            <span class="ml-1">PAT:</span>
+            <span>PAT:</span>
             <select @change="patternChange($event.target.value)">
               <template x-for="pattNum in 256" :key="pattNum">
                 <option :value="pattNum-1" x-text="pattNum-1" :selected="activePattern.number==pattNum-1"></option>
@@ -50,9 +50,9 @@
             <button @click="patternChange(activePattern.number-1)" class="mini">-</button>
             <button @click="patternChange(activePattern.number+1)" class="mini">+</button>
 
-            <span class="ml-1">LEN:</span><input type="text" x-model="activePattern.length" disabled size="4" />
-            <button @click="pattLenChange(-4)" class="mini">-</button>
-            <button @click="pattLenChange(+4)" class="mini">+</button>
+            <span class="ml-1">LEN:</span><input type="text" x-model="activePattern.length" readonly size="4" />
+            <button @click="pattLenChange(-1)" class="mini">-</button>
+            <button @click="pattLenChange(+1)" class="mini">+</button>
 
             <span class="ml-1">INS:</span>
             <select @change="instChange($event.target.value)">
@@ -67,9 +67,34 @@
                 <option :value="oct" x-text="oct-1" x-bind:selected="oct === octave"></option>
               </template>
             </select>
+
+            <span class="ml-1">STEP:</span>
+            <select x-model="stepJump">
+              <template x-for="step in 17">
+                <option :value="step-1" x-text="step-1" x-bind:selected="step-1 === stepJump"></option>
+              </template>
+            </select>
+
+            <button class="ml-1" @click="songControls = !songControls" :class="!songControls || 'lit'">SONG</button>
           </div>
 
-          <div id="pattView" x-ref="pattView">
+          <div id="songEdit" class="row" x-show="songControls">
+            <select size="6" @change="changeSongPos" class="mr-2">
+              <template x-for="(p, pi) in $store.project.song">
+                <option :selected="pi == songPos" :value="p" x-text="pi.toString().padStart(2, '0')+':   '+toHex(p)+'   &nbsp;'"></option>
+              </template>
+            </select>
+            <div class="col">
+              <button>ADD</button>
+              <div>
+                <button>-</button>
+                <button>+</button>
+              </div>
+              <button>DEL</button>
+            </div>
+          </div>
+
+          <div id="pattView" x-ref="pattView" :class="!songControls || 'vh70'">
             <div class="trackHead" x-ref="trackHead">
               <template x-for="(trk, trkNum) in $store.project.tracks">
                 <div>
@@ -79,6 +104,7 @@
                 </div>
               </template>
             </div>
+            <!-- Main canvas for rendering the pattern -->
             <canvas id="pattCanvas" width="10" height="10" x-ref="pattCanvas" class="sunken"> </canvas>
           </div>
         </div>
@@ -150,7 +176,6 @@
 
           <canvas class="sunken" id="sampleView" width="1024" height="300" x-ref="sampleView"></canvas>
         </div>
-
         <!-- end inst view -->
 
         <div x-show="$store.view == 'file'" x-data="viewFile">
@@ -167,11 +192,19 @@
               </tr>
               <tr>
                 <th>BPM</th>
-                <td><input type="number" min="60" max="250" x-model="$store.project.bpm" /></td>
+                <td class="row">
+                  <input type="number" min="60" max="250" x-model="$store.project.bpm" />
+                  <button @click="bpmChange(-1)" class="mini">-</button>
+                  <button @click="bpmChange(+1)" class="mini">+</button>
+                </td>
               </tr>
               <tr>
                 <th>Speed</th>
-                <td><input type="number" min="1" max="50" x-model="$store.project.speed" /></td>
+                <td class="row">
+                  <input type="number" min="1" max="50" x-model="$store.project.speed" />
+                  <button @click="speedChange(-1)" class="mini">-</button>
+                  <button @click="speedChange(+1)" class="mini">+</button>
+                </td>
               </tr>
               <tr>
                 <th>Loaded File</th>
@@ -185,15 +218,6 @@
           <h1>NanoTracker - <span x-text="version"></span></h1>
           <h3>&copy; Ben Coleman, 2023<br /><a href="https://github.com/benc-uk/nanotracker">github.com/benc-uk/nanotracker</a></h3>
           <textarea id="helpText" cols="80" rows="20" x-text="helpText" disabled></textarea>
-        </div>
-
-        <div x-show="$store.view == 'song'" x-data="viewSong">
-          <h2>Length <span x-text="$store.project.song.length"></span></h2>
-          <select size="16">
-            <template x-for="(p, pi) in $store.project.song">
-              <option :value="p" x-text="pi.toString().padStart(2, '0')+':   '+toHex(p)+'   &nbsp;'"></option>
-            </template>
-          </select>
         </div>
 
         <div x-show="$store.view == 'mixer'">

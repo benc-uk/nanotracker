@@ -4,7 +4,6 @@ import { viewFile } from './view-file.js'
 import { viewPatt } from './view-pattern.js'
 import { viewHelp } from './view-help.js'
 import { viewInst } from './view-inst.js'
-import { viewSong } from './view-song.js'
 import { Project } from './project.js'
 import { Clock } from './clock.js'
 import { loadXM } from './xm-loader.js'
@@ -34,6 +33,11 @@ Alpine.data('app', () => ({
 
     this.$refs.dialog.classList.remove('hidden')
 
+    Alpine.effect(() => {
+      this.clock.updateRepeat(Alpine.store('project').bpm)
+      this.clock.updateTickSpeed(Alpine.store('project').speed)
+    })
+
     // TODO: Remove test code
     try {
       const filename = 'electro.xm'
@@ -54,10 +58,10 @@ Alpine.data('viewFile', viewFile)
 Alpine.data('viewPatt', viewPatt)
 Alpine.data('viewHelp', viewHelp)
 Alpine.data('viewInst', viewInst)
-Alpine.data('viewSong', viewSong)
 
 // IMPORTANT: Init with an empty project and all defaults
 Alpine.store('project', newProject)
+Alpine.store('octave', 5) // Shared across pattern & sample editors
 
 const storedView = localStorage.getItem('view')
 if (!storedView) {

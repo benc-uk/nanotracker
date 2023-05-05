@@ -22,7 +22,7 @@ export function editorKeys(e) {
     e.preventDefault()
     this.cursor.step--
     if (this.cursor.step <= 0) {
-      this.cursor.step = 0
+      this.cursor.step = this.activePattern.length - 1
     }
   }
 
@@ -30,7 +30,7 @@ export function editorKeys(e) {
     e.preventDefault()
     this.cursor.step++
     if (this.cursor.step >= this.activePattern.length) {
-      this.cursor.step = this.activePattern.length - 1
+      this.cursor.step = 0
     }
   }
 
@@ -222,6 +222,12 @@ export function editorKeys(e) {
 
     this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(noteNum)
     this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(this.activeInst) + 1)
+
+    console.log('this.stepJump', this.stepJump)
+    this.cursor.step += parseInt(this.stepJump)
+    if (this.cursor.step >= this.activePattern.length) {
+      this.cursor.step = this.cursor.step - this.activePattern.length
+    }
   }
 }
 
