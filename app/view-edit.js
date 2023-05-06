@@ -3,18 +3,20 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 import { ctx } from './main.js'
 import { toHex } from './utils.js'
 import { editorKeys, keysUp } from './key-bindings.js'
+import { Pattern } from './pattern.js'
 
 let canvas = null
 let ctx2d = null
 
-// Magic numbers for the pattern view
-const lineH = 26
+// Magic numbers for rendering the pattern view
+const lineH = 20
+const lineH2 = 18
 const trackW = 148
 const font = '26px VT323'
 const fontW = 11
 const curOffsets = [2, 43, 43 + fontW, 74, 74 + fontW, 106, 105 + fontW, 104 + fontW * 2]
 
-export const viewPatt = (clock) => ({
+export const viewEdit = (clock) => ({
   loopPattern: false,
   stopped: true,
   activePattern: null,
@@ -28,23 +30,23 @@ export const viewPatt = (clock) => ({
   record: false,
   clockTimer: null,
   octave: 5,
-  stepJump: 4,
+  stepJump: 1,
   toHex,
-  songControls: false,
+  fullMode: true,
   songPos: 0,
+  copyPattSource: null,
+  copyTrackSource: null,
 
   async init() {
     this.activePattern = Alpine.store('project').patterns[0]
     this.currentStep = 0
 
-    // Effect to watch the store
-    // TODO: Move to main?
+    // Effect to watch the store for changes to the active pattern
     Alpine.effect(() => {
-      const prj = Alpine.store('project')
-      this.activePattern = prj.patterns[prj.song[0]]
+      this.activePattern = Alpine.store('project').patterns[Alpine.store('project').song[0]]
     })
 
-    // Rerender the pattern when the active pattern changes
+    // Re-render the pattern under various conditions
     this.$watch('activePattern', () => {
       this.renderPattern()
       Alpine.store('activePattNum', this.activePattern.number)
@@ -60,6 +62,11 @@ export const viewPatt = (clock) => ({
     // Keyboard bindings
     window.addEventListener('keydown', editorKeys.bind(this))
     window.addEventListener('keyup', keysUp.bind(this))
+    window.addEventListener('project-loaded', () => {
+      console.log('RECV!!! Project loaded')
+      this.songPos = 0
+      this.$refs.songSelect.selectedIndex = this.songPos
+    })
 
     canvas = this.$refs.pattCanvas
     ctx2d = canvas.getContext('2d')
@@ -67,6 +74,13 @@ export const viewPatt = (clock) => ({
     // Listen for clock ticks and play
     window.addEventListener('clockTick', () => {
       if (!this.stopped) this.playCurrentRow()
+    })
+
+    // Render the pattern after the fonts are loaded
+    document.fonts.ready.then(() => {
+      setTimeout(() => {
+        this.renderPattern()
+      }, 200)
     })
   },
 
@@ -85,6 +99,10 @@ export const viewPatt = (clock) => ({
         // Advance song position and switch pattern
         this.songPos++
         if (this.songPos >= prj.song.length) this.songPos = 0
+
+        this.$refs.songSelect.scrollTop = (this.songPos - 1) * 26
+        this.$refs.songSelect.selectedIndex = this.songPos
+
         const nextPattNum = prj.song[this.songPos]
         this.patternChange(nextPattNum)
       }
@@ -144,9 +162,9 @@ export const viewPatt = (clock) => ({
   soloTrack(trackNum) {
     const prj = Alpine.store('project')
     for (let track of prj.tracks) {
-      track.muted = true
+      track.setMute(true)
     }
-    prj.tracks[trackNum].muted = false
+    prj.tracks[trackNum].setMute(false)
   },
 
   recordMode() {
@@ -175,30 +193,30 @@ export const viewPatt = (clock) => ({
       // Draw background stripe for every 4th step
       if (s % 4 == 0 && s != this.currentStep) {
         ctx2d.fillStyle = '#131313'
-        ctx2d.fillRect(0, indexW + (s - 1) * lineH, canvas.width, lineH)
+        ctx2d.fillRect(0, indexW + (s - 1) * lineH - 6, canvas.width, lineH)
       }
 
       // Side index numbers
       ctx2d.fillStyle = '#ddd'
       if (s % 4 == 0) ctx2d.fillStyle = '#ffff00'
-      ctx2d.fillText(toHex(s), 0, s * lineH + 20)
+      ctx2d.fillText(toHex(s), 0, s * lineH + lineH2)
 
       for (let t = 0; t < prj.tracks.length; t++) {
         const step = this.activePattern?.steps[t][s]
         if (!step || step.isEmpty()) {
-          ctx2d.fillStyle = '#555'
-          ctx2d.fillText('··· ·· ·· ···', t * trackW + 2 + indexW, s * lineH + 20)
+          ctx2d.fillStyle = '#282828'
+          ctx2d.fillText('··· ·· ·· ···', t * trackW + 2 + indexW, s * lineH + lineH2)
           continue
         }
 
         ctx2d.fillStyle = 'rgb(79, 202, 192)'
-        ctx2d.fillText(step.noteString, t * trackW + 2 + indexW, s * lineH + 20)
+        ctx2d.fillText(step.noteString, t * trackW + 2 + indexW, s * lineH + lineH2)
         ctx2d.fillStyle = 'rgb(241, 212, 81)'
-        ctx2d.fillText(step.instString, t * trackW + 2 + 42 + indexW, s * lineH + 20)
+        ctx2d.fillText(step.instString, t * trackW + 2 + 42 + indexW, s * lineH + lineH2)
         ctx2d.fillStyle = 'rgb(199, 73, 238)'
-        ctx2d.fillText(step.volString, t * trackW + 2 + 72 + indexW, s * lineH + 20)
+        ctx2d.fillText(step.volString, t * trackW + 2 + 72 + indexW, s * lineH + lineH2)
         ctx2d.fillStyle = 'rgb(58, 99, 235)'
-        ctx2d.fillText(step.efxString, t * trackW + 2 + 104 + indexW, s * lineH + 20)
+        ctx2d.fillText(step.efxString, t * trackW + 2 + 104 + indexW, s * lineH + lineH2)
       }
     }
 
@@ -233,8 +251,65 @@ export const viewPatt = (clock) => ({
     ctx2d.strokeRect(this.cursor.track * trackW + indexW, this.cursor.step * lineH, trackW - 10, lineH)
   },
 
-  changeSongPos(e) {
-    this.songPos = e.target.selectedIndex
+  // Event handler to move the song position
+  changeSongPos(event) {
+    this.songPos = event.target.selectedIndex
     this.patternChange(Alpine.store('project').song[this.songPos])
+  },
+
+  // Insert a new song position after the current one
+  songSlotIns() {
+    const prj = Alpine.store('project')
+    prj.song.splice(this.songPos, 0, this.activePattern.number)
+  },
+
+  // Delete the active song position
+  songSlotDec() {
+    const prj = Alpine.store('project')
+    if (prj.song.length == 1) return
+    prj.song.splice(this.songPos, 1)
+  },
+
+  // Increase the pattern number of the active song position
+  songPattInc() {
+    const prj = Alpine.store('project')
+    prj.song[this.songPos]++
+    if (prj.song[this.songPos] > 255) prj.song[this.songPos] = 255
+  },
+
+  // Decrease the pattern number of the active song position
+  songPattDec() {
+    const prj = Alpine.store('project')
+    prj.song[this.songPos]--
+    if (prj.song[this.songPos] < 0) prj.song[this.songPos] = 0
+  },
+
+  // Clear the active pattern
+  clearPattern() {
+    this.activePattern.clear()
+    this.renderPattern()
+  },
+
+  // Clear the selected track
+  clearTrack() {
+    this.activePattern.clearTrack(this.cursor.track)
+    this.renderPattern()
+  },
+
+  // Paste pattern from the copy buffer to active pattern
+  pastePattern() {
+    const prj = Alpine.store('project')
+    const srcPatt = prj.patterns[this.copyPattSource]
+    const copiedPatt = new Pattern(this.activePattern.number, srcPatt.length, prj.trackCount)
+
+    // Copy & clone steps
+    for (let t = 0; t < prj.trackCount; t++) {
+      for (let s = 0; s < srcPatt.length; s++) {
+        copiedPatt.steps[t][s] = srcPatt.steps[t][s].clone()
+      }
+    }
+
+    this.activePattern = copiedPatt
+    prj.patterns[this.activePattern.number] = copiedPatt
   },
 })

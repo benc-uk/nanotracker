@@ -7,8 +7,6 @@ export class Pattern {
   /** @type {Step[][]} */
   steps = []
 
-  domView = null
-
   constructor(num, len, trackCount) {
     this.length = len
     this.number = num
@@ -18,5 +16,17 @@ export class Pattern {
     for (let t = 0; t < trackCount; t++) {
       this.steps[t] = []
     }
+  }
+
+  // Clear all steps in the pattern
+  clear() {
+    for (let t = 0; t < this.steps.length; t++) {
+      this.steps[t] = []
+    }
+  }
+
+  // Clear one track in the pattern
+  clearTrack(track) {
+    this.steps[track] = []
   }
 }

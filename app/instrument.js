@@ -1,5 +1,6 @@
 import { ctx } from './main.js'
 import { SAMP_MODE_NONE, Sample } from './sample.js'
+import { periodForNote, rateForPeriod } from './utils.js'
 
 const MAX_SAMPLES = 16
 
@@ -31,8 +32,8 @@ export class Instrument {
     const samp = this.samples[0]
 
     const gainNode = ctx.createGain()
-    gainNode.gain.value = volume ? volume : 1.0
-    gainNode.gain.value *= samp.volume // Scale by sample volume
+    gainNode.gain.value = volume ? volume : samp.volume
+    // gainNode.gain.value *= samp.volume // Scale by sample volume
 
     const audioNode = ctx.createBufferSource()
     audioNode.channelCount = 1
@@ -44,10 +45,9 @@ export class Instrument {
     audioNode.buffer = this.samples[0].buffer
 
     // This shit is insane ¯\_(ツ)_/¯
-    // But it works, I think...
-    const notePeriod = 7680 - (noteNum + samp.relativeNote - 1 + samp.fineTune / 256) * 64
-    const rate = (8363 * Math.pow(2, (4608 - notePeriod) / 768)) / ctx.sampleRate
-    audioNode.playbackRate.value = rate
+    // See utils.js for full madness
+    const notePeriod = periodForNote(noteNum, samp.relativeNote - 1, samp.fineTune)
+    audioNode.playbackRate.value = rateForPeriod(notePeriod, ctx.sampleRate)
 
     // BUG: PingPong mode is not implemented, treated the same as normal loops
     if (samp.loopMode > SAMP_MODE_NONE) {

@@ -1,8 +1,10 @@
+/*
+  Styling for range inputs
+*/
+
 input[type='range'] {
   height: 28px;
   -webkit-appearance: none;
-  /* margin: 10px 0; */
-  /* width: 100%; */
   border: none;
   background: none;
 }

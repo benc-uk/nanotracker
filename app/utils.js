@@ -51,6 +51,14 @@ export async function loadSampleURL(url) {
   }
 }
 
-export function getSampleRateForPeriod(period) {
-  return 8363 * Math.pow(2, (4608 - period) / 768)
+// Calculate the period for a note
+// This shit is crazy but see etc/xm-form.txt
+export function periodForNote(noteNum, courseOffset = 0, fineOffset = 0) {
+  return 7680 - (noteNum + courseOffset + fineOffset / 256) * 64
+}
+
+// Calculate the sample rate for a given period
+// This shit is crazy but see etc/xm-form.txt
+export function rateForPeriod(period, masterRate) {
+  return (8363 * Math.pow(2, (4608 - period) / 768)) / masterRate
 }

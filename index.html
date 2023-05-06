@@ -9,6 +9,9 @@
 
     <script src="lib/WAAClock.js"></script>
 
+    <link rel="stylesheet" href="static/fontawesome/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="static/fontawesome/css/solid.min.css" />
+
     <link rel="stylesheet" href="static/app.css" />
     <script src="app/main.js" type="module"></script>
   </head>
@@ -22,24 +25,31 @@
       </div>
 
       <nav class="panel">
-        <button :class="$store.view == 'file' && 'active'" @click="changeView('file')">Project</button>
-        <button :class="$store.view == 'patt' && 'active'" @click="changeView('patt')">Editor</button>
-        <!-- <button :class="$store.view == 'song' && 'active'" @click="changeView('song')">Song</button> -->
-        <button :class="$store.view == 'inst' && 'active'" @click="changeView('inst')">Instruments</button>
-        <button :class="$store.view == 'mixer' && 'active'" @click="changeView('mixer')">Mixer</button>
-        <button :class="$store.view == 'midi' && 'active'" @click="changeView('midi')">MIDI</button>
-        <button :class="$store.view == 'pref' && 'active'" @click="changeView('pref')">Prefs</button>
-        <button :class="$store.view == 'help' && 'active'" @click="changeView('help')">Help</button>
+        <button :class="$store.view == 'file' && 'active'" @click="changeView('file')"><i class="fa-solid fa-tarp"></i>Project</button>
+        <button :class="$store.view == 'edit' && 'active'" @click="changeView('edit')"><i class="fa-solid fa-table-list"></i>Editor</button>
+        <button :class="$store.view == 'inst' && 'active'" @click="changeView('inst')"><i class="fa-solid fa-music"></i>Instruments</button>
+        <button :class="$store.view == 'mixer' && 'active'" @click="changeView('mixer')"><i class="fa-solid fa-headphones"></i>Mixer</button>
+        <button :class="$store.view == 'midi' && 'active'" @click="changeView('midi')"><i class="fa-solid fa-arrow-right-arrow-left"></i>MIDI</button>
+        <button :class="$store.view == 'pref' && 'active'" @click="changeView('pref')"><i class="fa-solid fa-wrench"></i>Prefs</button>
+        <button :class="$store.view == 'help' && 'active'" @click="changeView('help')"><i class="fa-solid fa-circle-question"></i>Help</button>
         <div class="version" x-text="version"></div>
       </nav>
 
       <div class="panel" id="main">
-        <div x-show="$store.view == 'patt'" x-data="viewPatt(clock)" id="pattEdit" @instchange.window="activeInst = $event.detail">
+        <div x-show="$store.view == 'edit'" x-data="viewEdit(clock)" id="pattEdit" @instchange.window="activeInst = $event.detail">
           <div class="mb-1 rowcentered">
-            <button @click="play()">▶️PLAY</button>
-            <button @click="loopPattern = !loopPattern" :class="loopPattern && 'lit'">🔁LOOP</button>
-            <button @click="stop">⏹️STOP</button>
-            <button @click="recordMode" class="mr-1" :class="record && 'lit'">⏺️REC</button>
+            <button
+              class="mr-1"
+              @click="fullMode = !fullMode"
+              x-html="fullMode ? `<i class='fa-solid fa-circle-chevron-up'></i>MINI` : `<i class='fa-solid fa-circle-chevron-down'></i>FULL`"
+            >
+              FULL
+            </button>
+
+            <button @click="play"><i class="fa-solid fa-play"></i>PLAY</button>
+            <button @click="loopPattern = !loopPattern" :class="loopPattern && 'lit'"><i class="fa-solid fa-repeat"></i>LOOP</button>
+            <button @click="stop"><i class="fa-solid fa-stop"></i>STOP</button>
+            <button @click="recordMode" class="mr-1" :class="record && 'lit'"><i class="fa-solid fa-circle"></i>REC</button>
 
             <span>PAT:</span>
             <select @change="patternChange($event.target.value)">
@@ -74,27 +84,35 @@
                 <option :value="step-1" x-text="step-1" x-bind:selected="step-1 === stepJump"></option>
               </template>
             </select>
-
-            <button class="ml-1" @click="songControls = !songControls" :class="!songControls || 'lit'">SONG</button>
           </div>
 
-          <div id="songEdit" class="row" x-show="songControls">
-            <select size="6" @change="changeSongPos" class="mr-2">
+          <!-- Extra controls for full edit mode-->
+          <div id="songEdit" class="row" x-show="fullMode">
+            <select size="6" @change="changeSongPos" class="mr-2" x-ref="songSelect">
               <template x-for="(p, pi) in $store.project.song">
                 <option :selected="pi == songPos" :value="p" x-text="pi.toString().padStart(2, '0')+':   '+toHex(p)+'   &nbsp;'"></option>
               </template>
             </select>
-            <div class="col">
-              <button>ADD</button>
-              <div>
-                <button>-</button>
-                <button>+</button>
-              </div>
-              <button>DEL</button>
+
+            <div class="col mr-2">
+              <h3>SONG</h3>
+              <button @click="songSlotIns"><i class="fa-solid fa-angles-left"></i>INS</button>
+              <div><button @click="songPattDec" class="w0">-</button><button @click="songPattInc" class="w0">+</button></div>
+              <button @click="songSlotDec"><i class="fa-solid fa-xmark"></i>DEL</button>
+            </div>
+
+            <div class="">
+              <h3>EDIT UTILS</h3>
+              PATT: &nbsp;<button @click="copyPattSource = activePattern.number"><i class="fa-solid fa-clone"></i>COPY</button
+              ><button @click="pastePattern"><i class="fa-solid fa-clipboard"></i>PASTE</button
+              ><button @click="clearPattern"><i class="fa-solid fa-trash-can"></i>ZAP</button><br />
+
+              TRACK: <button><i class="fa-solid fa-clone"></i>COPY</button><button><i class="fa-solid fa-clipboard"></i>PASTE</button
+              ><button @click="clearTrack"><i class="fa-solid fa-trash-can"></i>ZAP</button>
             </div>
           </div>
 
-          <div id="pattView" x-ref="pattView" :class="!songControls || 'vh70'">
+          <div id="pattView" x-ref="pattView" :class="!fullMode || 'vh70'">
             <div class="trackHead" x-ref="trackHead">
               <template x-for="(trk, trkNum) in $store.project.tracks">
                 <div>
@@ -104,6 +122,7 @@
                 </div>
               </template>
             </div>
+
             <!-- Main canvas for rendering the pattern -->
             <canvas id="pattCanvas" width="10" height="10" x-ref="pattCanvas" class="sunken"> </canvas>
           </div>
@@ -180,9 +199,9 @@
 
         <div x-show="$store.view == 'file'" x-data="viewFile">
           <div class="mb-1">
-            <button @click="newProj">✨ NEW</button>
+            <button @click="newProj"><i class="fa-solid fa-file-medical"></i>NEW</button>
             <button @click="save" x-show="fileHandle">💾 SAVE</button>
-            <button @click="load">📂 LOAD</button>
+            <button @click="load"><i class="fa-solid fa-folder-open"></i>LOAD</button>
           </div>
           <div class="padded">
             <table>

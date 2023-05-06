@@ -10,7 +10,6 @@ export class Step {
   volume = null
   /** @type {number} */
   note = null
-  /** @type {boolean} */
   noteOff = false
   /** @type {string} */
   efxCmd = null
@@ -19,13 +18,12 @@ export class Step {
   /** @type {number} */
   efxVal2 = null
 
-  /** @type {string} */
   noteString = '···'
   volString = '··'
   instString = '··'
   efxString = '···'
 
-  // Create an empty "null" step, with no note or instrument
+  // Create an empty "null" step, with no data
   constructor() {
     this.note = null
     this.instNum = null
@@ -37,6 +35,9 @@ export class Step {
     this.updateStrings()
   }
 
+  /**
+   * Update the string representations of the step data
+   */
   updateStrings() {
     this.noteString = toNote(this.note)
     if (this.noteOff) this.noteString = ' ▭'
@@ -73,7 +74,23 @@ export class Step {
     return this
   }
 
+  /**
+   * Is this step empty without any data
+   * @returns {boolean}
+   */
   isEmpty() {
     return this.note == null && this.instNum == null && this.volume == null && this.efxCmd == null
+  }
+
+  clone() {
+    const step = new Step()
+    step.note = this.note
+    step.instNum = this.instNum
+    step.volume = this.volume
+    step.efxCmd = this.efxCmd
+    step.efxVal1 = this.efxVal1
+    step.efxVal2 = this.efxVal2
+    step.updateStrings()
+    return step
   }
 }

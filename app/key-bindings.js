@@ -13,7 +13,7 @@ let previewAudioNode
 let previewKeyDown = false
 
 export function editorKeys(e) {
-  if (Alpine.store('view') !== 'patt') return
+  if (Alpine.store('view') !== 'edit') return
 
   const prj = Alpine.store('project')
   const keyOffset = keyboardKeys.indexOf(e.key)
@@ -187,6 +187,11 @@ export function editorKeys(e) {
       }
     }
 
+    this.cursor.step += parseInt(this.stepJump)
+    if (this.cursor.step >= this.activePattern.length) {
+      this.cursor.step = this.cursor.step - this.activePattern.length
+    }
+
     return
   }
 
@@ -201,6 +206,11 @@ export function editorKeys(e) {
 
     if (this.cursor.column >= 3 && this.cursor.column <= 4) {
       this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(null)
+    }
+
+    this.cursor.step += parseInt(this.stepJump)
+    if (this.cursor.step >= this.activePattern.length) {
+      this.cursor.step = this.cursor.step - this.activePattern.length
     }
   }
 
@@ -223,7 +233,6 @@ export function editorKeys(e) {
     this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(noteNum)
     this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(this.activeInst) + 1)
 
-    console.log('this.stepJump', this.stepJump)
     this.cursor.step += parseInt(this.stepJump)
     if (this.cursor.step >= this.activePattern.length) {
       this.cursor.step = this.cursor.step - this.activePattern.length
@@ -272,9 +281,4 @@ function previewInst(inst, noteNum) {
   previewGainNode = gn
   previewAudioNode.start()
   previewGainNode.connect(masterOut)
-
-  // previewAudioNode.onended = () => {
-  //   previewGainNode.disconnect()
-  //   previewAudioNode.disconnect()
-  // }
 }

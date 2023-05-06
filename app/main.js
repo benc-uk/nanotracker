@@ -1,7 +1,7 @@
 import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { viewFile } from './view-file.js'
-import { viewPatt } from './view-pattern.js'
+import { viewEdit } from './view-edit.js'
 import { viewHelp } from './view-help.js'
 import { viewInst } from './view-inst.js'
 import { Project } from './project.js'
@@ -16,7 +16,7 @@ export const masterOut = ctx.createGain()
 masterOut.connect(ctx.destination)
 
 // CHANGE ME
-export const VERSION = '0.0.20'
+export const VERSION = '0.0.21'
 
 const newProject = new Project(8)
 
@@ -38,7 +38,9 @@ Alpine.data('app', () => ({
       this.clock.updateTickSpeed(Alpine.store('project').speed)
     })
 
+    // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
     // TODO: Remove test code
+    // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
     try {
       const filename = 'electro.xm'
       const resp = await fetch('projects/' + filename)
@@ -55,7 +57,7 @@ Alpine.data('app', () => ({
 }))
 
 Alpine.data('viewFile', viewFile)
-Alpine.data('viewPatt', viewPatt)
+Alpine.data('viewEdit', viewEdit)
 Alpine.data('viewHelp', viewHelp)
 Alpine.data('viewInst', viewInst)
 

@@ -21,8 +21,11 @@ export const viewFile = () => ({
       const prj = await loadXM(data, ctx)
 
       Alpine.store('project', prj)
-      Alpine.store('view', 'patt')
-      localStorage.setItem('view', 'patt')
+      Alpine.store('view', 'edit')
+      localStorage.setItem('view', 'edit')
+
+      console.log('Project loaded')
+      window.dispatchEvent(new CustomEvent('project-loaded'))
     } catch (err) {
       Alpine.store('error', err)
       console.error(err)
@@ -38,7 +41,7 @@ export const viewFile = () => ({
   newProj() {
     const prj = new Project()
     Alpine.store('project', prj)
-    Alpine.store('view', 'patt')
+    Alpine.store('view', 'edit')
   },
 
   bpmChange(delta) {
