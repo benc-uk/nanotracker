@@ -7,7 +7,7 @@ JSDOC_PATH := .tools/node_modules/.bin/jsdoc
 ESLINT_USE_FLAT_CONFIG := true
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: help lint install-tools docs serve build
+.PHONY: help lint install-tools docs serve publish
 .DEFAULT_GOAL := help
 
 help: ## 💬 This help message :)
@@ -33,14 +33,14 @@ docs: ## 📚 Generate documentation
 lint: ## 🔍 Lint & format check only, sets exit code on error for CI
 	@figlet $@ || true
 	@$(ESLINT_PATH) -c ./eslint.config.mjs ./
-	@$(PRETTIER_PATH) **/*.js  --check
+	@$(PRETTIER_PATH) app/*.js  --check
 
 lint-fix: ## 📝 Lint & format, attempts to fix errors & modify code
 	@figlet $@ || true
 	@$(ESLINT_PATH) -c ./eslint.config.mjs ./ --fix
-	@$(PRETTIER_PATH) **/*.js --write
+	@$(PRETTIER_PATH) app/*.js --write
 
-build: ## 📦 Copy files into dist/
+publish: ## 📦 Copy files into dist/ for easier publishing
 	@figlet $@ || true
 	@mkdir -p dist/
 	@cp index.html help.txt dist/

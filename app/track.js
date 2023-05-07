@@ -1,6 +1,9 @@
 import { ctx, masterOut } from './main.js'
 import { Step } from './step.js'
 
+const analyserSize = 512
+let scale = 2.0
+
 export class Track {
   number = 0
   muted = false
@@ -20,21 +23,58 @@ export class Track {
 
   /**
    * @param {number} num - Track number
-   * @param {number} totalTracks - Total number of tracks in the project
    * */
-  constructor(num, totalTracks) {
+  constructor(num) {
     this.number = num
     this.muted = false
     this.trackOutput = null
 
     this.trackOutput = ctx.createGain()
 
-    // TODO: Not sure if this is the best way to do this
     this.trackOutput.gain.value = this.volume
     this.trackOutput.connect(masterOut)
 
     this.activeAudioNode = null
     this.activeOutNode = null
+
+    this.analyser = ctx.createAnalyser()
+    this.analyser.fftSize = analyserSize
+    this.trackOutput.connect(this.analyser)
+
+    this.frameCount = 0
+    requestAnimationFrame(this.drawPeakMeter.bind(this))
+    this.sampleBuffer = new Float32Array(this.analyser.fftSize)
+  }
+
+  drawPeakMeter() {
+    // Memoize the canvas and canvas context
+    if (!this.canvas) {
+      this.canvas = document.querySelector('#meter_' + this.number)
+      this.canvasCtx = this.canvas.getContext('2d')
+
+      const gradient = this.canvasCtx.createLinearGradient(this.canvas.width, 0, 0, 0)
+      gradient.addColorStop(0, '#ff0000')
+      gradient.addColorStop(0.3, '#ffff00')
+      gradient.addColorStop(0.8, '#00dd00')
+      gradient.addColorStop(1, '#005500')
+      this.canvasCtx.fillStyle = gradient
+    }
+
+    this.analyser.getFloatTimeDomainData(this.sampleBuffer)
+
+    let max = 0
+    for (let i = 0; i < analyserSize; i++) {
+      if (this.sampleBuffer[i] > max) {
+        max = this.sampleBuffer[i]
+      }
+    }
+
+    // max = 1
+
+    this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.canvasCtx.fillRect(0, this.canvas.height, max * scale * this.canvas.width, -this.canvas.height)
+
+    requestAnimationFrame(this.drawPeakMeter.bind(this))
   }
 
   setGain(gain) {

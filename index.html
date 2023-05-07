@@ -78,7 +78,7 @@
               </template>
             </select>
 
-            <span class="ml-1">STEP:</span>
+            <span class="ml-1">JUMP:</span>
             <select x-model="stepJump">
               <template x-for="step in 17">
                 <option :value="step-1" x-text="step-1" x-bind:selected="step-1 === stepJump"></option>
@@ -87,7 +87,7 @@
           </div>
 
           <!-- Extra controls for full edit mode-->
-          <div id="songEdit" class="row" x-show="fullMode">
+          <div id="songEdit" class="row" :class="fullMode || 'hidden'" x-show="fullMode">
             <select size="6" @change="changeSongPos" class="mr-2" x-ref="songSelect">
               <template x-for="(p, pi) in $store.project.song">
                 <option :selected="pi == songPos" :value="p" x-text="pi.toString().padStart(2, '0')+':   '+toHex(p)+'   &nbsp;'"></option>
@@ -112,13 +112,21 @@
             </div>
           </div>
 
+          <!-- Main pattern view -->
           <div id="pattView" x-ref="pattView" :class="!fullMode || 'vh70'">
+            <!-- Track headers -->
             <div class="trackHead" x-ref="trackHead">
+              <div style="width: 2%"></div>
               <template x-for="(trk, trkNum) in $store.project.tracks">
-                <div>
-                  <span x-text="`T:${trkNum+1}`" class="mr-1"></span>
-                  <button class="mini" :class="trk.muted && 'lit'" @click="trk.setMute(!trk.muted); renderPattern()">M</button>
-                  <button class="mini" @click="soloTrack(trkNum)">S</button>
+                <div :style="`width: ${((1/$store.project.tracks.length)*100)}%`">
+                  <div>
+                    <span x-text="`${trkNum+1}`" class="mr-1"></span>
+                    <button class="mini" :class="trk.muted && 'lit'" @click="trk.setMute(!trk.muted); renderPattern()">M</button>
+                    <button class="mini" @click="soloTrack(trkNum)">S</button>
+                  </div>
+                  <div>
+                    <canvas :id="`meter_${trkNum}`" class="trackMeter hide-sm" width="100" height="20"></canvas>
+                  </div>
                 </div>
               </template>
             </div>
@@ -200,7 +208,7 @@
         <div x-show="$store.view == 'file'" x-data="viewFile">
           <div class="mb-1">
             <button @click="newProj"><i class="fa-solid fa-file-medical"></i>NEW</button>
-            <button @click="save" x-show="fileHandle">💾 SAVE</button>
+            <button @click="save" x-show="fileHandle"><i class="fa-solid fa-save"></i>SAVE</button>
             <button @click="load"><i class="fa-solid fa-folder-open"></i>LOAD</button>
           </div>
           <div class="padded">

@@ -82,6 +82,7 @@ export function editorKeys(e) {
     this.recordMode()
   }
 
+  // CTRL + SPACE: Play from top and loop pattern
   if (e.key === ' ' && e.ctrlKey) {
     e.preventDefault()
     this.loopPattern = true
@@ -91,6 +92,7 @@ export function editorKeys(e) {
     return
   }
 
+  // SHIFT + SPACE: Play from current point
   if (e.key === ' ' && e.shiftKey) {
     e.preventDefault()
     this.record = false
@@ -98,6 +100,7 @@ export function editorKeys(e) {
     return
   }
 
+  // SPACE: Play song from top of this pattern or stop
   if (e.key === ' ') {
     e.preventDefault()
     if (!this.stopped) {
@@ -110,12 +113,14 @@ export function editorKeys(e) {
     }
   }
 
+  // CTRL + ENTER: Step play current row
   if (e.key === 'Enter') {
     e.preventDefault()
     this.playCurrentRow()
     return
   }
 
+  // TAB: Move to next track
   if (e.key === 'Tab') {
     e.preventDefault()
     this.cursor.track++
@@ -124,12 +129,23 @@ export function editorKeys(e) {
     return
   }
 
+  // SHIFT + TAB: Move to previous track
+  if (e.key === 'Tab' && e.shiftKey) {
+    e.preventDefault()
+    this.cursor.track--
+    if (this.cursor.track < 0) this.cursor.track = prj.trackCount - 1
+    this.cursor.column = 0
+    return
+  }
+
+  // HOME: Move to first step
   if (e.key === 'Home') {
     e.preventDefault()
     this.cursor.step = 0
     return
   }
 
+  // PG-DOWN: Move 16 steps down
   if (e.key === 'PageDown') {
     e.preventDefault()
     this.cursor.step += 16
@@ -139,6 +155,7 @@ export function editorKeys(e) {
     return
   }
 
+  // PG-UP: Move 16 steps up
   if (e.key === 'PageUp') {
     e.preventDefault()
     this.cursor.step -= 16
@@ -148,6 +165,7 @@ export function editorKeys(e) {
     return
   }
 
+  // END: Move to last step
   if (e.key === 'End') {
     e.preventDefault()
     this.cursor.step = this.activePattern.length - 1
@@ -155,41 +173,51 @@ export function editorKeys(e) {
     return
   }
 
+  // Entering digits in the inst, vol & effect columns
   if (this.record && this.cursor.column > 0 && e.key !== 'Delete') {
+    const patt = this.activePattern
+    const step = patt.steps[this.cursor.track][this.cursor.step]
+
     if (hexKeys.indexOf(e.key) > -1) {
       e.preventDefault()
 
-      if (!this.activePattern.steps[this.cursor.track][this.cursor.step]) {
-        this.activePattern.steps[this.cursor.track][this.cursor.step] = new Step()
+      // Create an empty step if it doesn't exist
+      if (!step) {
+        step = new Step()
       }
 
-      let instHex = toHex(this.activePattern.steps[this.cursor.track][this.cursor.step].instNum)
-      let volHex = toHex(this.activePattern.steps[this.cursor.track][this.cursor.step].volume * 64)
+      let instHex = '00'
+      if (step.instNum) {
+        instHex = toHex(step.instNum)
+      }
+      let volHex = toHex(step.volume * 64)
+
       switch (this.cursor.column) {
         case 1:
           instHex = e.key + instHex[1]
-          this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(instHex, 16))
+          step.setInst(parseInt(instHex, 16))
           break
         case 2:
           instHex = instHex[0] + e.key
-          this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(parseInt(instHex, 16))
+          step.setInst(parseInt(instHex, 16))
           break
         case 3:
           volHex = e.key + volHex[1]
           if (parseInt(volHex, 16) > 64) volHex = '40'
-          this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(parseInt(volHex, 16) / 64)
+          step.setVol(parseInt(volHex, 16) / 64)
           break
         case 4:
           volHex = volHex[0] + e.key
           if (parseInt(volHex, 16) > 64) volHex = '40'
-          this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(parseInt(volHex, 16) / 64)
+          step.setVol(parseInt(volHex, 16) / 64)
           break
       }
-    }
 
-    this.cursor.step += parseInt(this.stepJump)
-    if (this.cursor.step >= this.activePattern.length) {
-      this.cursor.step = this.cursor.step - this.activePattern.length
+      this.cursor.step += parseInt(this.stepJump)
+      if (this.cursor.step >= patt.length) {
+        // Wrap around
+        this.cursor.step = this.cursor.step - patt.length
+      }
     }
 
     return

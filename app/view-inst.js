@@ -2,7 +2,7 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 import { ctx } from './main.js'
 import { toHex } from './utils.js'
 import { Sample, SAMP_MODE_FORWARD, SAMP_MODE_NONE, SAMP_MODE_PINGPONG } from './sample.js'
-import { instKeys, keysUp } from './key-bindings.js'
+import { instKeys, keysUp } from './key-bind.js'
 
 export const viewInst = () => ({
   selectedInstNum: null,

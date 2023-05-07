@@ -93,4 +93,14 @@ export class Step {
     step.updateStrings()
     return step
   }
+
+  clear() {
+    this.note = null
+    this.instNum = null
+    this.volume = null
+    this.efxCmd = null
+    this.efxVal1 = null
+    this.efxVal2 = null
+    this.updateStrings()
+  }
 }

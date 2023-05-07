@@ -2,7 +2,7 @@ import Alpine from 'https://unpkg.com/alpinejs@3.12.0/dist/module.esm.js'
 
 import { ctx } from './main.js'
 import { toHex } from './utils.js'
-import { editorKeys, keysUp } from './key-bindings.js'
+import { editorKeys, keysUp } from './key-bind.js'
 import { Pattern } from './pattern.js'
 
 let canvas = null
@@ -178,16 +178,16 @@ export const viewEdit = (clock) => ({
   renderPattern() {
     const prj = Alpine.store('project')
     if (!this.activePattern) return
+    const indexW = ctx2d.measureText('00').width + 6
 
     canvas.height = this.activePattern.length * lineH
-    canvas.width = prj.tracks.length * trackW
+    canvas.width = prj.tracks.length * trackW + indexW - 4
 
     // Draw background for active step
     ctx2d.fillStyle = 'rgba(0, 255, 255, 0.2)'
     ctx2d.fillRect(0, this.currentStep * lineH, canvas.width, lineH)
     ctx2d.font = font
 
-    const indexW = ctx2d.measureText('00').width + 6
     // Draw the step row index on the left
     for (let s = 0; s < this.activePattern.length; s++) {
       // Draw background stripe for every 4th step

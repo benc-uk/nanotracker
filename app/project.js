@@ -34,7 +34,7 @@ export class Project {
     this.trackCount = trackCount
 
     for (let i = 0; i < trackCount; i++) {
-      const t = new Track(i, trackCount)
+      const t = new Track(i)
       this.tracks.push(t)
     }
 

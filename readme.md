@@ -4,9 +4,9 @@ This is a project create a music tracker in using Alpine.JS plus modern ES6 Java
 
 What is a "tracker"? It's a type of sequencer for creating music based on samples. They date back to the 1990s and the 16-bit era, but remain popular today. [Read more](https://en.wikipedia.org/wiki/Music_tracker)
 
-![](https://user-images.githubusercontent.com/14982936/233846778-5b595dfd-1916-4238-bdf4-7ebe145f1848.png)
+![Screenshot of main editor](https://user-images.githubusercontent.com/14982936/236693095-61d45fa1-b6b7-4e8b-9841-9109bf362bc0.png)
 
-![](https://user-images.githubusercontent.com/14982936/233846849-b009fd9c-8727-4fc5-86f0-3e95b7b662ea.png)
+![Screenshot of wave editor](https://user-images.githubusercontent.com/14982936/236667885-bfc0f47e-dcba-4fc3-a6da-476119e350e4.png)
 
 # Features
 
@@ -21,11 +21,12 @@ In progress:
   
 Todo:
 - Sample vibrato 
-- Saving XM files
-- Mixer and tracker/master effects
+- Envelopes
 - XM Vol effects
 - XM Step effects
-- Lots more keys
+- Saving XM files
+- Mixer and tracker/master effects
+- Select copy & paste
 - Song & pattern chain editor
 - Loading XMI (?)
 - MIDI 
@@ -39,7 +40,9 @@ It's hosted & running from GitHub pages here https://tracker.benco.io/
 
 # Running Locally
 
-I wouldn't bother
+I wouldn't bother if I was you, but as it's 100% static with no bundling/build required you can simply start a HTTP server in the root of the project where index.html is.
+
+Alternatively run `make install-tools` and `make serve`
 
 # Implementation Notes
 

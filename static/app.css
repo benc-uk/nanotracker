@@ -8,9 +8,9 @@
   --hi: #dddddd;
   --shad: #444444;
   --nrblack: #111111;
-  --purple: rgb(228, 169, 59);
   --cyan: #33ddff;
-  --on: #29e697;
+  --on: #ff9633;
+  --icon: #00ff95;
 }
 
 @font-face {
@@ -147,7 +147,7 @@ nav {
 }
 
 #pattView {
-  height: 85vh;
+  height: 75vh;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -160,11 +160,11 @@ nav {
   background-color: black;
   padding: 0px;
   width: 100%;
+  margin-bottom: 0;
 }
 
 .trackHead {
   display: flex;
-  justify-content: space-around;
   align-items: center;
   padding: 4px 0;
   position: sticky;
@@ -173,8 +173,20 @@ nav {
   border-bottom: 2px solid var(--shad);
 }
 
-.trackHead > div {
+.trackHead > div > div {
   display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trackMeter {
+  background-color: black;
+  border: 2px solid;
+  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
+  margin-left: 5px;
+  max-height: 16px;
+  width: 100%;
+  margin-top: 4px;
 }
 
 .mb-0 {
@@ -284,4 +296,11 @@ nav {
 
   /* fudge */
   padding-right: 3px;
+}
+
+/* hide on small screens */
+@media (max-height: 800px) {
+  .hide-sm {
+    display: none;
+  }
 }

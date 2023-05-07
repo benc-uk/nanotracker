@@ -85,7 +85,6 @@ export async function loadXM(data, ctx) {
 
         byteIndex += noteByteJump
       } else {
-        // console.log(`WARNING: uncompressed note data ${trackIndex + 1},${stepIndex}: `, byte.toString(2).padStart(8, '0'))
         // Handle uncompressed note data
         noteByte = pattData.getUint8(byteIndex + 0)
         instByte = pattData.getUint8(byteIndex + 1)
