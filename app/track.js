@@ -52,11 +52,12 @@ export class Track {
       this.canvas = document.querySelector('#meter_' + this.number)
       this.canvasCtx = this.canvas.getContext('2d')
 
-      const gradient = this.canvasCtx.createLinearGradient(this.canvas.width, 0, 0, 0)
-      gradient.addColorStop(0, '#ff0000')
-      gradient.addColorStop(0.3, '#ffff00')
-      gradient.addColorStop(0.8, '#00dd00')
-      gradient.addColorStop(1, '#005500')
+      const opacity = 0.55 //55% visible
+      const gradient = this.canvasCtx.createLinearGradient(0, 0, 0, this.canvas.height)
+      gradient.addColorStop(0, `rgba(255, 0, 0, ${opacity})`)
+      gradient.addColorStop(0.3, `rgba(255, 255, 0, ${opacity})`)
+      gradient.addColorStop(0.8, `rgba(0, 221, 0, ${opacity})`)
+      gradient.addColorStop(1, `rgba(0, 85, 0, ${opacity})`)
       this.canvasCtx.fillStyle = gradient
     }
 
@@ -69,10 +70,9 @@ export class Track {
       }
     }
 
-    // max = 1
-
     this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.canvasCtx.fillRect(0, this.canvas.height, max * scale * this.canvas.width, -this.canvas.height)
+    // draw vertical bar
+    this.canvasCtx.fillRect(0, this.canvas.height, this.canvas.width, -max * scale * this.canvas.height)
 
     requestAnimationFrame(this.drawPeakMeter.bind(this))
   }

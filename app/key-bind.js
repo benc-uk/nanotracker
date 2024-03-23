@@ -227,15 +227,21 @@ export function editorKeys(e) {
     e.preventDefault()
     if (!this.record) return
 
+    const step = this.activePattern.steps[this.cursor.track][this.cursor.step]
+    if (!step) return
+
+    // Delete in note or inst columns
     if (this.cursor.column >= 0 && this.cursor.column <= 2) {
-      this.activePattern.steps[this.cursor.track][this.cursor.step].setNote(null)
-      this.activePattern.steps[this.cursor.track][this.cursor.step].setInst(null)
+      step.setNote(null)
+      step.setInst(null)
     }
 
+    // Delete in vol column
     if (this.cursor.column >= 3 && this.cursor.column <= 4) {
-      this.activePattern.steps[this.cursor.track][this.cursor.step].setVol(null)
+      step.setVol(null)
     }
 
+    // Handle cursor jump
     this.cursor.step += parseInt(this.stepJump)
     if (this.cursor.step >= this.activePattern.length) {
       this.cursor.step = this.cursor.step - this.activePattern.length

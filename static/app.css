@@ -140,7 +140,7 @@ nav {
   padding: 4px;
 }
 
-.version {
+#version {
   margin-left: auto;
   color: var(--shad);
   text-shadow: none;
@@ -163,7 +163,7 @@ nav {
   margin-bottom: 0;
 }
 
-.trackHead {
+#trackHeader {
   display: flex;
   align-items: center;
   padding: 4px 0;
@@ -173,20 +173,23 @@ nav {
   border-bottom: 2px solid var(--shad);
 }
 
-.trackHead > div > div {
+.trackHead {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .trackMeter {
-  background-color: black;
-  border: 2px solid;
-  border-color: var(--shad) var(--hi) var(--hi) var(--shad);
-  margin-left: 5px;
-  max-height: 16px;
+  position: absolute;
+  top: 50px;
+  width: 2.5vw;
+}
+
+.meterWrap {
   width: 100%;
-  margin-top: 4px;
+  /* border: 2px solid red; */
+  display: flex;
+  justify-content: center;
 }
 
 .mb-0 {
@@ -296,11 +299,4 @@ nav {
 
   /* fudge */
   padding-right: 3px;
-}
-
-/* hide on small screens */
-@media (max-height: 800px) {
-  .hide-sm {
-    display: none;
-  }
 }

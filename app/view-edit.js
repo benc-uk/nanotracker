@@ -16,7 +16,7 @@ const font = '26px VT323'
 const fontW = 11
 const curOffsets = [2, 43, 43 + fontW, 74, 74 + fontW, 106, 105 + fontW, 104 + fontW * 2]
 
-export const viewEdit = (clock) => ({
+export const viewEdit = () => ({
   loopPattern: false,
   stopped: true,
   activePattern: null,
@@ -80,7 +80,7 @@ export const viewEdit = (clock) => ({
     document.fonts.ready.then(() => {
       setTimeout(() => {
         this.renderPattern()
-      }, 200)
+      }, 300)
     })
   },
 

@@ -32,11 +32,11 @@
         <button :class="$store.view == 'midi' && 'active'" @click="changeView('midi')"><i class="fa-solid fa-arrow-right-arrow-left"></i>MIDI</button>
         <button :class="$store.view == 'pref' && 'active'" @click="changeView('pref')"><i class="fa-solid fa-wrench"></i>Prefs</button>
         <button :class="$store.view == 'help' && 'active'" @click="changeView('help')"><i class="fa-solid fa-circle-question"></i>Help</button>
-        <div class="version" x-text="version"></div>
+        <div id="version" x-text="version"></div>
       </nav>
 
       <div class="panel" id="main">
-        <div x-show="$store.view == 'edit'" x-data="viewEdit(clock)" id="pattEdit" @instchange.window="activeInst = $event.detail">
+        <div x-show="$store.view == 'edit'" x-data="viewEdit()" id="pattEdit" @instchange.window="activeInst = $event.detail">
           <div class="mb-1 rowcentered">
             <button
               class="mr-1"
@@ -115,17 +115,17 @@
           <!-- Main pattern view -->
           <div id="pattView" x-ref="pattView" :class="!fullMode || 'vh70'">
             <!-- Track headers -->
-            <div class="trackHead" x-ref="trackHead">
+            <div id="trackHeader">
               <div style="width: 2%"></div>
               <template x-for="(trk, trkNum) in $store.project.tracks">
                 <div :style="`width: ${((1/$store.project.tracks.length)*100)}%`">
-                  <div>
+                  <div class="trackHead">
                     <span x-text="`${trkNum+1}`" class="mr-1"></span>
                     <button class="mini" :class="trk.muted && 'lit'" @click="trk.setMute(!trk.muted); renderPattern()">M</button>
                     <button class="mini" @click="soloTrack(trkNum)">S</button>
                   </div>
-                  <div>
-                    <canvas :id="`meter_${trkNum}`" class="trackMeter hide-sm" width="100" height="20"></canvas>
+                  <div class="meterWrap">
+                    <canvas :id="`meter_${trkNum}`" class="trackMeter" width="30" height="120"></canvas>
                   </div>
                 </div>
               </template>
